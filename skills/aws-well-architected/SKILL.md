@@ -219,13 +219,13 @@ Use this checklist when proposing or reviewing AWS architecture. Address any unc
 
 Common tensions between pillars and how to resolve them:
 
-| Tension | Guidance |
-|---|---|
-| Security vs. Performance | Prefer TLS termination at the load balancer, not per-instance; use regional endpoints to avoid cross-region latency |
-| Cost vs. Reliability | Use multi-AZ for stateful tiers (databases, queues); accept single-AZ for stateless compute only in non-critical environments |
-| Cost vs. Performance | Use reserved capacity for baseline load and on-demand/Spot for burst; cache aggressively |
+| Tension                                | Guidance                                                                                                                           |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Security vs. Performance               | Prefer TLS termination at the load balancer, not per-instance; use regional endpoints to avoid cross-region latency                |
+| Cost vs. Reliability                   | Use multi-AZ for stateful tiers (databases, queues); accept single-AZ for stateless compute only in non-critical environments      |
+| Cost vs. Performance                   | Use reserved capacity for baseline load and on-demand/Spot for burst; cache aggressively                                           |
 | Operational simplicity vs. Reliability | Prefer managed services even at higher unit cost; reduced operational burden outweighs marginal cost difference for most workloads |
-| Sustainability vs. Performance | Right-sizing and graviton instances generally improve both; resolve conflicts by optimizing for per-transaction cost |
+| Sustainability vs. Performance         | Right-sizing and graviton instances generally improve both; resolve conflicts by optimizing for per-transaction cost               |
 
 ---
 

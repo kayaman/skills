@@ -113,12 +113,12 @@ Extended best practices per pillar. Read this file when you need deeper guidance
 
 ### Selection
 
-| Resource Type | Guidance |
-|---|---|
-| Compute | Match instance family to workload: compute-optimized (C-family) for CPU-bound, memory-optimized (R-family) for in-memory data, storage-optimized (I-family) for high IOPS |
-| Storage | S3 for object storage, EBS gp3 for general block storage, io2 for high-IOPS databases, EFS for shared file systems |
-| Database | Aurora for relational; DynamoDB for key-value/document at scale; ElastiCache (Redis) for low-latency caching; Redshift for analytics |
-| Network | Place resources in the same AZ to minimize cross-AZ latency; use placement groups for HPC workloads |
+| Resource Type | Guidance                                                                                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Compute       | Match instance family to workload: compute-optimized (C-family) for CPU-bound, memory-optimized (R-family) for in-memory data, storage-optimized (I-family) for high IOPS |
+| Storage       | S3 for object storage, EBS gp3 for general block storage, io2 for high-IOPS databases, EFS for shared file systems                                                        |
+| Database      | Aurora for relational; DynamoDB for key-value/document at scale; ElastiCache (Redis) for low-latency caching; Redshift for analytics                                      |
+| Network       | Place resources in the same AZ to minimize cross-AZ latency; use placement groups for HPC workloads                                                                       |
 
 ### Review
 
