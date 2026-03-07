@@ -116,7 +116,7 @@ When using MUST NOT or SHOULD NOT, the document SHOULD provide guidance on what 
 When reviewing a document for RFC 2119 compliance:
 
 - [ ] The BCP 14 boilerplate paragraph is present near the beginning of the document
-- [ ] Keywords are ONLY in uppercase when conveying normative meaning
+- [ ] Keywords are ONLY in ALL CAPS when conveying normative meaning
 - [ ] Lowercase uses of "must", "should", "may", etc. do not carry normative intent
 - [ ] MUST / MUST NOT are reserved for absolute requirements and prohibitions
 - [ ] SHOULD / SHOULD NOT are used where exceptions are possible but discouraged
