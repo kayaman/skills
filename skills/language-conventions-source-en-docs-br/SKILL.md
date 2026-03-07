@@ -10,7 +10,7 @@ description: Enforces language usage conventions for teams based in Brazil. Use 
 | Artifact                                                          | Language             |
 | ----------------------------------------------------------------- | -------------------- |
 | Docstrings                                                        | Brazilian Portuguese |
-| Project README and user-facing markdown docs                      | Brazilian Portuguese |
+| Project/user-facing documentation (product README, user guides, markdown docs) | Brazilian Portuguese |
 | Inline comments explaining intent                                 | Brazilian Portuguese |
 | Source code (identifiers, variables, functions, classes, modules) | English              |
 | Parameters and arguments                                          | English              |
@@ -63,6 +63,7 @@ BLOB_CONTAINER_NAME = "audio-uploads"
 When writing any file, verify:
 
 - [ ] All docstrings are written in Brazilian Portuguese
+- [ ] Project/user-facing documentation (product README, user guides, markdown docs) is written in Brazilian Portuguese
 - [ ] All identifiers (variables, functions, classes, modules) are English
 - [ ] Parameter names and type annotations are English
 - [ ] Configuration keys and environment variable names are English
