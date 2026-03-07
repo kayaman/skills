@@ -1,5 +1,5 @@
 ---
-name: well-architected
+name: aws-well-architected
 description: Enforces AWS Well-Architected Framework best practices across all six pillars (Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, Sustainability). Use when designing AWS architecture, writing infrastructure code (CDK, CloudFormation, Terraform), reviewing pull requests for cloud workloads, or making technology selection decisions on AWS.
 ---
 
