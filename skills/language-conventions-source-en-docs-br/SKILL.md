@@ -63,7 +63,7 @@ BLOB_CONTAINER_NAME = "audio-uploads"
 When writing any file, verify:
 
 - [ ] All docstrings are written in Brazilian Portuguese
-- [ ] Project/user-facing documentation (product README, user guides) is written in Brazilian Portuguese
+- [ ] Project/user-facing documentation (product README, user guides, markdown docs) is written in Brazilian Portuguese
 - [ ] All identifiers (variables, functions, classes, modules) are English
 - [ ] Parameter names and type annotations are English
 - [ ] Configuration keys and environment variable names are English
