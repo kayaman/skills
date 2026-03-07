@@ -87,7 +87,7 @@ Keywords MUST only be used where actually required for interoperation or to limi
 
 ### 3. Always Capitalize When Normative
 
-When a keyword conveys a BCP 14 requirement level, it MUST be written in ALL CAPITALS. When the word is used in its ordinary English sense, it MUST NOT be capitalized.
+When a keyword conveys a BCP 14 requirement level, it MUST be written in ALL CAPITALS. When the word is used in its ordinary English sense, it MUST NOT be written in ALL CAPITALS and SHOULD follow normal English capitalization rules.
 
 **Correct:**
 > Clients MUST include the `Authorization` header in every request.
