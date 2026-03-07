@@ -10,7 +10,7 @@ description: Enforces language usage conventions for teams based in Brazil. Use 
 | Artifact                                                          | Language             |
 | ----------------------------------------------------------------- | -------------------- |
 | Docstrings                                                        | Brazilian Portuguese |
-| README and markdown docs                                          | Brazilian Portuguese |
+| Project README and user-facing markdown docs                      | Brazilian Portuguese |
 | Inline comments explaining intent                                 | Brazilian Portuguese |
 | Source code (identifiers, variables, functions, classes, modules) | English              |
 | Parameters and arguments                                          | English              |
