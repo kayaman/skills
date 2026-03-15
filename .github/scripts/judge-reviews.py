@@ -21,18 +21,19 @@ from pathlib import Path
 
 
 JUDGE_PROMPT = """\
-You are an LLM-as-Judge for Agent Skill reviews. You receive the outputs of five \
+You are an LLM-as-Judge for Agent Skill reviews. You receive the outputs of six \
 independent skill reviewers, each applying a different best-practices lens:
 
-1. mgechev-skill-reviewer (structure, discoverability, progressive disclosure)
-2. codex-skill-reviewer (Codex progressive disclosure, invocation, single-job scope)
-3. ms-agent-skill-reviewer (security, token budgets, skills-vs-workflows)
-4. agentskills-skill-reviewer (expertise grounding, context efficiency, patterns)
-5. claude-skill-reviewer (conciseness, degrees of freedom, anti-patterns)
+1. skill-reviewer (comprehensive cross-source reviewer covering all best-practice dimensions)
+2. mgechev-skill-reviewer (structure, discoverability, progressive disclosure)
+3. codex-skill-reviewer (Codex progressive disclosure, invocation, single-job scope)
+4. ms-agent-skill-reviewer (security, token budgets, skills-vs-workflows)
+5. agentskills-skill-reviewer (expertise grounding, context efficiency, patterns)
+6. claude-skill-reviewer (conciseness, degrees of freedom, anti-patterns)
 
 Your job:
 
-1. Read all five reviews.
+1. Read all six reviews.
 2. Identify findings that appear across multiple reviewers (consensus issues).
 3. Identify findings unique to a single reviewer (specialist issues).
 4. Prioritize: FAIL items first, then WARN items, grouped by theme.
@@ -64,6 +65,7 @@ Output format:
 ### Individual Reviewer Verdicts
 | Reviewer | Verdict |
 |----------|---------|
+| unified  | ...     |
 | mgechev  | ...     |
 | codex    | ...     |
 | ms-agent | ...     |
@@ -160,7 +162,7 @@ def main():
         content = f.read_text(encoding="utf-8")
         reviews.append(f"### Review from {f.stem}\n\n{content}")
 
-    user_message = "Here are the five reviewer outputs. Aggregate them into a single verdict.\n\n" + "\n\n---\n\n".join(reviews)
+    user_message = "Here are the six reviewer outputs. Aggregate them into a single verdict.\n\n" + "\n\n---\n\n".join(reviews)
 
     if args.provider == "openai":
         model = args.model or "gpt-4o"
