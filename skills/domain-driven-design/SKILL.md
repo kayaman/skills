@@ -1,6 +1,6 @@
 ---
 name: domain-driven-design
-description: Enforces Domain-Driven Design strategic and tactical patterns including Bounded Contexts, Aggregates, Value Objects, Domain Events, and Context Mapping. Use when modeling a business domain, defining bounded context boundaries, designing aggregates, applying ubiquitous language, running Event Storming workshops, implementing CQRS or Event Sourcing, or reviewing domain models for DDD anti-patterns like Anemic Domain Models.
+description: Enforces Domain-Driven Design strategic and tactical patterns including Bounded Contexts, Aggregates, Value Objects, Domain Events, and Context Mapping. Use when modeling a business domain, defining bounded context boundaries, designing aggregates, applying ubiquitous language, running Event Storming workshops, implementing CQRS or Event Sourcing, or reviewing domain models for DDD anti-patterns like Anemic Domain Model.
 ---
 
 # Domain-Driven Design
@@ -217,4 +217,4 @@ Before finalizing a domain model, verify:
 | *Patterns, Principles, and Practices of Domain-Driven Design* | Millett & Tune | Wrox | 2015 |
 | *Balancing Coupling in Software Design* | Vlad Khononov | Addison-Wesley | 2024 |
 | *Architecture for Flow* | Andrew Harmel-Law | O'Reilly | 2023 |
-| *Introducing EventStorming* | Alberto Brandolini | Leanpub | ~2024 |
+| *Introducing EventStorming* | Alberto Brandolini | Leanpub | TBD |
