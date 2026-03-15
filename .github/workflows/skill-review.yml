@@ -1,0 +1,146 @@
+name: Skill Review
+
+on:
+  pull_request:
+    paths:
+      - 'skills/**/SKILL.md'
+      - 'skills/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  detect-skills:
+    name: Detect changed skills
+    runs-on: ubuntu-latest
+    outputs:
+      skills: ${{ steps.changed.outputs.skills }}
+      has_skills: ${{ steps.changed.outputs.has_skills }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find changed skill directories
+        id: changed
+        run: |
+          CHANGED_SKILLS=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} \
+            | grep '^skills/' \
+            | cut -d'/' -f1-2 \
+            | sort -u \
+            | jq -R -s 'split("\n") | map(select(length > 0))' )
+
+          echo "skills=$CHANGED_SKILLS" >> "$GITHUB_OUTPUT"
+
+          if [ "$(echo "$CHANGED_SKILLS" | jq 'length')" -gt 0 ]; then
+            echo "has_skills=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_skills=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  review:
+    name: "${{ matrix.reviewer }} → ${{ matrix.skill }}"
+    needs: detect-skills
+    if: needs.detect-skills.outputs.has_skills == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        reviewer:
+          - mgechev-skill-reviewer
+          - codex-skill-reviewer
+          - ms-agent-skill-reviewer
+          - agentskills-skill-reviewer
+          - claude-skill-reviewer
+        skill: ${{ fromJson(needs.detect-skills.outputs.skills) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run reviewer
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openai' }}
+        run: |
+          SKILL_NAME=$(basename "${{ matrix.skill }}")
+          python .github/scripts/review-skill.py \
+            --agent ".github/agents/${{ matrix.reviewer }}.agent.md" \
+            --skill "${{ matrix.skill }}" \
+            --provider "$LLM_PROVIDER" \
+            --output "review-${SKILL_NAME}-${{ matrix.reviewer }}.md"
+
+      - name: Upload review artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "review-${{ matrix.skill }}-${{ matrix.reviewer }}"
+          path: "review-*.md"
+          retention-days: 7
+
+  judge:
+    name: LLM-as-Judge
+    needs: [detect-skills, review]
+    if: needs.detect-skills.outputs.has_skills == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download all review artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: reviews/
+          pattern: "review-*"
+          merge-multiple: true
+
+      - name: Aggregate reviews
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openai' }}
+        run: |
+          python .github/scripts/judge-reviews.py \
+            --reviews-dir reviews/ \
+            --provider "$LLM_PROVIDER" \
+            --output aggregated-review.md
+
+      - name: Post PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('aggregated-review.md', 'utf8');
+            const marker = '<!-- skill-review-bot -->';
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c => c.body.includes(marker));
+
+            const fullBody = `${marker}\n\n${body}`;
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: fullBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: fullBody,
+              });
+            }
