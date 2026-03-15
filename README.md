@@ -7,6 +7,7 @@ A collection of Agent Skills that encode best practices, conventions, and archit
 | Skill | Description |
 | ----- | ----------- |
 | [aws-well-architected](skills/aws-well-architected/SKILL.md) | Enforces AWS Well-Architected Framework best practices across all six pillars (Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, Sustainability). |
+| [domain-driven-design](skills/domain-driven-design/SKILL.md) | Enforces Domain-Driven Design strategic and tactical patterns including Bounded Contexts, Aggregates, Value Objects, Domain Events, and Context Mapping. |
 | [blog-post-with-diagrams](skills/blog-post-with-diagrams/SKILL.md) | Guides writing technical blog posts that embed Mermaid diagrams, ASCII art, and annotated code blocks to explain architecture, workflows, and decisions. |
 | [azure-well-architected](skills/azure-well-architected/SKILL.md) | Enforces Azure Well-Architected Framework best practices across all five pillars (Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency). |
 | [language-conventions-source-en-docs-br](skills/language-conventions-source-en-docs-br/SKILL.md) | Enforces language usage conventions for teams based in Brazil — Brazilian Portuguese for documentation, docstrings, and inline comments; English for source code, configuration, and commit messages. |
