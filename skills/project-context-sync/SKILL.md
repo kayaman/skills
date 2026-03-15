@@ -26,7 +26,7 @@ Maintain a `context/status.md` (or equivalent) at the repository root with at mi
 | **Last Milestone** | Most recent completed deliverable with version or PR reference |
 | **Next Steps** | 1-3 concrete, actionable items (see rules below) |
 
-Include a `Last updated` line with the date and a brief label (e.g. `2026-03-15 (auth-migration)`).
+Include a `Last updated` line immediately below the table with the date and a brief label (e.g. `YYYY-MM-DD (topic-label)`).
 
 ## Rules
 
@@ -53,7 +53,7 @@ Each next step MUST describe a concrete action that someone can start immediatel
 If a task references a plan or issue, link to it so the next session can pick up without searching.
 
 ```markdown
-| AI Gateway | Phase A | Evaluation in progress | [confirm-gateway-choice](.cursor/plans/refined-gateway-phased-plan.plan.md): Complete evaluation |
+| AI Gateway | Phase A | Evaluation in progress | [confirm-gateway-choice](path/to/plan-file.md): Complete evaluation |
 ```
 
 ### 4. Update Phase and Milestone Accurately
@@ -68,7 +68,7 @@ Do not update rows for projects that were not touched in the current session.
 
 ### 6. Preserve the Format
 
-Keep the status table in the same Markdown format so it can be parsed by scripts or other agents. Do not add free-form prose above the table.
+Keep the status table in the same Markdown format so it can be parsed by scripts or other agents. Do not add free-form prose above the table or between the table and the `Last updated` line.
 
 ## Checklist
 
