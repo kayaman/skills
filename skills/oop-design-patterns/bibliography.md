@@ -3,6 +3,26 @@
 An annotated reading list of the most influential and widely recommended books
 on Object-Oriented Programming, ordered roughly from foundational to advanced.
 
+## Table of Contents
+
+- [Core Canon](#core-canon)
+  - [Design Patterns: Elements of Reusable Object-Oriented Software](#design-patterns-elements-of-reusable-object-oriented-software)
+  - [Clean Code: A Handbook of Agile Software Craftsmanship](#clean-code-a-handbook-of-agile-software-craftsmanship)
+  - [Refactoring: Improving the Design of Existing Code](#refactoring-improving-the-design-of-existing-code)
+  - [Head First Design Patterns](#head-first-design-patterns)
+  - [Head First Object-Oriented Analysis and Design](#head-first-object-oriented-analysis-and-design)
+- [Advanced and Specialized](#advanced-and-specialized)
+  - [Agile Software Development: Principles, Patterns, and Practices](#agile-software-development-principles-patterns-and-practices)
+  - [Applying UML and Patterns](#applying-uml-and-patterns)
+  - [Object Design: Responsibility-Driven Design](#object-design-responsibility-driven-design)
+  - [Growing Object-Oriented Software, Guided by Tests](#growing-object-oriented-software-guided-by-tests)
+  - [Object Thinking](#object-thinking)
+  - [Elegant Objects (Volumes 1 and 2)](#elegant-objects-volumes-1-and-2)
+  - [Object-Oriented Software Construction](#object-oriented-software-construction)
+  - [Smalltalk Best Practice Patterns](#smalltalk-best-practice-patterns)
+  - [Clean Architecture](#clean-architecture)
+- [Suggested Reading Order](#suggested-reading-order)
+
 ## Core Canon
 
 ### Design Patterns: Elements of Reusable Object-Oriented Software
