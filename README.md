@@ -7,7 +7,10 @@ A collection of Agent Skills that encode best practices, conventions, and archit
 | Skill | Description |
 | ----- | ----------- |
 | [aws-well-architected](skills/aws-well-architected/SKILL.md) | Enforces AWS Well-Architected Framework best practices across all six pillars (Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, Sustainability). |
+| [azure-well-architected](skills/azure-well-architected/SKILL.md) | Enforces Azure Well-Architected Framework best practices across all five pillars (Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency). |
 | [language-conventions-source-en-docs-br](skills/language-conventions-source-en-docs-br/SKILL.md) | Enforces language usage conventions for teams based in Brazil — Brazilian Portuguese for documentation, docstrings, and inline comments; English for source code, configuration, and commit messages. |
+| [rfc2119](skills/rfc2119/SKILL.md) | Enforces RFC 2119 (BCP 14) requirement level keywords in documentation, specifications, and technical writing. |
+| [semver](skills/semver/SKILL.md) | Enforces Semantic Versioning 2.0.0 rules for version bumps, tagging, pre-release handling, and deprecation workflows. |
 
 ## Usage
 
@@ -33,3 +36,15 @@ Five specialized reviewer agents live in `.github/agents/`. Each reviews skills 
 | `claude-skill-reviewer` | [Claude Platform](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) | Conciseness, degrees of freedom, naming/description, anti-patterns, feedback loops |
 
 All five agents use the same output format (PASS / PASS WITH WARNINGS / FAIL) for uniform consumption by the LLM-as-Judge CI pipeline.
+
+### CI Setup
+
+The review pipeline requires LLM API keys. Run the setup script to configure secrets:
+
+```bash
+export OPENAI_API_KEY="sk-..."
+# and/or
+export ANTHROPIC_API_KEY="sk-ant-..."
+export LLM_PROVIDER="openai"  # or "anthropic"
+bash .github/scripts/setup-gh-secrets.sh
+```
