@@ -69,7 +69,7 @@ jobs:
 
       - name: Stagger API requests
         run: |
-          DELAY=$(( 5 + RANDOM % 20 ))
+          DELAY=$(( 5 + RANDOM % 40 ))
           echo "Waiting ${DELAY}s to stagger API calls..."
           sleep "$DELAY"
 
