@@ -20,8 +20,9 @@ import time
 import random
 from pathlib import Path
 
-MAX_RETRIES = 8
-BASE_DELAY = 3
+MAX_RETRIES = 10
+BASE_DELAY = 5
+MAX_DELAY = 120
 
 
 def read_file(path: str) -> str:
@@ -88,7 +89,7 @@ def _retry_on_rate_limit(make_request):
                 if retry_after and retry_after.isdigit():
                     delay = int(retry_after) + random.uniform(0, 2)
                 else:
-                    delay = BASE_DELAY * (2 ** attempt) + random.uniform(0, 2)
+                    delay = min(BASE_DELAY * (2 ** attempt), MAX_DELAY) + random.uniform(0, 5)
                 print(f"Rate limited (429). Retrying in {delay:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})...", file=sys.stderr)
                 time.sleep(delay)
             else:
@@ -123,7 +124,7 @@ def call_openai(system_prompt: str, user_content: str, model: str) -> str:
                 "Authorization": f"Bearer {api_key}",
             },
         )
-        with urllib.request.urlopen(req, timeout=120) as resp:
+        with urllib.request.urlopen(req, timeout=180) as resp:
             result = json.loads(resp.read().decode("utf-8"))
             return result["choices"][0]["message"]["content"]
 
@@ -158,7 +159,7 @@ def call_anthropic(system_prompt: str, user_content: str, model: str) -> str:
                 "anthropic-version": "2023-06-01",
             },
         )
-        with urllib.request.urlopen(req, timeout=120) as resp:
+        with urllib.request.urlopen(req, timeout=180) as resp:
             result = json.loads(resp.read().decode("utf-8"))
             return result["content"][0]["text"]
 
