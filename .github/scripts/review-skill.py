@@ -16,7 +16,12 @@ import argparse
 import json
 import os
 import sys
+import time
+import random
 from pathlib import Path
+
+MAX_RETRIES = 8
+BASE_DELAY = 3
 
 
 def read_file(path: str) -> str:
@@ -71,8 +76,28 @@ def parse_agent_prompt(agent_path: str) -> str:
     return content
 
 
+def _retry_on_rate_limit(make_request):
+    """Retry a request function with exponential backoff on HTTP 429."""
+    import urllib.error
+    for attempt in range(MAX_RETRIES):
+        try:
+            return make_request()
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < MAX_RETRIES - 1:
+                retry_after = e.headers.get("Retry-After")
+                if retry_after and retry_after.isdigit():
+                    delay = int(retry_after) + random.uniform(0, 2)
+                else:
+                    delay = BASE_DELAY * (2 ** attempt) + random.uniform(0, 2)
+                print(f"Rate limited (429). Retrying in {delay:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})...", file=sys.stderr)
+                time.sleep(delay)
+            else:
+                raise
+
+
 def call_openai(system_prompt: str, user_content: str, model: str) -> str:
     import urllib.request
+    import urllib.error
 
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
@@ -89,22 +114,25 @@ def call_openai(system_prompt: str, user_content: str, model: str) -> str:
         "max_tokens": 4096,
     }).encode("utf-8")
 
-    req = urllib.request.Request(
-        "https://api.openai.com/v1/chat/completions",
-        data=payload,
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {api_key}",
-        },
-    )
+    def make_request():
+        req = urllib.request.Request(
+            "https://api.openai.com/v1/chat/completions",
+            data=payload,
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {api_key}",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
+            return result["choices"][0]["message"]["content"]
 
-    with urllib.request.urlopen(req, timeout=120) as resp:
-        result = json.loads(resp.read().decode("utf-8"))
-        return result["choices"][0]["message"]["content"]
+    return _retry_on_rate_limit(make_request)
 
 
 def call_anthropic(system_prompt: str, user_content: str, model: str) -> str:
     import urllib.request
+    import urllib.error
 
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
@@ -120,19 +148,21 @@ def call_anthropic(system_prompt: str, user_content: str, model: str) -> str:
         ],
     }).encode("utf-8")
 
-    req = urllib.request.Request(
-        "https://api.anthropic.com/v1/messages",
-        data=payload,
-        headers={
-            "Content-Type": "application/json",
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
-        },
-    )
+    def make_request():
+        req = urllib.request.Request(
+            "https://api.anthropic.com/v1/messages",
+            data=payload,
+            headers={
+                "Content-Type": "application/json",
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
+            return result["content"][0]["text"]
 
-    with urllib.request.urlopen(req, timeout=120) as resp:
-        result = json.loads(resp.read().decode("utf-8"))
-        return result["content"][0]["text"]
+    return _retry_on_rate_limit(make_request)
 
 
 def main():

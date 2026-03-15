@@ -9,6 +9,7 @@ A collection of Agent Skills that encode best practices, conventions, and archit
 | [aws-well-architected](skills/aws-well-architected/SKILL.md) | Enforces AWS Well-Architected Framework best practices across all six pillars (Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, Sustainability). |
 | [azure-well-architected](skills/azure-well-architected/SKILL.md) | Enforces Azure Well-Architected Framework best practices across all five pillars (Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency). |
 | [language-conventions-source-en-docs-br](skills/language-conventions-source-en-docs-br/SKILL.md) | Enforces language usage conventions for teams based in Brazil — Brazilian Portuguese for documentation, docstrings, and inline comments; English for source code, configuration, and commit messages. |
+| [project-context-sync](skills/project-context-sync/SKILL.md) | Enforces updating a shared status file after each work session so that every agent and collaborator starts with accurate project state. |
 | [rfc2119](skills/rfc2119/SKILL.md) | Enforces RFC 2119 (BCP 14) requirement level keywords in documentation, specifications, and technical writing. |
 | [semver](skills/semver/SKILL.md) | Enforces Semantic Versioning 2.0.0 rules for version bumps, tagging, pre-release handling, and deprecation workflows. |
 

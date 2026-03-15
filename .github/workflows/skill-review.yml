@@ -29,7 +29,7 @@ jobs:
             | grep '^skills/' \
             | cut -d'/' -f1-2 \
             | sort -u \
-            | jq -R -s 'split("\n") | map(select(length > 0))' )
+            | jq -R -s -c 'split("\n") | map(select(length > 0))' )
 
           echo "skills=$CHANGED_SKILLS" >> "$GITHUB_OUTPUT"
 
@@ -61,23 +61,32 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Prepare skill name
+        id: meta
+        run: echo "skill_name=$(basename '${{ matrix.skill }}')" >> "$GITHUB_OUTPUT"
+
+      - name: Stagger API requests
+        run: |
+          DELAY=$(( RANDOM % 15 ))
+          echo "Waiting ${DELAY}s to stagger API calls..."
+          sleep "$DELAY"
+
       - name: Run reviewer
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openai' }}
         run: |
-          SKILL_NAME=$(basename "${{ matrix.skill }}")
           python .github/scripts/review-skill.py \
             --agent ".github/agents/${{ matrix.reviewer }}.agent.md" \
             --skill "${{ matrix.skill }}" \
             --provider "$LLM_PROVIDER" \
-            --output "review-${SKILL_NAME}-${{ matrix.reviewer }}.md"
+            --output "review-${{ steps.meta.outputs.skill_name }}-${{ matrix.reviewer }}.md"
 
       - name: Upload review artifact
         uses: actions/upload-artifact@v4
         with:
-          name: "review-${{ matrix.skill }}-${{ matrix.reviewer }}"
+          name: "review-${{ steps.meta.outputs.skill_name }}-${{ matrix.reviewer }}"
           path: "review-*.md"
           retention-days: 7
 
