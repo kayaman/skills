@@ -29,7 +29,7 @@ jobs:
             | grep '^skills/' \
             | cut -d'/' -f1-2 \
             | sort -u \
-            | jq -R -s 'split("\n") | map(select(length > 0))' )
+            | jq -R -s -c 'split("\n") | map(select(length > 0))' )
 
           echo "skills=$CHANGED_SKILLS" >> "$GITHUB_OUTPUT"
 
