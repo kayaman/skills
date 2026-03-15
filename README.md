@@ -2,6 +2,8 @@
 
 A collection of Agent Skills that encode best practices, conventions, and architectural guidance for use with AI coding assistants.
 
+These skills are published to [agentskills](https://github.com/kayaman/agentskills) for discovery and distribution.
+
 ## Available Skills
 
 | Skill | Description |
