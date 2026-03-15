@@ -27,17 +27,18 @@ Refer to a skill's `SKILL.md` when configuring your AI assistant, or link direct
 
 ## Skill Reviewers (GitHub Copilot Custom Agents)
 
-Five specialized reviewer agents live in `.github/agents/`. Each reviews skills through a distinct best-practices lens:
+Six reviewer agents live in `.github/agents/`. One unified reviewer covers all best-practice dimensions, while five specialists dive deep into their respective source:
 
 | Agent | Source | Focus |
 | ----- | ------ | ----- |
+| `skill-reviewer` | All sources | Comprehensive cross-source reviewer covering structure, discoverability, progressive disclosure, instruction quality, content expertise, scope, security, scripts, anti-patterns, and portability |
 | `mgechev-skill-reviewer` | [mgechev/skills-best-practices](https://github.com/mgechev/skills-best-practices) | Structure, frontmatter discoverability, progressive disclosure, procedural instructions, deterministic scripts |
 | `codex-skill-reviewer` | [OpenAI Codex Skills](https://developers.openai.com/codex/skills/) | Progressive disclosure model, implicit/explicit invocation, single-job scope, imperative style |
 | `ms-agent-skill-reviewer` | [Microsoft Agent Framework](https://learn.microsoft.com/en-us/agent-framework/agents/skills) | Token budgets, security practices, script execution safety, skills-vs-workflows boundary |
 | `agentskills-skill-reviewer` | [agentskills.io](https://agentskills.io/skill-creation/best-practices) | Expertise grounding, context efficiency, control calibration, instruction patterns |
 | `claude-skill-reviewer` | [Claude Platform](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices) | Conciseness, degrees of freedom, naming/description, anti-patterns, feedback loops |
 
-All five agents use the same output format (PASS / PASS WITH WARNINGS / FAIL) for uniform consumption by the LLM-as-Judge CI pipeline.
+All six agents use the same output format (PASS / PASS WITH WARNINGS / FAIL) for uniform consumption by the LLM-as-Judge CI pipeline.
 
 ### CI Setup
 
