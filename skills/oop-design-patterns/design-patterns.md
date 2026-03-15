@@ -1,8 +1,38 @@
 # Design Patterns — Detailed Reference
 
-This reference expands on the 23 Gang of Four patterns and the two core maxims
-introduced in the main skill. Each pattern lists its intent, category, and
-typical use case.
+This reference expands on the 23 Gang of Four patterns introduced in the main
+skill. Patterns are grouped by category; each entry lists its intent and typical
+use case.
+
+## Table of Contents
+
+- [Creational Patterns](#creational-patterns)
+  - [Abstract Factory](#abstract-factory)
+  - [Builder](#builder)
+  - [Factory Method](#factory-method)
+  - [Prototype](#prototype)
+  - [Singleton](#singleton)
+- [Structural Patterns](#structural-patterns)
+  - [Adapter](#adapter)
+  - [Bridge](#bridge)
+  - [Composite](#composite)
+  - [Decorator](#decorator)
+  - [Facade](#facade)
+  - [Flyweight](#flyweight)
+  - [Proxy](#proxy)
+- [Behavioral Patterns](#behavioral-patterns)
+  - [Chain of Responsibility](#chain-of-responsibility)
+  - [Command](#command)
+  - [Interpreter](#interpreter)
+  - [Iterator](#iterator)
+  - [Mediator](#mediator)
+  - [Memento](#memento)
+  - [Observer](#observer)
+  - [State](#state)
+  - [Strategy](#strategy)
+  - [Template Method](#template-method)
+  - [Visitor](#visitor)
+- [Sources](#sources)
 
 ## Creational Patterns
 
