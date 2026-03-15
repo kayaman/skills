@@ -7,6 +7,7 @@ A collection of Agent Skills that encode best practices, conventions, and archit
 | Skill | Description |
 | ----- | ----------- |
 | [aws-well-architected](skills/aws-well-architected/SKILL.md) | Enforces AWS Well-Architected Framework best practices across all six pillars (Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, Sustainability). |
+| [blog-post-with-diagrams](skills/blog-post-with-diagrams/SKILL.md) | Guides writing technical blog posts that embed Mermaid diagrams, ASCII art, and annotated code blocks to explain architecture, workflows, and decisions. |
 | [azure-well-architected](skills/azure-well-architected/SKILL.md) | Enforces Azure Well-Architected Framework best practices across all five pillars (Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency). |
 | [language-conventions-source-en-docs-br](skills/language-conventions-source-en-docs-br/SKILL.md) | Enforces language usage conventions for teams based in Brazil — Brazilian Portuguese for documentation, docstrings, and inline comments; English for source code, configuration, and commit messages. |
 | [project-context-sync](skills/project-context-sync/SKILL.md) | Enforces updating a shared status file after each work session so that every agent and collaborator starts with accurate project state. |
