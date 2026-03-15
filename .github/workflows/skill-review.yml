@@ -61,6 +61,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Stagger API requests
+        run: |
+          DELAY=$(( RANDOM % 15 ))
+          echo "Waiting ${DELAY}s to stagger API calls..."
+          sleep "$DELAY"
+
       - name: Run reviewer
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

@@ -20,8 +20,8 @@ import time
 import random
 from pathlib import Path
 
-MAX_RETRIES = 5
-BASE_DELAY = 2
+MAX_RETRIES = 8
+BASE_DELAY = 3
 
 
 def read_file(path: str) -> str:
@@ -84,7 +84,11 @@ def _retry_on_rate_limit(make_request):
             return make_request()
         except urllib.error.HTTPError as e:
             if e.code == 429 and attempt < MAX_RETRIES - 1:
-                delay = BASE_DELAY * (2 ** attempt) + random.uniform(0, 1)
+                retry_after = e.headers.get("Retry-After")
+                if retry_after and retry_after.isdigit():
+                    delay = int(retry_after) + random.uniform(0, 2)
+                else:
+                    delay = BASE_DELAY * (2 ** attempt) + random.uniform(0, 2)
                 print(f"Rate limited (429). Retrying in {delay:.1f}s (attempt {attempt + 1}/{MAX_RETRIES})...", file=sys.stderr)
                 time.sleep(delay)
             else:
