@@ -1,6 +1,6 @@
 ---
 name: triage-issue
-description: Triage a bug or issue by exploring the codebase to find root cause, then create a GitHub issue with a TDD-based fix plan. Use when user reports a bug, wants to file an issue, mentions "triage", or wants to investigate and plan a fix for a problem.
+description: Triages a GitHub issue by exploring the codebase to find root cause, then creates a GitHub issue with a TDD-based fix plan. Use when user reports a bug, wants to file an issue, mentions "triage", or wants to investigate and plan a fix for a problem.
 ---
 
 # Triage Issue
@@ -17,7 +17,7 @@ Do NOT ask follow-up questions yet. Start investigating immediately.
 
 ### 2. Explore and diagnose
 
-Use the Agent tool with subagent_type=Explore to deeply investigate the codebase. Your goal is to find:
+Use repository search and targeted file reads to deeply investigate the codebase. Your goal is to find:
 
 - **Where** the bug manifests (entry points, UI, API responses)
 - **What** code path is involved (trace the flow)
@@ -56,10 +56,16 @@ Rules:
 
 ### 5. Create the GitHub issue
 
-Create a GitHub issue using `gh issue create` with the template below. Do NOT ask the user to review before creating - just create it and share the URL.
+Before creating the issue, run preflight checks:
+1. Verify `gh` is authenticated: `gh auth status`
+2. Confirm the target repository: `gh repo view --json nameWithOwner -q .nameWithOwner`
+3. Show the user the repo name and ask: "I'm about to create a GitHub issue in **{repo}**. Proceed?"
 
-<issue-template>
+Once confirmed, create a GitHub issue using `gh issue create` with the template below. **Do NOT include the template section markers in the actual issue body.**
 
+**Issue body template** (use this structure, omit the marker lines):
+
+```markdown
 ## Problem
 
 A clear description of the bug or issue, including:
@@ -96,7 +102,6 @@ A numbered list of RED-GREEN cycles:
 - [ ] Criterion 2
 - [ ] All new tests pass
 - [ ] Existing tests still pass
-
-</issue-template>
+```
 
 After creating the issue, print the issue URL and a one-line summary of the root cause.
