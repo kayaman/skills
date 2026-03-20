@@ -13,7 +13,7 @@ Break a PRD into independently-grabbable GitHub issues using vertical slices (tr
 
 Ask the user for the PRD GitHub issue number (or URL).
 
-If the PRD is not already in your context window, fetch it with `gh issue view <number>` (with comments).
+If the PRD is not already in your context window, fetch it with `gh issue view <number> --comments` (with comments).
 
 ### 2. Explore the codebase (optional)
 
@@ -25,11 +25,11 @@ Break the PRD into **tracer bullet** issues. Each issue is a thin vertical slice
 
 Slices may be 'HITL' or 'AFK'. HITL slices require human interaction, such as an architectural decision or a design review. AFK slices can be implemented and merged without human interaction. Prefer AFK over HITL where possible.
 
-<vertical-slice-rules>
+**Vertical slice rules:**
+
 - Each slice delivers a narrow but COMPLETE path through every layer (schema, API, UI, tests)
 - A completed slice is demoable or verifiable on its own
 - Prefer many thin slices over few thick ones
-</vertical-slice-rules>
 
 ### 4. Quiz the user
 
@@ -51,11 +51,13 @@ Iterate until the user approves the breakdown.
 
 ### 5. Create the GitHub issues
 
-For each approved slice, create a GitHub issue using `gh issue create`. Use the issue body template below.
+For each approved slice, create a GitHub issue using `gh issue create`. Use the issue body template below. **Do NOT include the template section markers in the actual issue body.**
 
 Create issues in dependency order (blockers first) so you can reference real issue numbers in the "Blocked by" field.
 
-<issue-template>
+**Issue body template** (use this structure, omit the marker lines):
+
+```markdown
 ## Parent PRD
 
 #<prd-issue-number>
@@ -82,7 +84,14 @@ Reference by number from the parent PRD:
 
 - User story 3
 - User story 7
-
-</issue-template>
+```
 
 Do NOT close or modify the parent PRD issue.
+
+## Checklist
+
+- [ ] Slices are in dependency order (blockers created first)
+- [ ] Each slice is end-to-end and demoable on its own
+- [ ] Acceptance criteria are specific and testable
+- [ ] HITL vs AFK classification confirmed with user
+- [ ] No content duplicated from parent PRD (referenced instead)
