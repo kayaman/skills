@@ -10,7 +10,7 @@ Pure computation, in-memory state, no I/O. Always deepenable — just merge the 
 
 ### 2. Local-substitutable
 
-Dependencies that have local test stand-ins (e.g., PGLite for Postgres, in-memory filesystem). Deepenable if the test substitute exists. The deepened module is tested with the local stand-in running in the test suite.
+Dependencies that have local test stand-ins (e.g., PGLite for Postgres, in-memory filesystem). Can be deepened if the test substitute exists. The deepened module is tested with the local stand-in running in the test suite.
 
 ### 3. Remote but owned (Ports & Adapters)
 
