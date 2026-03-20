@@ -34,6 +34,9 @@ Copy it to the target location based on scope:
 
 Make it executable with `chmod +x`.
 
+> **Prerequisites:** The hook script requires `jq` to parse Claude's JSON input.
+> Install with: `brew install jq` (macOS), `apt-get install jq` (Debian/Ubuntu), or `choco install jq` (Windows).
+
 ### 3. Add hook to settings
 
 Add to the appropriate settings file:

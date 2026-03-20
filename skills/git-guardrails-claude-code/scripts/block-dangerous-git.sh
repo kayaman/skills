@@ -1,7 +1,14 @@
 #!/bin/bash
+set -euo pipefail
+
+command -v jq >/dev/null 2>&1 || { echo "ERROR: jq is required but not installed." >&2; exit 1; }
 
 INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command')
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+
+if [ -z "$COMMAND" ]; then
+  exit 1
+fi
 
 DANGEROUS_PATTERNS=(
   "git push"
