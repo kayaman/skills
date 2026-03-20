@@ -70,7 +70,9 @@ Write a `UBIQUITOUS_LANGUAGE.md` file with this structure:
 
 When invoked again in the same conversation:
 
-1. Read the existing `UBIQUITOUS_LANGUAGE.md`
+1. Check if `UBIQUITOUS_LANGUAGE.md` exists.
+   - **If it does not exist** (first invocation, or the file was removed): create it from scratch following the Output Format above.
+   - **If it exists**: read the current contents, then proceed with steps 2–6 below.
 2. Incorporate any new terms from subsequent discussion
 3. Update definitions if understanding has evolved
 4. Mark changed entries with "(updated)" and new entries with "(new)"
