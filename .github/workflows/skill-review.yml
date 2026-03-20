@@ -3,8 +3,7 @@ name: Skill Review
 on:
   pull_request:
     paths:
-      - 'skills/**/SKILL.md'
-      - 'skills/**'
+      - '**/SKILL.md'
 
 permissions:
   contents: read
@@ -26,8 +25,9 @@ jobs:
         id: changed
         run: |
           CHANGED_SKILLS=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} \
-            | grep '^skills/' \
-            | cut -d'/' -f1-2 \
+            | grep 'SKILL\.md' \
+            | grep -v '^\.' \
+            | cut -d'/' -f1 \
             | sort -u \
             | jq -R -s -c 'split("\n") | map(select(length > 0))' )
 

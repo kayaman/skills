@@ -1,14 +1,6 @@
 ---
 name: azure-well-architected
 description: Enforces Azure Well-Architected Framework best practices across all five pillars (Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency). Use when designing Azure or application architecture, writing infrastructure code (Bicep, ARM, Terraform), reviewing pull requests for cloud workloads, or making technology selection decisions. Provides both Azure-specific guidance and cloud-agnostic application and solutions architecture principles.
-license: Apache-2.0
-metadata:
-  author: Marco Antonio Gonzalez Junior
-  email: m@rco.sh
-  version: "1.0.0"
-  model: "claude-opus-4-6"
-  generated: "2026-03-14"
-  category: software-engineering
 ---
 
 # Azure Well-Architected Framework

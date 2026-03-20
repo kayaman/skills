@@ -1,5 +1,5 @@
 ---
-name: oop-knowledge
+name: oop-design-patterns
 description: >-
   Comprehensive knowledge base covering the main topics from the most
   influential Object-Oriented Programming books. Use when the user asks about
@@ -7,13 +7,11 @@ description: >-
   thinking, or object-oriented analysis and design. Also useful when reviewing
   code for OOP best practices, discussing trade-offs like composition vs
   inheritance, or applying design patterns to solve structural problems.
-license: Apache-2.0
+license: CC-BY-4.0
 metadata:
-  author: Marco Antonio Gonzalez Junior
-  email: m@rco.sh
+  author: claude-opus-4-6
   version: "1.0.0"
   model: claude-opus-4-6
-  generated: "2026-03-14"
   category: software-engineering
   tags: oop, design-patterns, solid, clean-code, refactoring
 ---
@@ -91,7 +89,7 @@ The GoF book emphasizes two principles above the individual patterns:
 - "Program to an interface, not an implementation."
 - "Favor object composition over class inheritance."
 
-See [references/design-patterns.md](references/design-patterns.md) for a
+See [design-patterns.md](design-patterns.md) for a
 detailed breakdown of each pattern with intent and applicability.
 
 ## Refactoring and Code Smells
@@ -198,5 +196,5 @@ Tests* (2009) bridges TDD and OOP design:
 ## Key Books Referenced
 
 For deeper exploration, consult
-[references/bibliography.md](references/bibliography.md) for the full
+[bibliography.md](bibliography.md) for the full
 annotated reading list.
