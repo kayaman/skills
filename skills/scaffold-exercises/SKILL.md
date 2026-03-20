@@ -16,17 +16,18 @@ Create exercise directory structures that pass `pnpm ai-hero-cli internal lint`,
 
 ## Exercise variants
 
-Each exercise needs at least one of these subfolders:
+Each exercise needs **at least one** of these subfolders:
 
 - `problem/` - student workspace with TODOs
 - `solution/` - reference implementation
 - `explainer/` - conceptual material, no TODOs
+- `explainer.1/`, `explainer.2/`, ... - numbered explainers when multiple conceptual sections are needed (same rules as `explainer/`)
 
 When stubbing, default to `explainer/` unless the plan specifies otherwise.
 
 ## Required files
 
-Each subfolder (`problem/`, `solution/`, `explainer/`) needs a `readme.md` that:
+Each variant subfolder (`problem/`, `solution/`, `explainer/`, `explainer.N/`) needs a `readme.md` that:
 
 - Is **not empty** (must have real content, even a single title line works)
 - Has no broken links
@@ -53,9 +54,9 @@ If the subfolder has code, it also needs a `main.ts` (>1 line). But for stubs, a
 
 The linter (`pnpm ai-hero-cli internal lint`) checks:
 
-- Each exercise has subfolders (`problem/`, `solution/`, `explainer/`)
+- Each exercise has **at least one** variant subfolder (`problem/`, `solution/`, `explainer/`, or `explainer.N/`)
 - At least one of `problem/`, `explainer/`, or `explainer.1/` exists
-- `readme.md` exists and is non-empty in the primary subfolder
+- `readme.md` exists and is non-empty in every variant subfolder present
 - No `.gitkeep` files
 - No `speaker-notes.md` files
 - No broken links in readmes
