@@ -18,11 +18,11 @@ Good interfaces make testing natural:
 
    ```typescript
    // Testable
-   function calculateDiscount(cart): Discount {}
+   function calculateDiscount(cart: Cart): Discount {}
 
    // Hard to test
-   function applyDiscount(cart): void {
-     cart.total -= discount;
+   function applyDiscount(cart: Cart, discount: Discount): void {
+     cart.total -= discount.amount;
    }
    ```
 
