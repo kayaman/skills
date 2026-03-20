@@ -17,10 +17,11 @@ A deep module (as opposed to a shallow module) is one which encapsulates a lot o
 
 Check with the user that these modules match their expectations. Check with the user which modules they want tests written for.
 
-5. Once you have a complete understanding of the problem and solution, use the template below to write the PRD. The PRD should be submitted as a GitHub issue.
+5. Once you have a complete understanding of the problem and solution, use the template below to write the PRD. The PRD should be submitted as a GitHub issue. **Do NOT include the template markers in the actual issue body.**
 
-<prd-template>
+**PRD template** (use this structure, omit the marker lines):
 
+```markdown
 ## Problem Statement
 
 The problem that the user is facing, from the user's perspective.
@@ -33,11 +34,10 @@ The solution to the problem, from the user's perspective.
 
 A LONG, numbered list of user stories. Each user story should be in the format of:
 
-1. As an <actor>, I want a <feature>, so that <benefit>
+1. As a `{actor}`, I want a `{feature}`, so that `{benefit}`
 
-<user-story-example>
+Example:
 1. As a mobile bank customer, I want to see balance on my accounts, so that I can make better informed decisions about my spending
-</user-story-example>
 
 This list of user stories should be extremely extensive and cover all aspects of the feature.
 
@@ -70,5 +70,4 @@ A description of the things that are out of scope for this PRD.
 ## Further Notes
 
 Any further notes about the feature.
-
-</prd-template>
+```
