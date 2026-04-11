@@ -39,9 +39,31 @@ jobs:
             echo "has_skills=false" >> "$GITHUB_OUTPUT"
           fi
 
+  validate:
+    name: "skills-ref → ${{ matrix.skill }}"
+    needs: detect-skills
+    if: needs.detect-skills.outputs.has_skills == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        skill: ${{ fromJson(needs.detect-skills.outputs.skills) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install skills-ref
+        run: python -m pip install --upgrade pip skills-ref
+
+      - name: Validate skill
+        run: skills-ref validate "${{ matrix.skill }}"
+
   review:
     name: "${{ matrix.reviewer }} → ${{ matrix.skill }}"
-    needs: detect-skills
+    needs: [detect-skills, validate]
     if: needs.detect-skills.outputs.has_skills == 'true'
     runs-on: ubuntu-latest
     strategy:
@@ -94,7 +116,7 @@ jobs:
 
   judge:
     name: LLM-as-Judge
-    needs: [detect-skills, review]
+    needs: [detect-skills, validate, review]
     if: needs.detect-skills.outputs.has_skills == 'true'
     runs-on: ubuntu-latest
     steps:
