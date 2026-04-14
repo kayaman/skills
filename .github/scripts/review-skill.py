@@ -99,7 +99,7 @@ def _retry_on_rate_limit(make_request):
 PROVIDER_MODELS = {
     "openai": "gpt-4o",
     "anthropic": "claude-sonnet-4-5",
-    "gemini": "gemini-2.0-flash",
+    "gemini": "gemini-2.5-flash",
 }
 
 
