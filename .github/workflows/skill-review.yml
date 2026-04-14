@@ -97,8 +97,8 @@ jobs:
 
       - name: Run reviewer
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AI_GATEWAY_URL: ${{ secrets.AI_GATEWAY_URL }}
+          GATEWAY_API_KEY: ${{ secrets.GATEWAY_API_KEY }}
           LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openai' }}
         run: |
           python .github/scripts/review-skill.py \
@@ -135,8 +135,8 @@ jobs:
 
       - name: Aggregate reviews
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AI_GATEWAY_URL: ${{ secrets.AI_GATEWAY_URL }}
+          GATEWAY_API_KEY: ${{ secrets.GATEWAY_API_KEY }}
           LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openai' }}
         run: |
           python .github/scripts/judge-reviews.py \

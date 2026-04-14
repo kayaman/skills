@@ -9,8 +9,8 @@ Reads all .md files from --reviews-dir, sends them to an LLM with a judging
 prompt, and outputs an aggregated review to stdout.
 
 Environment variables:
-    OPENAI_API_KEY    — required when provider is openai
-    ANTHROPIC_API_KEY — required when provider is anthropic
+    AI_GATEWAY_URL   — ai-gateway-rs base URL (e.g. https://gateway.example.com)
+    GATEWAY_API_KEY  — Bearer token for the gateway
 """
 
 import argparse
@@ -75,16 +75,25 @@ Output format:
 """
 
 
-def call_openai(system_prompt: str, user_content: str, model: str) -> str:
+PROVIDER_MODELS = {
+    "openai": "gpt-4o",
+    "anthropic": "claude-sonnet-4-5",
+    "gemini": "gemini-2.0-flash",
+}
+
+
+def call_gateway(system_prompt: str, user_content: str, model: str, provider: str) -> str:
     import urllib.request
 
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        print("Error: OPENAI_API_KEY not set", file=sys.stderr)
+    gateway_url = os.environ.get("AI_GATEWAY_URL", "").rstrip("/")
+    api_key = os.environ.get("GATEWAY_API_KEY", "")
+    if not gateway_url:
+        print("Error: AI_GATEWAY_URL not set", file=sys.stderr)
         sys.exit(1)
 
     payload = json.dumps({
         "model": model,
+        "provider": provider,
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_content},
@@ -94,7 +103,7 @@ def call_openai(system_prompt: str, user_content: str, model: str) -> str:
     }).encode("utf-8")
 
     req = urllib.request.Request(
-        "https://api.openai.com/v1/chat/completions",
+        f"{gateway_url}/v1/chat/completions",
         data=payload,
         headers={
             "Content-Type": "application/json",
@@ -105,38 +114,6 @@ def call_openai(system_prompt: str, user_content: str, model: str) -> str:
     with urllib.request.urlopen(req, timeout=180) as resp:
         result = json.loads(resp.read().decode("utf-8"))
         return result["choices"][0]["message"]["content"]
-
-
-def call_anthropic(system_prompt: str, user_content: str, model: str) -> str:
-    import urllib.request
-
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        print("Error: ANTHROPIC_API_KEY not set", file=sys.stderr)
-        sys.exit(1)
-
-    payload = json.dumps({
-        "model": model,
-        "max_tokens": 4096,
-        "system": system_prompt,
-        "messages": [
-            {"role": "user", "content": user_content},
-        ],
-    }).encode("utf-8")
-
-    req = urllib.request.Request(
-        "https://api.anthropic.com/v1/messages",
-        data=payload,
-        headers={
-            "Content-Type": "application/json",
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
-        },
-    )
-
-    with urllib.request.urlopen(req, timeout=180) as resp:
-        result = json.loads(resp.read().decode("utf-8"))
-        return result["content"][0]["text"]
 
 
 def main():
@@ -164,12 +141,8 @@ def main():
 
     user_message = "Here are the six reviewer outputs. Aggregate them into a single verdict.\n\n" + "\n\n---\n\n".join(reviews)
 
-    if args.provider == "openai":
-        model = args.model or "gpt-4o"
-        result = call_openai(JUDGE_PROMPT, user_message, model)
-    else:
-        model = args.model or "claude-sonnet-4-20250514"
-        result = call_anthropic(JUDGE_PROMPT, user_message, model)
+    model = args.model or PROVIDER_MODELS.get(args.provider, "gpt-4o")
+    result = call_gateway(JUDGE_PROMPT, user_message, model, args.provider)
 
     if args.output:
         Path(args.output).write_text(result, encoding="utf-8")
