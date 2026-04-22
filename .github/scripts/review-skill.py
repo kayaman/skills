@@ -6,8 +6,8 @@ Usage:
     python review-skill.py --agent <agent-file> --skill <skill-dir> --provider <openai|anthropic>
 
 Environment variables:
-    OPENAI_API_KEY   — required when provider is openai
-    ANTHROPIC_API_KEY — required when provider is anthropic
+    AI_GATEWAY_URL   — ai-gateway-rs base URL (e.g. https://gateway.example.com)
+    GATEWAY_API_KEY  — Bearer token for the gateway
 
 Outputs the review text to stdout. Exits non-zero on API or input errors.
 """
@@ -96,17 +96,26 @@ def _retry_on_rate_limit(make_request):
                 raise
 
 
-def call_openai(system_prompt: str, user_content: str, model: str) -> str:
+PROVIDER_MODELS = {
+    "openai": "gpt-4o",
+    "anthropic": "claude-sonnet-4-5",
+    "gemini": "gemini-2.5-flash",
+}
+
+
+def call_gateway(system_prompt: str, user_content: str, model: str, provider: str) -> str:
     import urllib.request
     import urllib.error
 
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        print("Error: OPENAI_API_KEY not set", file=sys.stderr)
+    gateway_url = os.environ.get("AI_GATEWAY_URL", "").rstrip("/")
+    api_key = os.environ.get("GATEWAY_API_KEY", "")
+    if not gateway_url:
+        print("Error: AI_GATEWAY_URL not set", file=sys.stderr)
         sys.exit(1)
 
     payload = json.dumps({
         "model": model,
+        "provider": provider,
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_content},
@@ -117,7 +126,7 @@ def call_openai(system_prompt: str, user_content: str, model: str) -> str:
 
     def make_request():
         req = urllib.request.Request(
-            "https://api.openai.com/v1/chat/completions",
+            f"{gateway_url}/v1/chat/completions",
             data=payload,
             headers={
                 "Content-Type": "application/json",
@@ -127,41 +136,6 @@ def call_openai(system_prompt: str, user_content: str, model: str) -> str:
         with urllib.request.urlopen(req, timeout=180) as resp:
             result = json.loads(resp.read().decode("utf-8"))
             return result["choices"][0]["message"]["content"]
-
-    return _retry_on_rate_limit(make_request)
-
-
-def call_anthropic(system_prompt: str, user_content: str, model: str) -> str:
-    import urllib.request
-    import urllib.error
-
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        print("Error: ANTHROPIC_API_KEY not set", file=sys.stderr)
-        sys.exit(1)
-
-    payload = json.dumps({
-        "model": model,
-        "max_tokens": 4096,
-        "system": system_prompt,
-        "messages": [
-            {"role": "user", "content": user_content},
-        ],
-    }).encode("utf-8")
-
-    def make_request():
-        req = urllib.request.Request(
-            "https://api.anthropic.com/v1/messages",
-            data=payload,
-            headers={
-                "Content-Type": "application/json",
-                "x-api-key": api_key,
-                "anthropic-version": "2023-06-01",
-            },
-        )
-        with urllib.request.urlopen(req, timeout=180) as resp:
-            result = json.loads(resp.read().decode("utf-8"))
-            return result["content"][0]["text"]
 
     return _retry_on_rate_limit(make_request)
 
@@ -179,12 +153,8 @@ def main():
     skill_content = collect_skill_content(args.skill)
     user_message = f"Review the following skill:\n\n{skill_content}"
 
-    if args.provider == "openai":
-        model = args.model or "gpt-4o"
-        review = call_openai(system_prompt, user_message, model)
-    else:
-        model = args.model or "claude-sonnet-4-20250514"
-        review = call_anthropic(system_prompt, user_message, model)
+    model = args.model or PROVIDER_MODELS.get(args.provider, "gpt-4o")
+    review = call_gateway(system_prompt, user_message, model, args.provider)
 
     if args.output:
         Path(args.output).write_text(review, encoding="utf-8")
