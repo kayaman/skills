@@ -34,7 +34,7 @@ These principles derive from human cognition, not trends. They apply regardless 
 - Auditing for dark patterns or manipulative design
 - Handling errors, empty states, and loading states
 
-**Don't use for:** typography decisions (`ui-typography`, `web-typography`), color/palette generation (`frontend-design`), responsive CSS layout (`responsive-design`), design token creation (`frontend-design`).
+**Don't use for:** typography decisions, color/palette generation, responsive CSS layout, or design token creation.
 
 ---
 
