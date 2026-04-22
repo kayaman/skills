@@ -142,7 +142,4 @@ Load these on demand for detailed guidance:
 
 ## Related Skills
 
-- `ui-typography` — character-level typographic correctness
-- `web-typography` — typeface selection, pairing, hierarchy
-- `frontend-design` — color palettes, design tokens, component templates, accessibility audits
-- `responsive-design` — container queries, fluid typography, CSS Grid, breakpoints
+No related skills are listed yet. Add entries here only when corresponding skill directories exist in the repo.
