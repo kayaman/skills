@@ -16,7 +16,7 @@ Run against any interface. Each check references its governing principle.
 
 ## Interaction
 
-- [ ] All clickable/tappable targets >= 44x44px (Fitts's Law / WCAG 2.5.8)
+- [ ] All clickable/tappable targets >= 44x44px (Fitts's Law)
 - [ ] Adjacent clickable targets have >= 8px spacing (Fitts's Law)
 - [ ] Primary CTA is visually distinct from secondary and tertiary actions (Von Restorff)
 - [ ] Destructive actions require confirmation with specific label (error prevention)

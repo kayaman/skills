@@ -13,13 +13,13 @@ Each law follows: Principle, When It Applies, Code Checks, Violation, Fix.
 **When:** Buttons, links, form controls, touch targets, dropdown items, mobile tap areas.
 
 **Code checks:**
-- All interactive elements: `min-width: 44px; min-height: 44px` (WCAG 2.5.8)
+- All interactive elements: at least `min-width: 24px; min-height: 24px` to meet WCAG 2.5.8 minimum target size requirements (exceptions may apply); prefer `44px × 44px` as a touch-friendly best practice
 - Spacing between adjacent clickable targets >= 8px to prevent mis-taps
 - Primary CTA positioned near expected cursor location (end of form, center of modal)
 - Corner/edge targets on desktop benefit from edge anchoring (infinite target depth)
 
 **Violation:** 16x16px close button in modal corner on mobile.
-**Fix:** 44x44px tap target with generous padding; icon can be visually smaller.
+**Fix:** Increase to at least a 24x24px target to satisfy WCAG 2.5.8 where applicable; prefer a 44x44px tap target with generous padding, even if the icon remains visually smaller.
 
 ---
 
