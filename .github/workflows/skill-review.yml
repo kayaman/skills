@@ -4,10 +4,16 @@ on:
   pull_request:
     paths:
       - '**/SKILL.md'
+  workflow_dispatch:
 
+# Prevent duplicate/racing runs per PR.
+concurrency:
+  group: skill-review-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+# Default least-privilege; job-specific permissions below.
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   detect-skills:
@@ -23,21 +29,30 @@ jobs:
 
       - name: Find changed skill directories
         id: changed
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.sha }}
         run: |
-          CHANGED_SKILLS=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} \
-            | grep 'SKILL\.md' \
-            | grep -v '^\.' \
-            | cut -d'/' -f1 \
-            | sort -u \
-            | jq -R -s -c 'split("\n") | map(select(length > 0))' )
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+          import subprocess
 
-          echo "skills=$CHANGED_SKILLS" >> "$GITHUB_OUTPUT"
+          base = os.environ["BASE_SHA"]
+          head = os.environ["HEAD_SHA"]
 
-          if [ "$(echo "$CHANGED_SKILLS" | jq 'length')" -gt 0 ]; then
-            echo "has_skills=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_skills=false" >> "$GITHUB_OUTPUT"
-          fi
+          # Use base...head to properly diff against merge-base.
+          out = subprocess.check_output(
+              ["git", "diff", "--name-only", f"{base}...{head}"],
+              text=True,
+          )
+
+          # Store the directory that *contains* SKILL.md (supports **/SKILL.md).
+          skills = sorted({os.path.dirname(p) for p in out.splitlines() if p.endswith("SKILL.md")})
+          print(f"skills={json.dumps(skills)}")
+          print(f"has_skills={'true' if skills else 'false'}")
+          PY
 
   validate:
     name: "skills-ref → ${{ matrix.skill }}"
@@ -54,6 +69,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: Install skills-ref
         run: python -m pip install --upgrade pip skills-ref
@@ -64,7 +80,8 @@ jobs:
   review:
     name: "${{ matrix.reviewer }} → ${{ matrix.skill }}"
     needs: [detect-skills, validate]
-    if: needs.detect-skills.outputs.has_skills == 'true'
+    # Skip when no skills changed OR secrets aren't available (common on fork PRs).
+    if: needs.detect-skills.outputs.has_skills == 'true' && secrets.GATEWAY_API_KEY != ''
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -84,47 +101,59 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: Prepare skill name
         id: meta
+        shell: bash
         run: echo "skill_name=$(basename '${{ matrix.skill }}')" >> "$GITHUB_OUTPUT"
 
       - name: Stagger API requests
+        shell: bash
         run: |
           DELAY=$(( 5 + RANDOM % 40 ))
           echo "Waiting ${DELAY}s to stagger API calls..."
           sleep "$DELAY"
 
       - name: Run reviewer
+        id: run_reviewer
         env:
           AI_GATEWAY_URL: ${{ secrets.AI_GATEWAY_URL }}
           GATEWAY_API_KEY: ${{ secrets.GATEWAY_API_KEY }}
           LLM_PROVIDER: ${{ vars.LLM_PROVIDER || 'openai' }}
+        shell: bash
         run: |
+          OUT="review-${{ steps.meta.outputs.skill_name }}-${{ matrix.reviewer }}.md"
           python .github/scripts/review-skill.py \
             --agent ".github/agents/${{ matrix.reviewer }}.agent.md" \
             --skill "${{ matrix.skill }}" \
             --provider "$LLM_PROVIDER" \
-            --output "review-${{ steps.meta.outputs.skill_name }}-${{ matrix.reviewer }}.md"
+            --output "$OUT"
+          echo "out=$OUT" >> "$GITHUB_OUTPUT"
 
       - name: Upload review artifact
         uses: actions/upload-artifact@v4
         with:
           name: "review-${{ steps.meta.outputs.skill_name }}-${{ matrix.reviewer }}"
-          path: "review-*.md"
+          path: ${{ steps.run_reviewer.outputs.out }}
           retention-days: 7
 
   judge:
     name: LLM-as-Judge
     needs: [detect-skills, validate, review]
-    if: needs.detect-skills.outputs.has_skills == 'true'
+    # Skip when no skills changed OR secrets aren't available (common on fork PRs).
+    if: needs.detect-skills.outputs.has_skills == 'true' && secrets.GATEWAY_API_KEY != ''
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: Download all review artifacts
         uses: actions/download-artifact@v4
@@ -132,6 +161,12 @@ jobs:
           path: reviews/
           pattern: "review-*"
           merge-multiple: true
+
+      - name: Verify downloaded reviews
+        shell: bash
+        run: |
+          ls -la reviews || true
+          test -n "$(find reviews -type f -name '*.md' -print -quit)"
 
       - name: Aggregate reviews
         env:
@@ -158,8 +193,7 @@ jobs:
               issue_number: context.issue.number,
             });
 
-            const existing = comments.find(c => c.body.includes(marker));
-
+            const existing = comments.find(c => c.body && c.body.includes(marker));
             const fullBody = `${marker}\n\n${body}`;
 
             if (existing) {
