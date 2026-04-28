@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentskills.example/event-envelope-v1.json",
+  "title": "Event Envelope v1",
+  "description": "Canonical envelope for domain events. Wrap your domain payload in `data`. See EVENT_SCHEMA.md for field rules.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "type",
+    "version",
+    "source",
+    "occurredAt",
+    "correlationId",
+    "data"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique per event; UUIDv7 or ULID so it sorts by creation time. Used by consumers to deduplicate.",
+      "pattern": "^(?:[0-9A-HJKMNP-TV-Z]{26}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+    },
+    "type": {
+      "type": "string",
+      "description": "Event name. Past tense, PascalCase, scoped to one aggregate (e.g., OrderPaid).",
+      "pattern": "^[A-Z][A-Za-z0-9]+$",
+      "minLength": 3,
+      "maxLength": 64
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Schema version of `data`. Bump on breaking changes."
+    },
+    "source": {
+      "type": "string",
+      "description": "Stable identifier for the producer (e.g., 'payments.service').",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp of when the fact became true (not when it was published)."
+    },
+    "publishedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Optional. When the event was handed to the broker."
+    },
+    "causationId": {
+      "type": "string",
+      "description": "The id of the command or event that directly caused this event. Null only for root events.",
+      "pattern": "^(?:[0-9A-HJKMNP-TV-Z]{26}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+    },
+    "correlationId": {
+      "type": "string",
+      "description": "The id of the root event/command that started the flow. Constant across a saga.",
+      "pattern": "^(?:[0-9A-HJKMNP-TV-Z]{26}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional flat bag for tracing, tenancy, actor. Keep keys namespaced if you share across teams.",
+      "additionalProperties": { "type": "string" }
+    },
+    "data": {
+      "type": "object",
+      "description": "Domain payload. Validate with the per-event schema (data-<type>-v<version>.json).",
+      "minProperties": 1
+    }
+  }
+}
