@@ -34,7 +34,7 @@ These principles derive from human cognition, not trends. They apply regardless 
 - Auditing for dark patterns or manipulative design
 - Handling errors, empty states, and loading states
 
-**Don't use for:** typography decisions (`ui-typography`, `web-typography`), color/palette generation (`frontend-design`), responsive CSS layout (`responsive-design`), design token creation (`frontend-design`).
+**Don't use for:** typography decisions, color/palette generation, responsive CSS layout, or design token creation.
 
 ---
 
@@ -142,7 +142,4 @@ Load these on demand for detailed guidance:
 
 ## Related Skills
 
-- `ui-typography` — character-level typographic correctness
-- `web-typography` — typeface selection, pairing, hierarchy
-- `frontend-design` — color palettes, design tokens, component templates, accessibility audits
-- `responsive-design` — container queries, fluid typography, CSS Grid, breakpoints
+No related skills are listed yet. Add entries here only when corresponding skill directories exist in the repo.
