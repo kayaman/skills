@@ -19,7 +19,7 @@ resource "aws_sns_sms_preferences" "default" {
   default_sms_type               = "Transactional"
   default_sender_id              = var.sms_default_sender_id
   delivery_status_iam_role_arn   = null
-  delivery_status_success_sampling_rate = "0"
+  delivery_status_success_sampling_rate = 0
 }
 
 # Optional: a CloudWatch alarm that fires when monthly spend approaches the cap.
