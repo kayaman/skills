@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/kayaman/ts-otp-aws-skill/assets/schemas/otp-record.schema.json",
+  "title": "OTP Record (DynamoDB single-table, custom path)",
+  "description": "Schema for items stored in the custom-DynamoDB OTP table. Two item kinds share the partition key: 'pending' (the OTP record itself) and 'rate#<hour-bucket>' (per-identifier rate-limit counter).",
+  "oneOf": [
+    { "$ref": "#/$defs/PendingOtp" },
+    { "$ref": "#/$defs/RateLimitCounter" }
+  ],
+  "$defs": {
+    "PendingOtp": {
+      "type": "object",
+      "required": ["PK", "SK", "otpHash", "attempts", "ttl", "createdAt"],
+      "additionalProperties": false,
+      "properties": {
+        "PK": {
+          "type": "string",
+          "pattern": "^otp#[a-f0-9]{64}$",
+          "description": "otp#<sha256(normalized identifier)>"
+        },
+        "SK": {
+          "const": "pending"
+        },
+        "otpHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "sha256(<salt>:<6-digit code>) — never store the code itself"
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Atomically incremented by UpdateItem with a ConditionExpression capping at MAX_OTP_ATTEMPTS"
+        },
+        "ttl": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Epoch seconds — DynamoDB TTL deletes the item after this point"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "RateLimitCounter": {
+      "type": "object",
+      "required": ["PK", "SK", "count", "ttl"],
+      "additionalProperties": false,
+      "properties": {
+        "PK": {
+          "type": "string",
+          "pattern": "^otp#[a-f0-9]{64}$"
+        },
+        "SK": {
+          "type": "string",
+          "pattern": "^rate#[0-9]+$",
+          "description": "rate#<floor(epochMs / 3_600_000)> — one bucket per hour"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of OTP issuances during the hour bucket"
+        },
+        "ttl": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}
