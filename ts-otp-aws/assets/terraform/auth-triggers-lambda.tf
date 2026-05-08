@@ -53,9 +53,11 @@ resource "aws_iam_role_policy_attachment" "lambda_basic" {
 resource "aws_iam_role_policy" "auth_triggers_inline" {
   name = "auth-triggers-channels"
   role = aws_iam_role.auth_triggers.id
-  # Loads the policy document from assets/iam/auth-trigger-policy.json.
-  # Adjust the path if you copy the file elsewhere in your repo.
-  policy = file("${path.module}/iam/auth-trigger-policy.json")
+  # Render the policy template from the sibling assets/iam directory so
+  # placeholders like ${SES_FROM} are substituted before applying.
+  policy = templatefile("${path.module}/../iam/auth-trigger-policy.json", {
+    SES_FROM = var.ses_from
+  })
 }
 
 resource "aws_lambda_function" "auth_triggers" {
