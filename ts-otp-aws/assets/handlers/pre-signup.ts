@@ -8,7 +8,5 @@ import type { PreSignUpTriggerEvent } from "aws-lambda";
 
 export const preSignUp = (event: PreSignUpTriggerEvent): PreSignUpTriggerEvent => {
 	event.response.autoConfirmUser = true;
-	event.response.autoVerifyEmail = true;
-	event.response.autoVerifyPhone = true;
 	return event;
 };
