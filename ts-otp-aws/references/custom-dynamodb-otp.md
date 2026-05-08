@@ -148,7 +148,8 @@ Lambda execution role gets:
 ["dynamodb:GetItem","dynamodb:PutItem","dynamodb:UpdateItem","dynamodb:DeleteItem"]
 ```
 
-scoped to the table ARN, plus `ses:SendEmail` and `sns:Publish`. See `assets/iam/custom-otp-policy.json`.
+scoped to the table ARN, plus `ses:SendEmail` and `sns:Publish`. See `assets/iam/custom-otp-policy.json` and replace the
+`REPLACE_WITH_*` placeholders with your table ARN and verified sender.
 
 ## Sources
 

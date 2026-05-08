@@ -20,6 +20,11 @@ type CognitoTriggerEvent =
 	| CreateAuthChallengeTriggerEvent
 	| VerifyAuthChallengeResponseTriggerEvent;
 
+const maskIdentifier = (value: string | undefined): string | undefined => {
+	if (!value) return undefined;
+	return value.length <= 4 ? "****" : `***${value.slice(-4)}`;
+};
+
 export const handler = async (event: CognitoTriggerEvent): Promise<CognitoTriggerEvent> => {
 	try {
 		switch (event.triggerSource) {
@@ -51,7 +56,7 @@ export const handler = async (event: CognitoTriggerEvent): Promise<CognitoTrigge
 		console.error("auth-triggers failed", {
 			triggerSource: event.triggerSource,
 			userPoolId: event.userPoolId,
-			userName: event.userName,
+			userNameMasked: maskIdentifier(event.userName),
 			errorName: e.name ?? "Unknown",
 			errorMessage: e.message ?? String(err),
 			httpStatusCode: e.$metadata?.httpStatusCode,

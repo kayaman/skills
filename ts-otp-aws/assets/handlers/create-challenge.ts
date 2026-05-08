@@ -22,6 +22,18 @@ const generateOtp = (): string => randomInt(0, 1_000_000).toString().padStart(6,
 const maskTail = (s: string, tail = 4): string =>
 	s.length <= tail ? s.replace(/./g, "*") : `${"*".repeat(s.length - tail)}${s.slice(-tail)}`;
 
+const buildHint = (
+	channel: Channel,
+	userName: string,
+	email: string | undefined,
+	phone: string | undefined,
+): string => {
+	if (channel === "sms") return maskTail(phone ?? userName);
+	const source = email ?? userName;
+	const localPart = source.split("@")[0] ?? source;
+	return maskTail(localPart || source);
+};
+
 export const createChallenge = async (
 	event: CreateAuthChallengeTriggerEvent,
 ): Promise<CreateAuthChallengeTriggerEvent> => {
@@ -60,14 +72,7 @@ export const createChallenge = async (
 
 	event.response.publicChallengeParameters = {
 		channel: effectiveChannel,
-		hint:
-			effectiveChannel === "sms"
-				? phone
-					? maskTail(phone)
-					: ""
-				: email
-					? maskTail((email.split("@")[0] ?? ""))
-					: "",
+		hint: buildHint(effectiveChannel, event.userName, email, phone),
 	};
 	event.response.privateChallengeParameters = { code: otp };
 	event.response.challengeMetadata = `OTP-${effectiveChannel.toUpperCase()}`;
