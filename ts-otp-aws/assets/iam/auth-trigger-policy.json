@@ -11,7 +11,7 @@
       "Resource": "*",
       "Condition": {
         "StringEquals": {
-          "ses:FromAddress": "${SES_FROM}"
+          "ses:FromAddress": "REPLACE_WITH_VERIFIED_SES_FROM_ADDRESS"
         }
       }
     },
