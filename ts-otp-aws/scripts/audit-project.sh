@@ -134,7 +134,7 @@ echo
 
 # --- Testing ---
 TEST_MOCK=$(seen 'aws-sdk-client-mock')
-TEST_VITEST=$(seen 'from "vitest"|from ''vitest''')
+TEST_VITEST=$(seen 'from ["'"'"']vitest["'"'"']')
 
 echo "Testing:"
 row "aws-sdk-client-mock present"                   "$TEST_MOCK"
