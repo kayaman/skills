@@ -32,23 +32,45 @@ export const createChallenge = async (
 	const phone = event.request.userAttributes["phone_number"];
 
 	const phantom = event.request.userNotFound === true;
+	const hasEmail = Boolean(email);
+	const hasPhone = Boolean(phone);
 
-	if (!phantom) {
-		if (channel === "sms") {
-			if (!phone) throw new Error("user has no phone_number on file");
-			await sendOtpSms(phone, otp);
+	const effectiveChannel: Channel =
+		channel === "sms"
+			? hasPhone
+				? "sms"
+				: hasEmail
+					? "email"
+					: "sms"
+			: hasEmail
+				? "email"
+				: hasPhone
+					? "sms"
+					: "email";
+
+	const deliveryTarget = effectiveChannel === "sms" ? phone : email;
+
+	if (!phantom && deliveryTarget) {
+		if (effectiveChannel === "sms") {
+			await sendOtpSms(deliveryTarget, otp);
 		} else {
-			if (!email) throw new Error("user has no email on file");
-			await sendOtpEmail(email, otp);
+			await sendOtpEmail(deliveryTarget, otp);
 		}
 	}
 
 	event.response.publicChallengeParameters = {
-		channel,
-		hint: channel === "sms" ? maskTail(phone ?? "") : maskTail((email ?? "").split("@")[0] ?? ""),
+		channel: effectiveChannel,
+		hint:
+			effectiveChannel === "sms"
+				? phone
+					? maskTail(phone)
+					: ""
+				: email
+					? maskTail((email.split("@")[0] ?? ""))
+					: "",
 	};
 	event.response.privateChallengeParameters = { code: otp };
-	event.response.challengeMetadata = `OTP-${channel.toUpperCase()}`;
+	event.response.challengeMetadata = `OTP-${effectiveChannel.toUpperCase()}`;
 
 	return event;
 };
