@@ -93,7 +93,7 @@ default to DE, AT, CH if they decline.
 ## Metric definitions
 
 - **Pipeline coverage** = open pipeline closing in the quarter ÷ remaining quota.
-  Use SQL Function `analytics.pipeline_coverage(quarter)`.
+  Use SQL Function `analytics.pipeline_coverage(p_region, p_quarter)`.
 - **Net new ARR** = `amount_usd` for opportunities with `stage = 'Closed Won'`
   and `is_renewal = FALSE`. Use SQL Function `analytics.net_new_arr(...)`.
 
