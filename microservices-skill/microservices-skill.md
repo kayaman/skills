@@ -1701,4 +1701,4 @@ Potential additions to this skill (v2.0):
 
 **Last Updated:** April 20, 2026  
 **Created by:** Agent Skill Builder (O'Reilly-curated)  
-**License:** CC-BY-4.0 (Anthropic)
+**License:** CC0-1.0
