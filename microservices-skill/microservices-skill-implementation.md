@@ -235,7 +235,7 @@ Notification Service sends confirmation email
 
 | Data | Consistency | Reason |
 |---|---|---|
-| Order + Payment | Strong (via saga) | Must not lose money; saga ensures exactly-once |
+| Order + Payment | Strong (via saga) | Must not lose money; saga coordinates the workflow with compensations; use idempotency/deduplication for safe retries |
 | User profiles | Strong | Immediate visibility needed |
 | Inventory counts | Strong | Must not oversell |
 | Analytics/stats | Eventual (15-60s) | Can be out-of-date briefly |
