@@ -130,7 +130,7 @@ COMMENT 'Pipeline coverage = open pipeline closing in the quarter / remaining qu
 RETURN (
   SELECT
     SUM(CASE WHEN o.stage NOT IN ('Closed Won','Closed Lost')
-             AND DATE_TRUNC('quarter', o.close_date) = p_quarter
+             AND CAST(DATE_TRUNC('quarter', o.close_date) AS DATE) = p_quarter
         THEN o.amount_usd ELSE 0 END)
     /
     NULLIF(
