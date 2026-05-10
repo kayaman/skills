@@ -547,9 +547,9 @@ async def get_with_fallback(url):
 
 ## Quick Reference Links
 
-- O'Reilly Research: `memory/microservices_agent_skill_research.md`
-- Full Skill Guide: `skills/microservices-skill.md`
-- Implementation Guide: `skills/microservices-skill-implementation.md`
+- O'Reilly Research: summarized in this quick reference: `microservices-skill/microservices-quick-reference.md`
+- Full Skill Guide: `microservices-skill/SKILL.md`
+- Implementation Guide: `microservices-skill/microservices-skill-implementation.md`
 - Example Code: Look at generated TypeScript/Python above
 
 ---

@@ -19,7 +19,7 @@ Enables AI coding agents to:
 
 ### For Agents
 1. Read: `microservices-quick-reference.md` (15 min overview)
-2. Reference: `microservices-skill.md` (comprehensive guide)
+2. Reference: `SKILL.md` (comprehensive guide)
 3. Implement: Use `microservices-skill-implementation.md` (execution flow)
 
 ### For Users
@@ -35,7 +35,7 @@ Enables AI coding agents to:
 
 | File | Size | Purpose |
 |---|---|---|
-| `microservices-skill.md` | 47KB | Complete skill definition with code templates |
+| `SKILL.md` | 47KB | Complete skill definition with code templates |
 | `microservices-skill-implementation.md` | 25KB | How agents should execute the skill |
 | `microservices-quick-reference.md` | 13KB | Quick lookup guide & cheat sheet |
 | `MICROSERVICES_SKILL_SUMMARY.md` | 16KB | Overview & getting started |
@@ -102,7 +102,7 @@ In 30-50 minutes, this skill enables agents to:
 - No event sourcing (Priority 3)
 - No CQRS pattern (Priority 3)
 - No service mesh config (can add post-impl)
-- Limited to 3 languages (TS/Python)
+- Limited to 2 languages (TypeScript/Python)
 - No GraphQL support (REST + events only)
 
 ## Future Enhancements (v2.0)
@@ -118,13 +118,13 @@ In 30-50 minutes, this skill enables agents to:
 
 **Questions?** See the appropriate file:
 - Quick answers → `microservices-quick-reference.md`
-- Comprehensive guide → `microservices-skill.md`
+- Comprehensive guide → `SKILL.md`
 - How agents implement → `microservices-skill-implementation.md`
 - Overview & getting started → `MICROSERVICES_SKILL_SUMMARY.md`
 
 ## License
 
-CC-BY-4.0 (Anthropic)
+CC0-1.0
 
 ---
 

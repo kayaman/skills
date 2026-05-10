@@ -235,7 +235,7 @@ Notification Service sends confirmation email
 
 | Data | Consistency | Reason |
 |---|---|---|
-| Order + Payment | Strong (via saga) | Must not lose money; saga ensures exactly-once |
+| Order + Payment | Strong (via saga) | Must not lose money; saga coordinates the workflow with compensations; use idempotency/deduplication for safe retries |
 | User profiles | Strong | Immediate visibility needed |
 | Inventory counts | Strong | Must not oversell |
 | Analytics/stats | Eventual (15-60s) | Can be out-of-date briefly |
@@ -305,6 +305,13 @@ paths:
     post:
       summary: Create a new order
       operationId: createOrder
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Unique client-provided key for safe retries; server may echo this header in responses.
       requestBody:
         required: true
         content:
@@ -322,11 +329,6 @@ paths:
       responses:
         '201':
           description: Order created successfully
-          headers:
-            X-Idempotency-Key:
-              schema:
-                type: string
-              description: Include in retry requests for idempotency
           content:
             application/json:
               schema:

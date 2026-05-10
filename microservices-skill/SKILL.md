@@ -1,3 +1,8 @@
+---
+name: microservices-skill
+description: Architect and implement production-grade microservices systems in TypeScript (NestJS) and Python (FastAPI), including resilience, observability, testing, deployment, and migration guidance.
+---
+
 # Microservices Agent Skill
 
 **Version:** 1.0.0  
@@ -292,7 +297,7 @@ src/
 **NestJS app.module.ts Template:**
 
 ```typescript
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TerminusModule } from '@nestjs/terminus';
@@ -327,7 +332,7 @@ import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
     PaymentModule,
   ],
 })
-export class AppModule {
+export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(RequestIdMiddleware, LoggerMiddleware)
@@ -921,7 +926,9 @@ class HttpClient:
             for attempt in range(3):
                 await asyncio.sleep(100 * (2 ** attempt) / 1000)  # Exponential backoff
                 try:
-                    return await self.client.get(url, **kwargs).json()
+                    response = await self.client.get(url, **kwargs)
+                    response.raise_for_status()
+                    return response.json()
                 except Exception:
                     if attempt == 2:
                         raise
@@ -1340,7 +1347,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir uv
 COPY pyproject.toml uv.lock ./
 RUN uv venv /opt/venv
-RUN /opt/venv/bin/uv pip install -r requirements.txt
+RUN UV_PROJECT_ENVIRONMENT=/opt/venv uv sync --frozen --no-dev
 
 # Stage 2: Runtime
 FROM python:3.11-slim
@@ -1701,4 +1708,4 @@ Potential additions to this skill (v2.0):
 
 **Last Updated:** April 20, 2026  
 **Created by:** Agent Skill Builder (O'Reilly-curated)  
-**License:** CC-BY-4.0 (Anthropic)
+**License:** CC0-1.0
