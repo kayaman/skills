@@ -104,7 +104,7 @@ Block 30 minutes per week per space. Run this ritual:
 - [ ] For "actually correct": educate the user (reply on the thread); investigate UX confusion
 - [ ] Add each fixed question to the benchmark set with corrected expected SQL
 - [ ] Re-run the benchmark — confirm no regression
-- [ ] Update CHANGELOG.md (keep one in the repo for the space's curation history)
+- [ ] Update the Genie space's own CHANGELOG.md or curation history tracker in that space's repo (do not add a CHANGELOG.md to this skill directory)
 - [ ] Ship
 ```
 
