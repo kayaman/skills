@@ -88,8 +88,8 @@ thousand with suffix " K USD". Always cite the as-of timestamp from the data.
 -- Parameters: :region (string), :year (int)
 
 SELECT
-  DATE_TRUNC('quarter', o.close_date)::DATE AS quarter,
-  SUM(o.amount_usd)                          AS net_new_arr_usd
+  CAST(DATE_TRUNC('quarter', o.close_date) AS DATE) AS quarter,
+  SUM(o.amount_usd)                                  AS net_new_arr_usd
 FROM sales.v_pipeline_clean o
 JOIN sales.dim_account a USING (account_id)
 WHERE o.stage = 'Closed Won'
