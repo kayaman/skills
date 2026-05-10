@@ -150,7 +150,7 @@ RETURNS TABLE (quarter DATE, arr_usd DECIMAL(18,2))
 COMMENT 'Net new ARR by quarter for a region/year. Excludes renewals and test accounts.'
 RETURN
   SELECT
-    DATE_TRUNC('quarter', o.close_date)::DATE,
+    CAST(DATE_TRUNC('quarter', o.close_date) AS DATE),
     SUM(o.amount_usd)
   FROM sales.fact_opportunity o
   JOIN sales.dim_account a USING (account_id)
