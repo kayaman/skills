@@ -23,7 +23,7 @@ A **production-grade agent skill** that enables coding agents (Claude Code, Curs
 ## Files Created
 
 ### 1. **O'Reilly Research Database** 
-📄 `~/.claude/projects/blogmarks/memory/microservices_agent_skill_research.md`
+📄 `microservices-skill/microservices-quick-reference.md` (research distilled into quick reference)
 
 - **Size:** 450+ lines
 - **Content:**
@@ -38,7 +38,7 @@ A **production-grade agent skill** that enables coding agents (Claude Code, Curs
 **Use:** Reference for skill accuracy; backup knowledge source if LLM knowledge drifts
 
 ### 2. **Microservices Skill Definition**
-📄 `~/Projects/blogmarks/skills/microservices-skill.md`
+📄 `microservices-skill/SKILL.md`
 
 - **Size:** 800+ lines
 - **Content:**
@@ -56,7 +56,7 @@ A **production-grade agent skill** that enables coding agents (Claude Code, Curs
 **Use:** Complete skill definition; reference for agents; can be plugged into agent skill systems
 
 ### 3. **Implementation Guide for Agents**
-📄 `~/Projects/blogmarks/skills/microservices-skill-implementation.md`
+📄 `microservices-skill/microservices-skill-implementation.md`
 
 - **Size:** 600+ lines
 - **Content:**
@@ -72,7 +72,7 @@ A **production-grade agent skill** that enables coding agents (Claude Code, Curs
 **Use:** How agents should execute the skill; can be integrated into agent reasoning
 
 ### 4. **Quick Reference Guide**
-📄 `~/Projects/blogmarks/skills/microservices-quick-reference.md`
+📄 `microservices-skill/microservices-quick-reference.md`
 
 - **Size:** 300+ lines
 - **Content:**
@@ -240,7 +240,7 @@ The skill implements all 14 patterns from Anthropic's skill authoring research:
 ### For Agents (Claude Code, Cursor, etc.)
 
 1. **Reference the skill files** when building microservices
-   - Use `microservices-skill.md` for comprehensive guidance
+  - Use `SKILL.md` for comprehensive guidance
    - Use `microservices-quick-reference.md` for quick lookups
    - Use `microservices-skill-implementation.md` to understand execution flow
 
@@ -403,8 +403,8 @@ Agent: [Generates Dockerfile, K8s manifests, CI/CD]
 
 | File | Size | Purpose | Read Time |
 |---|---|---|---|
-| `microservices_agent_skill_research.md` | 450 lines | O'Reilly research database | 30 min |
-| `microservices-skill.md` | 800 lines | Complete skill definition | 45 min |
+| `microservices-quick-reference.md` | 300 lines | O'Reilly research highlights | 15 min |
+| `SKILL.md` | 800 lines | Complete skill definition | 45 min |
 | `microservices-skill-implementation.md` | 600 lines | How agents implement skill | 40 min |
 | `microservices-quick-reference.md` | 300 lines | Quick lookup guide | 15 min |
 | `MICROSERVICES_SKILL_SUMMARY.md` | This file | Overview & getting started | 10 min |
@@ -418,7 +418,7 @@ Agent: [Generates Dockerfile, K8s manifests, CI/CD]
 **For agents starting fresh:**
 
 1. Read: `microservices-quick-reference.md` (15 min)
-2. Reference: `microservices-skill.md` (as needed)
+2. Reference: `SKILL.md` (as needed)
 3. Implement: Follow decision tree in `microservices-skill-implementation.md`
 4. Validate: Run anti-pattern checklist before output
 
@@ -458,9 +458,9 @@ Agent: [Generates Dockerfile, K8s manifests, CI/CD]
 
 1. Copy skill files to agent skill registry:
    ```
-   skills/microservices-skill.md
-   skills/microservices-skill-implementation.md
-   skills/microservices-quick-reference.md
+   microservices-skill/SKILL.md
+   microservices-skill/microservices-skill-implementation.md
+   microservices-skill/microservices-quick-reference.md
    ```
 
 2. Register skill with CLI:
@@ -468,9 +468,9 @@ Agent: [Generates Dockerfile, K8s manifests, CI/CD]
    /microservices-skill [problem-type] [language]
    ```
 
-3. Link research document to memory:
+3. Keep the quick reference linked for source context:
    ```
-   memory/microservices_agent_skill_research.md
+   microservices-skill/microservices-quick-reference.md
    ```
 
 ### For Usage
@@ -499,8 +499,8 @@ When using this skill, cite:
 
 **Questions about the skill?**
 - Check: `microservices-quick-reference.md` (quick answers)
-- Read: `microservices-skill.md` (comprehensive guide)
-- Reference: `microservices_agent_skill_research.md` (research backing)
+- Read: `SKILL.md` (comprehensive guide)
+- Reference: `microservices-quick-reference.md` (research backing)
 
 **Issues or improvements?**
 - Research is from O'Reilly: reliable + current

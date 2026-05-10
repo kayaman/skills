@@ -305,6 +305,13 @@ paths:
     post:
       summary: Create a new order
       operationId: createOrder
+      parameters:
+        - name: X-Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Unique client-provided key for safe retries; server may echo this header in responses.
       requestBody:
         required: true
         content:
@@ -322,11 +329,6 @@ paths:
       responses:
         '201':
           description: Order created successfully
-          headers:
-            X-Idempotency-Key:
-              schema:
-                type: string
-              description: Include in retry requests for idempotency
           content:
             application/json:
               schema:
