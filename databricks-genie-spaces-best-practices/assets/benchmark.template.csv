@@ -1,0 +1,6 @@
+id,question,expected_sql_ref,expected_shape,acceptable_variants,owner,last_reviewed
+1,"Show me net new ARR for EMEA in 2026",example_sql/net_new_arr_by_quarter.sql,"4 rows: quarter, net_new_arr_usd","'EMEA'='Europe, Middle East & Africa'",@analytics-revops,2026-05-09
+2,"Top 10 EMEA accounts by ARR closed in 2026 Q1",example_sql/top_accounts_by_arr.sql,"10 rows ordered desc","'closed' may map to stage='Closed Won'",@analytics-revops,2026-05-09
+3,"Pipeline coverage for DACH this quarter",sql_function/analytics.pipeline_coverage,"single scalar 0..5","DACH = DE+AT+CH",@analytics-revops,2026-05-09
+4,"What is our renewals revenue this quarter?",REFUSE,"Refusal redirecting to 'EMEA Renewals' space","",@analytics-revops,2026-05-09
+5,"Top 5 machines by downtime hours last week",example_sql/top_machines_downtime.sql,"5 rows ordered","'downtime' default to unplanned",@reliability,2026-05-09
