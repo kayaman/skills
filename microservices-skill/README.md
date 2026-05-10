@@ -102,7 +102,7 @@ In 30-50 minutes, this skill enables agents to:
 - No event sourcing (Priority 3)
 - No CQRS pattern (Priority 3)
 - No service mesh config (can add post-impl)
-- Limited to 3 languages (TS/Python)
+- Limited to 2 languages (TypeScript/Python)
 - No GraphQL support (REST + events only)
 
 ## Future Enhancements (v2.0)
