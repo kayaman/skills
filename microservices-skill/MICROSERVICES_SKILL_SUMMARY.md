@@ -491,7 +491,7 @@ When using this skill, cite:
 > - Martin Kleppmann's "Designing Data-Intensive Applications" for data consistency
 > - Additional resources documented in skill research file
 
-**License:** CC-BY-4.0 (Anthropic)
+**License:** CC0-1.0
 
 ---
 
