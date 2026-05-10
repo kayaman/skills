@@ -232,7 +232,7 @@ hour. For trends, prefer line charts (provide one-row-per-time-bucket SQL).
 SELECT
   m.machine_id,
   m.machine_name,
-  ROUND(SUM(DATEDIFF(SECOND, d.start_ts, d.end_ts)) / 3600.0, 1) AS downtime_hours
+  ROUND(SUM(TIMESTAMPDIFF(SECOND, d.start_ts, d.end_ts)) / 3600.0, 1) AS downtime_hours
 FROM iot.fact_downtime_event d
 JOIN iot.dim_machine m USING (machine_id)
 WHERE d.cause_code <> 'PLANNED'
