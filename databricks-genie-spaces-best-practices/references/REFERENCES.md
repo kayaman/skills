@@ -44,5 +44,5 @@ To pull a specific O'Reilly chapter as further evidence, request: *"From O'Reill
 
 ## Specification adherence
 
-- This skill follows the agent skill specification at `https://agentskills.io` — YAML frontmatter (`name`, `description`, optional `license`/`metadata`/`allowed-tools`), Markdown body under 200 lines, progressive disclosure via `references/`, bundled `assets/`.
+- This skill follows the general agent skill structure at `https://agentskills.io` — YAML frontmatter (`name`, `description`, optional `license`/`metadata`/`allowed-tools`), a Markdown body, progressive disclosure via `references/`, and bundled `assets/`. In this repository, authoring guidance uses an approximately 500-line budget for `SKILL.md` bodies rather than treating “under 200 lines” as a hard agentskills.io requirement.
 - Authoring patterns reflect *Skill Authoring Patterns from Anthropic's Claude Skills* (generativeprogrammer.com): activation metadata with explicit triggers and exclusions, context budget, progressive disclosure, control tuning (high/medium/low freedom), explain-the-why, template scaffolds, in-skill examples, known gotchas, execution checklist, self-correcting loop, plan-validate-execute.
