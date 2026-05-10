@@ -1,0 +1,86 @@
+{
+  "_comment": "Genie Space configuration scaffold. Fill in every field before sharing. UI labels are noted as // hints; this JSON mirrors the conceptual surface, not the literal API payload.",
+
+  "identity": {
+    "title": "<Audience-specific, scope-bearing title — e.g. 'EMEA Pipeline & Forecast — RevOps'>",
+    "description_markdown": "Two paragraphs in Markdown. (1) what questions this space answers; (2) what it does NOT answer + where to redirect.",
+    "thumbnail_url": "<optional asset URL>",
+    "tags": ["<domain>", "<region>", "<audience>"]
+  },
+
+  "compute": {
+    "warehouse_type": "SERVERLESS",
+    "warehouse_id": "<warehouse_id>",
+    "_note": "Pro is also acceptable. Classic warehouses are not supported."
+  },
+
+  "data": {
+    "tables": [
+      {
+        "full_name": "<catalog>.<schema>.<table_or_view>",
+        "purpose": "<one line on what the user asks against this table>"
+      }
+    ],
+    "_max_tables": 30,
+    "_recommended_starting_count": 5
+  },
+
+  "joins_review_required": true,
+
+  "common_questions": [
+    "<Question 1 — dominant shape: aggregation>",
+    "<Question 2 — trend>",
+    "<Question 3 — ranking>",
+    "<Question 4 — filter>",
+    "<Question 5 — distribution>"
+  ],
+
+  "general_instructions_path": "assets/general-instructions.template.md",
+
+  "example_sql_paths": [
+    "assets/example-sql.template.sql"
+  ],
+
+  "sql_functions": [
+    {
+      "full_name": "<catalog>.<schema>.<function_name>",
+      "purpose": "<metric this codifies>",
+      "trusted_asset_eligible": true
+    }
+  ],
+
+  "knowledge_store": {
+    "synonyms": [
+      { "canonical_column": "<table.column>", "aliases": ["<alias1>", "<alias2>"] }
+    ],
+    "glossary": [
+      { "term": "<business term>", "definition": "<one-paragraph definition>" }
+    ]
+  },
+
+  "benchmarks": {
+    "csv_path": "assets/benchmark.template.csv",
+    "minimum_size": 20,
+    "pass_target": 0.95,
+    "trusted_target_top20": 0.90,
+    "trusted_target_overall": 0.60
+  },
+
+  "permissions": {
+    "can_manage": ["<curator group>"],
+    "can_edit":   ["<analyst group>"],
+    "can_run":    ["<consumer group>"],
+    "can_view":   []
+  },
+
+  "monitoring": {
+    "weekly_review_owner": "<email or group>",
+    "weekly_review_calendar": "<cadence link>"
+  },
+
+  "operational_notes": {
+    "conversation_cap": 10000,
+    "rate_limit_qpm_workspace": 20,
+    "archive_strategy": "Clone-and-rotate before reaching 80% of conversation cap."
+  }
+}
