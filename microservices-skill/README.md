@@ -124,7 +124,7 @@ In 30-50 minutes, this skill enables agents to:
 
 ## License
 
-CC-BY-4.0 (Anthropic)
+CC0-1.0
 
 ---
 
