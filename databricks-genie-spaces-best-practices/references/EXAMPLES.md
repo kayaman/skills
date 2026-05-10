@@ -273,7 +273,7 @@ RETURNS DOUBLE
 COMMENT 'Mean time between failures (hours) for a line over a period.'
 RETURN (
   SELECT
-    DATEDIFF(SECOND, p_start, p_end) / 3600.0
+    TIMESTAMPDIFF(SECOND, p_start, p_end) / 3600.0
     /
     NULLIF((
       SELECT COUNT(*)
