@@ -286,7 +286,7 @@ def deviation_diverging():
 
 ---
 
-# Anti-examples: the same data, shown wrong
+## Anti-examples: the same data, shown wrong
 
 The examples above show the right chart. These show the *wrong* one beside its fix — the failures
 are easier to recognize once you've seen them rendered. Each uses identical data on both sides, so
