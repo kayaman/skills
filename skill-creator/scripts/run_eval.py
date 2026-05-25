@@ -138,8 +138,9 @@ def run_single_query(
                                     pending_tool_name = tool_name
                                     accumulated_json = ""
                                 else:
-                                    return False
-
+                                    # Not a skill/read tool use; keep scanning.
+                                    pending_tool_name = None
+                                    accumulated_json = ""
                         elif se_type == "content_block_delta" and pending_tool_name:
                             delta = se.get("delta", {})
                             if delta.get("type") == "input_json_delta":
