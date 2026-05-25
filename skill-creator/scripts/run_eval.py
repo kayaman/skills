@@ -16,8 +16,12 @@ import uuid
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
-from scripts.utils import parse_skill_md
+# Allow running as a script (e.g. `python scripts/run_eval.py`) by ensuring the
+# skill-creator directory is on sys.path so `import scripts.*` works.
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from scripts.utils import parse_skill_md
 
 def find_project_root() -> Path:
     """Find the project root by walking up from cwd looking for .claude/.
