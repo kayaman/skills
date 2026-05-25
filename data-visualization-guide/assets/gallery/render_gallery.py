@@ -162,9 +162,108 @@ def deviation_diverging():
     fig.tight_layout(); fig.savefig(f"{OUT}/deviation-diverging.png", dpi=120); plt.close(fig)
 
 
+# ---------------------------------------------------------------------------
+# Anti-examples: the same data shown wrong (left) vs. right (right).
+# ---------------------------------------------------------------------------
+
+# A1 — Truncated bar baseline exaggerates a tiny difference
+def integrity_truncated_axis():
+    teams = ["A", "B", "C", "D"]
+    vals = [96, 94, 97, 95]
+    fig, (bad, good) = plt.subplots(1, 2, figsize=(10, 4))
+    bad.bar(teams, vals, color=ACCENT)
+    bad.set_ylim(90, 98)                       # the lie: baseline at 90
+    bad.set_title("Misleading: y-axis starts at 90", loc="left", color=ACCENT, weight="bold")
+    good.bar(teams, vals, color=GREY)
+    good.set_ylim(0, 100)                       # honest: bars encode length from zero
+    good.set_title("Honest: zero baseline", loc="left", color=INK, weight="bold")
+    for ax in (bad, good):
+        for s in ("top", "right"):
+            ax.spines[s].set_visible(False)
+        ax.tick_params(length=0)
+    fig.suptitle("Bars must start at zero — length IS the value", x=0.02, ha="left",
+                 fontsize=13, weight="bold", color=INK)
+    fig.tight_layout(); fig.savefig(f"{OUT}/integrity-truncated-axis.png", dpi=120); plt.close(fig)
+
+
+# A2 — Dual axes manufacture a correlation; index to 100 instead
+def integrity_dual_axis():
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+    revenue = [120, 130, 125, 140, 150, 160]       # $K, +33%
+    visits = [800, 870, 890, 1020, 1100, 1180]     # site visits, +47% — same data in both panels
+    fig, (bad, good) = plt.subplots(1, 2, figsize=(10, 4))
+    # BAD: dual axes; each axis auto-scales to its own range, overlaying the lines so two
+    # series that grow at *different* rates look like they move in lockstep ("proving" a link).
+    bad.plot(months, revenue, color=ACCENT, lw=2.5)
+    twin = bad.twinx()
+    twin.plot(months, visits, color="#2c7fb8", lw=2.5)
+    bad.set_title("Misleading: dual axes 'prove' a link", loc="left", color=ACCENT, weight="bold")
+    # GOOD: index both to 100 at the start, one axis — the different slopes become visible.
+    rev_idx = [100 * v / revenue[0] for v in revenue]
+    vis_idx = [100 * v / visits[0] for v in visits]
+    good.plot(months, rev_idx, color=ACCENT, lw=2.5)
+    good.plot(months, vis_idx, color="#2c7fb8", lw=2.5)
+    good.text(5, rev_idx[-1], "  Revenue", color=ACCENT, va="center", weight="bold")
+    good.text(5, vis_idx[-1], "  Visits", color="#2c7fb8", va="center", weight="bold")
+    good.axhline(100, color=GREY, lw=1)
+    good.margins(x=0.12)
+    good.set_title("Honest: indexed to 100, one axis", loc="left", color=INK, weight="bold")
+    for ax in (bad, twin, good):
+        ax.spines["top"].set_visible(False)
+        ax.tick_params(length=0)
+    fig.tight_layout(); fig.savefig(f"{OUT}/integrity-dual-axis.png", dpi=120); plt.close(fig)
+
+
+# A3 — Rainbow (jet) invents bands; viridis is perceptually uniform
+def color_jet_vs_viridis():
+    x = np.linspace(-3, 3, 200)
+    field = np.exp(-(x[:, None] ** 2 + x[None, :] ** 2) / 4)   # smooth gradient, no real bands
+    fig, (bad, good) = plt.subplots(1, 2, figsize=(10, 4.2))
+    bad.imshow(field, cmap="jet"); bad.set_title("Misleading: 'jet' invents bands",
+                                                  loc="left", color=ACCENT, weight="bold")
+    good.imshow(field, cmap="viridis"); good.set_title("Honest: 'viridis' is uniform",
+                                                        loc="left", color=INK, weight="bold")
+    for ax in (bad, good):
+        ax.set_xticks([]); ax.set_yticks([])
+    fig.suptitle("Same smooth gradient — rainbow fabricates edges that aren't in the data",
+                 x=0.02, ha="left", fontsize=13, weight="bold", color=INK)
+    fig.tight_layout(); fig.savefig(f"{OUT}/color-jet-vs-viridis.png", dpi=120); plt.close(fig)
+
+
+# A4 — Chartjunk vs. decluttered: identical data
+def declutter_before_after():
+    cats = ["North", "South", "East", "West", "Central"]
+    vals = [118, 109, 104, 92, 101]
+    fig, (bad, good) = plt.subplots(1, 2, figsize=(10, 4.2))
+    # BAD: rainbow bars, heavy grid, dark frame, redundant legend, 3-D-ish edges
+    palette = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00"]
+    bad.bar(cats, vals, color=palette, edgecolor="black", linewidth=1.5, hatch="//",
+            label="quota %")
+    bad.grid(True, color="grey", linewidth=1.2)
+    bad.set_facecolor("#eaeaea")
+    bad.legend(loc="upper right")
+    bad.set_title("Cluttered", loc="left", color=ACCENT, weight="bold")
+    # GOOD: sorted, grey + one highlight, direct labels, zero baseline, decluttered
+    order = np.argsort(vals)
+    c2 = [cats[i] for i in order]; v2 = [vals[i] for i in order]
+    colors = [ACCENT if c == "West" else GREY for c in c2]
+    good.barh(c2, v2, color=colors)
+    good.axvline(100, color="#666666", lw=1)
+    for y, v in enumerate(v2):
+        good.text(v + 1, y, f"{v}%", va="center", fontsize=9, color=INK)
+    good.set_xlim(0, max(v2) * 1.12); good.set_xticks([])
+    for s in ("top", "right", "bottom"):
+        good.spines[s].set_visible(False)
+    good.tick_params(length=0)
+    good.set_title("Decluttered: West missed quota", loc="left", color=INK, weight="bold")
+    fig.tight_layout(); fig.savefig(f"{OUT}/declutter-before-after.png", dpi=120); plt.close(fig)
+
+
 if __name__ == "__main__":
     for fn in (comparison_bar, trend_line, part_to_whole, ranking_lollipop,
                distribution_histogram, distribution_box, relationship_scatter,
-               deviation_diverging):
+               deviation_diverging,
+               integrity_truncated_axis, integrity_dual_axis,
+               color_jet_vs_viridis, declutter_before_after):
         fn()
         print("rendered", fn.__name__)

@@ -14,7 +14,7 @@ description: >
 license: MIT
 metadata:
   author: kayaman
-  version: "1.0.0"
+  version: "1.1.0"
   type: knowledge
   domain: data-visualization
 ---
@@ -135,21 +135,21 @@ For a worked example of each situation above — rendered chart plus the exact c
 Specific traps that look fine until someone is misled. Details and fixes in the linked files.
 
 - **Truncated bar axis.** A bar chart not starting at zero exaggerates differences. (Line charts are
-  the opposite — forcing zero can flatten a meaningful trend.) → decluttering-and-integrity.md
+  the opposite — forcing zero can flatten a meaningful trend.) → [decluttering-and-integrity.md](references/decluttering-and-integrity.md)
 - **Dual y-axes.** Two series on two scales invites readers to infer a correlation you manufactured
-  by choosing the scales. Prefer indexed series or two stacked panels. → decluttering-and-integrity.md
+  by choosing the scales. Prefer indexed series or two stacked panels. → [decluttering-and-integrity.md](references/decluttering-and-integrity.md)
 - **Rainbow / jet colormaps** create false boundaries and aren't perceptually uniform; the "bright
-  band" looks like a feature in the data that isn't there. Use viridis/cividis. → color-and-accessibility.md
+  band" looks like a feature in the data that isn't there. Use viridis/cividis. → [color-and-accessibility.md](references/color-and-accessibility.md)
 - **Encoding quantity by area or radius.** Doubling a bubble's *radius* quadruples its area; readers
-  under-read area by a known factor. Scale by area, and prefer length where you can. → perception-and-encoding.md
+  under-read area by a known factor. Scale by area, and prefer length where you can. → [perception-and-encoding.md](references/perception-and-encoding.md)
 - **Pie charts with many slices, or 3-D anything.** Angle, area, and volume sit at the bottom of the
-  accuracy ranking; 3-D adds occlusion and perspective distortion for zero information. → perception-and-encoding.md
+  accuracy ranking; 3-D adds occlusion and perspective distortion for zero information. → [perception-and-encoding.md](references/perception-and-encoding.md)
 - **Legends far from the data.** Forcing the eye to ping-pong between a legend and the plot adds
-  cognitive load; label series directly. → storytelling.md
+  cognitive load; label series directly. → [storytelling.md](references/storytelling.md)
 - **Overplotting.** Thousands of opaque points become a blob. Use transparency, binning (hexbin),
-  or sampling. → chart-selection.md
+  or sampling. → [chart-selection.md](references/chart-selection.md)
 - **Cherry-picked ranges and unlabeled log scales.** Both are integrity failures even when each data
-  point is accurate. → decluttering-and-integrity.md
+  point is accurate. → [decluttering-and-integrity.md](references/decluttering-and-integrity.md)
 
 ## A worked example (good vs. bad)
 

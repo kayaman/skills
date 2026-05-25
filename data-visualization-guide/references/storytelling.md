@@ -66,7 +66,7 @@ support it — they'll ask for the backup, not the buildup.
 - **Annotate the insight.** Add a short text note pointing at the exact bar/point that matters
   ("← launch"). The annotation layer is where narrative meets the data.
 - **Highlight with color, mute the rest.** Use the preattentive "one thing pops" technique
-  (see perception-and-encoding.md) so the eye lands on the point.
+  (see [perception-and-encoding.md](perception-and-encoding.md)) so the eye lands on the point.
 - **Direct-label** instead of legends so the audience never has to decode while you talk.
 - **Pace the reveal** in live presentations: build a chart up (show context, then add the
   highlighted series) so attention follows your words rather than racing ahead.

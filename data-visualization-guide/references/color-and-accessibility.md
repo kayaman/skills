@@ -54,7 +54,8 @@ The classic rainbow (jet) colormap is **not perceptually uniform**: it has brigh
 cyan) that create the illusion of edges or features in the data that don't exist, and it's
 unreadable in grayscale or with color blindness. It remains common in legacy scientific tools —
 replace it with viridis/cividis. This is a correctness issue, not taste: rainbow maps have caused
-misreadings of medical and climate data in published work.
+misreadings of medical and climate data in published work. For a rendered side-by-side of the same
+gradient in jet vs. viridis, see the anti-example in [chart-gallery.md](chart-gallery.md#a3-rainbow-jet-colormap).
 
 ## Colorblind safety
 

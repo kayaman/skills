@@ -96,6 +96,9 @@ scales until the lines track. Readers can't see that you chose the alignment. Pr
 series to 100 at a common start point and plot on one axis, or use two stacked panels (small
 multiples) sharing the x-axis.
 
+> **Rendered anti-examples.** [chart-gallery.md](chart-gallery.md#anti-examples-the-same-data-shown-wrong)
+> shows the truncated-axis, dual-axis, and chartjunk failures beside their fixes, with the code.
+
 ### Proportion and area
 
 - **Area/bubble by radius** doubles the radius for a 2× value and shows a 4× blob — see
@@ -113,6 +116,26 @@ multiples) sharing the x-axis.
 - **Correlation presented as causation** — a trend line or two adjacent series implies a causal claim
   you may not have earned. Say what you actually know.
 
+### Show uncertainty — hiding it is a form of lying
+
+A single bar or point drawn with a crisp edge claims a precision the data rarely has. Cairo's
+truthfulness extends here: if an estimate has a margin of error, the chart should show it, or the
+reader will over-trust it.
+
+- **Error bars / intervals.** Add them to estimates, and **always say what they represent** — a
+  standard deviation (spread of the data), a standard error (precision of the mean), or a 95%
+  confidence interval are three different claims. An unlabeled error bar is ambiguous to the point of
+  useless.
+- **The "dynamite plot."** A bar with a single error-bar whisker shows two numbers and hides the
+  distribution's shape and sample size. Prefer a box/violin plot with the raw points overlaid (see
+  the box-plot entry in [chart-gallery.md](chart-gallery.md)).
+- **Confidence bands** for model fits and trends: shade the interval around the line rather than
+  drawing a bare line that implies the fit is exact.
+- **Forecast fans.** For projections, widen a shaded band into the future so the growing uncertainty
+  is visible; a single extrapolated line reads as a promise.
+- **Rounding is an uncertainty statement.** Reporting "$1.2M" rather than "$1,234,567" honestly
+  signals the precision you actually have; false decimals imply false certainty.
+
 ## Integrity checklist
 
 ```
@@ -123,6 +146,7 @@ multiples) sharing the x-axis.
 [ ] Log or non-linear scales clearly labeled?
 [ ] Counts normalized to rates where comparing populations?
 [ ] No causal language the data doesn't support?
+[ ] Uncertainty shown where it exists (error bars/bands/fans), and labeled (SD vs SE vs CI)?
 [ ] Lie Factor ≈ 1: the visual magnitude of the effect matches the real one?
 ```
 

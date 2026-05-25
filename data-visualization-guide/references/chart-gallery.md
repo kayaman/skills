@@ -286,6 +286,152 @@ def deviation_diverging():
 
 ---
 
+# Anti-examples: the same data, shown wrong
+
+The examples above show the right chart. These show the *wrong* one beside its fix — the failures
+are easier to recognize once you've seen them rendered. Each uses identical data on both sides, so
+the only difference is the design choice. (Background: [decluttering-and-integrity.md](decluttering-and-integrity.md)
+and [color-and-accessibility.md](color-and-accessibility.md).)
+
+## A1. Truncated bar baseline
+
+- **What's wrong:** the left chart's y-axis starts at 90, so a 94-vs-97 difference fills most of the
+  panel — the bars look wildly different when the values are nearly identical.
+- **Why it misleads:** a bar encodes its value as *length*. Cutting the baseline breaks that
+  contract and inflates the Lie Factor (see [decluttering-and-integrity.md](decluttering-and-integrity.md)).
+- **The fix:** bars start at zero (right). The values are correctly shown as nearly equal.
+
+![Left: bars on a 90-start axis look very different; right: the same values on a zero baseline look nearly equal](../assets/gallery/integrity-truncated-axis.png)
+
+```python
+def integrity_truncated_axis():
+    teams = ["A", "B", "C", "D"]
+    vals = [96, 94, 97, 95]
+    fig, (bad, good) = plt.subplots(1, 2, figsize=(10, 4))
+    bad.bar(teams, vals, color=ACCENT)
+    bad.set_ylim(90, 98)                       # the lie: baseline at 90
+    bad.set_title("Misleading: y-axis starts at 90", loc="left", color=ACCENT, weight="bold")
+    good.bar(teams, vals, color=GREY)
+    good.set_ylim(0, 100)                       # honest: bars encode length from zero
+    good.set_title("Honest: zero baseline", loc="left", color=INK, weight="bold")
+    for ax in (bad, good):
+        for s in ("top", "right"):
+            ax.spines[s].set_visible(False)
+        ax.tick_params(length=0)
+    fig.suptitle("Bars must start at zero — length IS the value", x=0.02, ha="left",
+                 fontsize=13, weight="bold", color=INK)
+    fig.tight_layout(); fig.savefig("integrity-truncated-axis.png", dpi=120)
+```
+
+## A2. Dual axes
+
+- **What's wrong:** two series with different units share one chart on two y-axes. Each axis
+  auto-scales to its own range, overlaying the lines so they appear to move in lockstep.
+- **Why it misleads:** the apparent "correlation" is an artifact of the scales *you* chose; a reader
+  can't see the manipulation. Here revenue grows ~33% and visits ~48% — not the same trajectory.
+- **The fix:** index both series to 100 at a common start and plot on one axis (right). The different
+  slopes — the real story — become visible. (Two stacked panels also work.)
+
+![Left: dual axes make revenue and visits look identical; right: indexed to 100 they grow at clearly different rates](../assets/gallery/integrity-dual-axis.png)
+
+```python
+def integrity_dual_axis():
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+    revenue = [120, 130, 125, 140, 150, 160]       # $K, +33%
+    visits = [800, 870, 890, 1020, 1100, 1180]     # site visits, +47% — same data in both panels
+    fig, (bad, good) = plt.subplots(1, 2, figsize=(10, 4))
+    # BAD: dual axes; each axis auto-scales to its own range, overlaying the lines so two
+    # series that grow at *different* rates look like they move in lockstep ("proving" a link).
+    bad.plot(months, revenue, color=ACCENT, lw=2.5)
+    twin = bad.twinx()
+    twin.plot(months, visits, color="#2c7fb8", lw=2.5)
+    bad.set_title("Misleading: dual axes 'prove' a link", loc="left", color=ACCENT, weight="bold")
+    # GOOD: index both to 100 at the start, one axis — the different slopes become visible.
+    rev_idx = [100 * v / revenue[0] for v in revenue]
+    vis_idx = [100 * v / visits[0] for v in visits]
+    good.plot(months, rev_idx, color=ACCENT, lw=2.5)
+    good.plot(months, vis_idx, color="#2c7fb8", lw=2.5)
+    good.text(5, rev_idx[-1], "  Revenue", color=ACCENT, va="center", weight="bold")
+    good.text(5, vis_idx[-1], "  Visits", color="#2c7fb8", va="center", weight="bold")
+    good.axhline(100, color=GREY, lw=1)
+    good.margins(x=0.12)
+    good.set_title("Honest: indexed to 100, one axis", loc="left", color=INK, weight="bold")
+    for ax in (bad, twin, good):
+        ax.spines["top"].set_visible(False)
+        ax.tick_params(length=0)
+    fig.tight_layout(); fig.savefig("integrity-dual-axis.png", dpi=120)
+```
+
+## A3. Rainbow (jet) colormap
+
+- **What's wrong:** the left heatmap of a smooth gradient uses `jet`. Its bright bands (cyan, yellow)
+  create sharp visual edges where the data has none.
+- **Why it misleads:** `jet` is not perceptually uniform — equal data steps map to unequal perceived
+  color steps — and it's unreadable in grayscale or with color blindness (see
+  color-and-accessibility.md).
+- **The fix:** a perceptually-uniform map (`viridis`, right). The gradient reads as smooth, because it
+  is.
+
+![Left: jet shows false concentric bands on a smooth blob; right: viridis renders the same field as a smooth gradient](../assets/gallery/color-jet-vs-viridis.png)
+
+```python
+def color_jet_vs_viridis():
+    x = np.linspace(-3, 3, 200)
+    field = np.exp(-(x[:, None] ** 2 + x[None, :] ** 2) / 4)   # smooth gradient, no real bands
+    fig, (bad, good) = plt.subplots(1, 2, figsize=(10, 4.2))
+    bad.imshow(field, cmap="jet"); bad.set_title("Misleading: 'jet' invents bands",
+                                                  loc="left", color=ACCENT, weight="bold")
+    good.imshow(field, cmap="viridis"); good.set_title("Honest: 'viridis' is uniform",
+                                                        loc="left", color=INK, weight="bold")
+    for ax in (bad, good):
+        ax.set_xticks([]); ax.set_yticks([])
+    fig.suptitle("Same smooth gradient — rainbow fabricates edges that aren't in the data",
+                 x=0.02, ha="left", fontsize=13, weight="bold", color=INK)
+    fig.tight_layout(); fig.savefig("color-jet-vs-viridis.png", dpi=120)
+```
+
+## A4. Chartjunk vs. decluttered
+
+- **What's wrong:** the left chart piles on rainbow fills, hatching, a heavy grid, a grey background,
+  a redundant legend, and leaves the bars unsorted — none of it carries information.
+- **Why it misleads:** every non-data mark is a tax on comprehension (Tufte's data-ink); the clutter
+  hides the one fact that matters.
+- **The fix (right):** sort by value, grey everything, highlight the single exception, label bars
+  directly, add a reference line at quota, drop the frame — and let the title state the takeaway.
+
+![Left: a cluttered rainbow bar chart with heavy grid and legend; right: a sorted grey horizontal bar chart with West highlighted](../assets/gallery/declutter-before-after.png)
+
+```python
+def declutter_before_after():
+    cats = ["North", "South", "East", "West", "Central"]
+    vals = [118, 109, 104, 92, 101]
+    fig, (bad, good) = plt.subplots(1, 2, figsize=(10, 4.2))
+    # BAD: rainbow bars, heavy grid, dark frame, redundant legend, busy edges
+    palette = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00"]
+    bad.bar(cats, vals, color=palette, edgecolor="black", linewidth=1.5, hatch="//",
+            label="quota %")
+    bad.grid(True, color="grey", linewidth=1.2)
+    bad.set_facecolor("#eaeaea")
+    bad.legend(loc="upper right")
+    bad.set_title("Cluttered", loc="left", color=ACCENT, weight="bold")
+    # GOOD: sorted, grey + one highlight, direct labels, zero baseline, decluttered
+    order = np.argsort(vals)
+    c2 = [cats[i] for i in order]; v2 = [vals[i] for i in order]
+    colors = [ACCENT if c == "West" else GREY for c in c2]
+    good.barh(c2, v2, color=colors)
+    good.axvline(100, color="#666666", lw=1)
+    for y, v in enumerate(v2):
+        good.text(v + 1, y, f"{v}%", va="center", fontsize=9, color=INK)
+    good.set_xlim(0, max(v2) * 1.12); good.set_xticks([])
+    for s in ("top", "right", "bottom"):
+        good.spines[s].set_visible(False)
+    good.tick_params(length=0)
+    good.set_title("Decluttered: West missed quota", loc="left", color=INK, weight="bold")
+    fig.tight_layout(); fig.savefig("declutter-before-after.png", dpi=120)
+```
+
+---
+
 ## Reproduce the gallery
 
 ```bash

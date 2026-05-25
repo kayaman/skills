@@ -41,7 +41,7 @@ Most business charts answer one of nine questions. Find yours:
 ## Step 3 — Apply the defaults and the exceptions
 
 **Bar charts** are the workhorse because length on a common scale is the most accurately perceived
-encoding (see perception-and-encoding.md). Default to **horizontal** bars when category labels are
+encoding (see [perception-and-encoding.md](perception-and-encoding.md)). Default to **horizontal** bars when category labels are
 long or there are many categories — labels stay readable and the eye compares lengths easily.
 
 **Line charts** for time, because the slope between adjacent points is the signal. Direct-label the
@@ -60,24 +60,52 @@ transparency, **hexbin**, or 2-D density.
 small chart across categories with shared scales. The eye compares panels effortlessly, and it
 scales where overlaying series fails. Reach for this whenever a single chart is getting crowded.
 
+## Maps & geospatial
+
+Put data on a map only when **location is the point** — when the question is genuinely "where?"
+Otherwise a sorted bar chart compares regions far more accurately than a map (which encodes value by
+color or area, both low on the perception ranking). When geography *is* the message:
+
+- **Choropleth (shaded regions): map rates, not counts.** A choropleth of raw counts mostly maps
+  population — big or populous regions dominate regardless of the metric. Normalize to a rate or
+  per-capita value first. Use a sequential palette (or diverging around a meaningful midpoint).
+- **Proportional-symbol map for counts/totals.** When you must show absolute magnitudes, size a
+  symbol by **area** (not radius — see [perception-and-encoding.md](perception-and-encoding.md)) over each location.
+- **Classification changes the story.** How you bin values into color classes — equal-interval,
+  quantile, or natural-breaks (Jenks) — can flip which regions look high or low. State the method;
+  don't let a default quietly drive the conclusion.
+- **Mind the projection and the area bias.** Map projections distort area (Mercator inflates high
+  latitudes); large rural regions catch the eye even when little happens there. Consider a cartogram
+  or tile/hex map when you need each unit to carry equal visual weight.
+
 ## Tables vs. charts
 
 A **table** is the right choice when readers need to look up exact values, when there are very few
-numbers, or when units differ per row. A **chart** wins when the message is a pattern, comparison,
-or trend. Stephen Few's heuristic: use a table when the display will be *read*; use a graph when it
-will be *perceived*. A hybrid — a table with embedded sparklines or in-cell bars — often serves
-operational reports best.
+numbers, when units differ per row, or when the data will be *read* line by line. A **chart** wins
+when the message is a pattern, comparison, or trend. Stephen Few's heuristic: use a table when the
+display will be *read*; use a graph when it will be *perceived*.
+
+When a table is right, format it so the numbers are scannable:
+
+- **Right-align numbers and align on the decimal**, with a consistent number of decimals per column,
+  so magnitudes line up vertically and the eye can compare digit columns. Left-align text.
+- **Minimize rules and borders.** Whitespace and subtle row banding separate rows better than heavy
+  gridlines (the same data-ink logic as charts — see [decluttering-and-integrity.md](decluttering-and-integrity.md)).
+- **Sort meaningfully** (by the column that matters, not alphabetically) and keep a clear header;
+  add a **summary/total row**, set off from the body.
+- **Make it a hybrid where it helps:** embed **sparklines** (trend per row) or **in-cell bars /
+  heat shading** (magnitude per cell) so an operational table is both lookup-able and perceivable.
 
 ## Avoid by default
 
 - **Stacked area charts with many series** — only the bottom series has a flat baseline; the rest
   are nearly impossible to read.
-- **Dual-axis charts** — see decluttering-and-integrity.md; the correlation is an artifact of your
+- **Dual-axis charts** — see [decluttering-and-integrity.md](decluttering-and-integrity.md); the correlation is an artifact of your
   scale choices.
 - **Radar/spider charts** — area is misleading and depends on the (arbitrary) ordering of axes.
 - **Word clouds** — size encodes frequency by area and ignores meaning; almost never the best choice.
 - **Gauges and speedometers on dashboards** — huge ink for one number; a bullet graph or a labeled
-  number does it better (see dashboards.md).
+  number does it better (see [dashboards.md](dashboards.md)).
 
 ## Quick decision prompts
 

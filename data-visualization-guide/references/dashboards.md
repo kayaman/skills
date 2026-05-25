@@ -35,7 +35,7 @@ a common failure.
 
 - **Most important, top-left.** Reading order (in LTR cultures) is top-left to bottom-right; put the
   headline metric where the eye lands first. Khan and Few both stress an explicit visual hierarchy.
-- **Group related metrics** using proximity and enclosure (see perception-and-encoding.md), not heavy
+- **Group related metrics** using proximity and enclosure (see [perception-and-encoding.md](perception-and-encoding.md)), not heavy
   borders. White space is the primary structuring tool.
 - **Consistent encodings across tiles** — the same color means the same thing everywhere on the
   dashboard, or the at-a-glance reading breaks.
