@@ -25,6 +25,29 @@ exactly three, mapped to the three data types from perception-and-encoding.md:
 - **Diverging** only when there is a meaningful midpoint (zero, a target, an average). The neutral
   center must sit at that value, or the chart lies about which side things fall on.
 
+## Recommended palettes (safe defaults)
+
+When you don't have a brand palette to honor, reach for these — all are colorblind-safe and widely
+available in matplotlib, ggplot, Tableau, Vega, and D3:
+
+| Use | First choice | Alternatives |
+| --- | --- | --- |
+| Sequential (low→high) | `viridis` | `cividis`, `magma`, single-hue `Blues`/`Greens` |
+| Diverging (−/0/+) | `RdBu` (red–blue) | `BrBG`, `PiYG` — avoid red–green |
+| Qualitative (categories) | Okabe-Ito (8-color, CVD-safe) | `tab10`, Vega/Tableau "Safe" set |
+| Highlight on grey | one accent (e.g. a strong red/blue) | brand accent |
+
+**Single-hue vs. multi-hue sequential.** Single-hue ramps (light→dark blue) read as "more of one
+thing" and are the safe default. Multi-hue perceptually-uniform ramps (viridis) give more
+discriminable steps across a wide range — use them for heatmaps and continuous fields where fine
+distinctions matter. Don't build your own multi-hue ramp by hand; you'll reintroduce the rainbow's
+non-uniform bands.
+
+**The highlight pattern.** The most useful palette in business reporting is *grey plus one*: render
+everything in neutral grey and give the one series/bar/point that carries the message a single
+accent color. This is the preattentive "one thing pops" technique (perception-and-encoding.md) and
+is how every example in [chart-gallery.md](chart-gallery.md) directs the eye.
+
 ## Avoid rainbow / jet
 
 The classic rainbow (jet) colormap is **not perceptually uniform**: it has bright bands (yellow,

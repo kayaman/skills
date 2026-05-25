@@ -5,6 +5,9 @@ Pick a chart by answering two questions in order: **what relationship am I showi
 on the point you're making. This taxonomy follows the *Financial Times* Visual Vocabulary and
 Andy Kirk's "trifecta" of intent, plus Wilke's chart directory and Berinato's typology.
 
+> For a rendered example and the exact code for each situation below, see
+> [chart-gallery.md](chart-gallery.md).
+
 ## Step 1 — Classify the intent
 
 Most business charts answer one of nine questions. Find yours:

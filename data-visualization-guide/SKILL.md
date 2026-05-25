@@ -92,12 +92,14 @@ Read the file that matches the task — don't load all of them at once.
 
 | You need to… | Read |
 | --- | --- |
+| See the right chart for a situation, with a rendered example + code | [references/chart-gallery.md](references/chart-gallery.md) |
 | Pick a chart type from the data and the question | [references/chart-selection.md](references/chart-selection.md) |
 | Choose encodings the eye reads accurately; preattentive cues; Gestalt grouping | [references/perception-and-encoding.md](references/perception-and-encoding.md) |
 | Choose a color palette; ensure colorblind safety and contrast | [references/color-and-accessibility.md](references/color-and-accessibility.md) |
 | Strip clutter and keep the chart honest (axes, proportions) | [references/decluttering-and-integrity.md](references/decluttering-and-integrity.md) |
 | Build a narrative, slide, or data story that drives action | [references/storytelling.md](references/storytelling.md) |
 | Design a dashboard or single-screen monitoring view | [references/dashboards.md](references/dashboards.md) |
+| Format titles & legends; annotate (titles/legends → storytelling; axes/numbers/gridlines/typography → decluttering; palettes → color) | [references/storytelling.md](references/storytelling.md), [references/decluttering-and-integrity.md](references/decluttering-and-integrity.md), [references/color-and-accessibility.md](references/color-and-accessibility.md) |
 | Apply the principles in code (matplotlib / plotly / Vega-Lite) | [references/recipes-python.md](references/recipes-python.md) |
 | See the source books and what each contributes | [references/BOOKS.md](references/BOOKS.md) |
 
@@ -121,6 +123,12 @@ to the file that explains *why* and when to break it.
   change"), not a label ("Revenue over time").
 - **Default to a colorblind-safe, perceptually-uniform palette** (e.g. viridis for sequential).
   Never encode meaning by color alone.
+- **Grey by default, one accent color** for the thing that matters; **direct-label** series instead
+  of a legend; **round numbers** to what the decision needs ($1.2M, not $1,234,567); **faint or no
+  gridlines.**
+
+For a worked example of each situation above — rendered chart plus the exact code — see
+[references/chart-gallery.md](references/chart-gallery.md).
 
 ## Known gotchas
 

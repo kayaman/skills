@@ -42,6 +42,33 @@ labels that *help* the reader — those are high-value ink. Setlur & Cogley's "f
 point: beauty and function reinforce each other when the styling serves comprehension; strip the
 decorative, keep the communicative.
 
+### Formatting for clarity
+
+Decluttering decides what to remove; formatting decides how the surviving non-data ink behaves.
+These are the small choices that separate a polished chart from a noisy one.
+
+- **Axes.** Label axes with the measure *and its unit* ("Revenue (USD millions)"). Keep ticks
+  **few and round** — five labeled ticks at 0/25/50/75/100 read faster than fifteen. Avoid rotated
+  x-labels; if category names are long, switch to a horizontal bar chart instead of tilting text.
+  (Baselines: bar axes start at zero, line axes use an honest range — see Part 2.)
+- **Number & unit formatting.** Round to the precision the decision needs — "$1.2M", not
+  "$1,234,567.89". Use **K/M/B** abbreviations on axes, **thousands separators** in tables, a single
+  consistent number of decimals, and put `%`/currency on the value, not buried in a title. Match the
+  audience's **locale** (decimal comma vs. point; date order).
+- **Gridlines & reference lines.** Make gridlines faint grey or remove them — closure (see
+  perception-and-encoding.md) means the eye reconstructs the grid. Reserve a visible line for a
+  **purposeful reference**: a target, a zero, a budget, an average — and label it.
+- **Ordering & sorting.** Sort categories **by value** unless they have a natural order (time,
+  age bands, Likert scale). Keep the **same order across every chart** in a report so the reader can
+  compare panels without re-learning the layout each time.
+- **Typography & text hierarchy.** Use **one font** and at most three sizes (title > labels >
+  footnote). Signal emphasis with **weight or color**, not by enlarging — and never by color alone
+  (accessibility). Left-align text blocks to a common edge; ragged alignment reads as unrelated.
+- **Bar width, spacing, aspect ratio.** Bars should be wider than the gaps between them; widen gaps
+  *between groups* and tighten them *within* a group so Gestalt proximity does the grouping. Choose
+  the aspect ratio for honest slope perception (banking-to-45°, perception-and-encoding.md), not for
+  drama — resizing a chart silently changes the message it sends.
+
 ## Part 2 — Graphical integrity
 
 Cairo's first quality of a great visualization is **truthful**. A chart can be technically accurate

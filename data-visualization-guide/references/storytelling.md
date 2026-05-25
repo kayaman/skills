@@ -71,6 +71,41 @@ support it — they'll ask for the backup, not the buildup.
 - **Pace the reveal** in live presentations: build a chart up (show context, then add the
   highlighted series) so attention follows your words rather than racing ahead.
 
+## Titles, labels, and legends (best practices)
+
+The text on a chart is part of the message, not afterthought. Get these right and the chart reads
+itself.
+
+**Titles & subtitles**
+
+- Make the **title the takeaway**, phrased as a complete sentence with the direction and the number
+  ("Revenue fell 12% after the May price change"). A label-style title ("Revenue by month") wastes
+  the most-read line on the chart.
+- Use a **subtitle** for the supporting context the title can't carry — the metric definition, units,
+  time range, or population ("Monthly recurring revenue, USD, all paid plans").
+- Add a small, muted **source/footnote line** ("Source: billing system, pulled 2026-05-01;
+  excludes refunds"). Credibility and reproducibility cost one grey line.
+- **Left-align** the title block. Readers scan from the left edge; centered titles drift away from
+  where the eye starts.
+
+**Legends vs. direct labeling**
+
+- **Prefer direct labels** on the data — at the end of each line, inside or beside each bar. A legend
+  forces the eye to ping-pong between a key and the marks and to hold a color→name mapping in working
+  memory (Hick's/Miller's load). Direct labels remove both.
+- When a legend is unavoidable (e.g. a scatter with many categories), **place it close to the data**
+  and **order it to match the visual order** of the series — top-to-bottom in the same order the
+  lines end, not alphabetically. A legend whose order contradicts the chart adds a decoding step.
+- **Color the legend text** (or the label) to match its series, so the link is preattentive rather
+  than positional.
+
+**Annotation layer**
+
+- The annotation layer is where narrative meets the data. Add a **short callout on the specific mark
+  that matters** ("← price change"), a **reference/target line** with a label, or a shaded band for
+  a period (a recession, a campaign window — Gestalt enclosure).
+- Annotate the *insight*, not everything. One or two notes guide; ten notes are clutter.
+
 ## Slides and reports
 
 - Slides are **projected, glanced at, and talked over** — bigger fonts, fewer elements, one chart
