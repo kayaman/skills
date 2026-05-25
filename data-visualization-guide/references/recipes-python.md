@@ -52,7 +52,7 @@ ax.set_xticks([])
 ax.set_title("Four of five regions beat quota; West missed by 8%",
              loc="left", fontsize=13, weight="bold")
 fig.tight_layout()
-fig.savefig("quota.png", dpi=120)
+fig.savefig("../assets/example-quota-bar.png", dpi=120)
 ```
 
 ## matplotlib — line chart, honest baseline, direct end-labels
