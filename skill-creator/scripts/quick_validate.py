@@ -6,8 +6,22 @@ Quick validation script for skills - minimal version
 import sys
 import os
 import re
-import yaml
 from pathlib import Path
+
+try:
+    import yaml  # type: ignore
+except ImportError:
+    # Keep this script dependency-light: if PyYAML isn't installed, fail with a
+    # clear error message rather than crashing at import time.
+    class _YamlStub:
+        class YAMLError(Exception):
+            pass
+
+        @staticmethod
+        def safe_load(_: str):
+            raise _YamlStub.YAMLError("PyYAML is required (pip install pyyaml)")
+
+    yaml = _YamlStub()
 
 def validate_skill(skill_path):
     """Basic validation of a skill"""
