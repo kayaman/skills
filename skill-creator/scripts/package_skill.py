@@ -110,10 +110,10 @@ def package_skill(skill_path, output_dir=None):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python utils/package_skill.py <path/to/skill-folder> [output-directory]")
-        print("\nExample:")
-        print("  python utils/package_skill.py skills/public/my-skill")
-        print("  python utils/package_skill.py skills/public/my-skill ./dist")
+        print("Usage: python -m scripts.package_skill <path/to/skill-folder> [output-directory]")
+        print("\nExample (from the skill-creator/ directory):")
+        print("  python -m scripts.package_skill ../my-skill")
+        print("  python -m scripts.package_skill ../my-skill ./dist")
         sys.exit(1)
 
     skill_path = sys.argv[1]
