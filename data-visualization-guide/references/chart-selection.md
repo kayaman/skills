@@ -114,7 +114,7 @@ When unsure, ask yourself in order:
 2. "Over time?" → line.
 3. "Relationship between two numbers?" → scatter.
 4. "Spread of one number?" → histogram/box.
-5. "Part of a whole, 2–3 parts?" → maybe pie; otherwise stacked/▪ bar.
+5. "Part of a whole, 2–3 parts?" → maybe pie; otherwise stacked bar.
 6. "More than one of the above at once?" → split into multiple charts or small multiples.
 
 Sources: Wilke *Fundamentals of Data Visualization* (chart directory); FT Visual Vocabulary lineage
