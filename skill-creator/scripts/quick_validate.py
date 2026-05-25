@@ -4,24 +4,71 @@ Quick validation script for skills - minimal version
 """
 
 import sys
-import os
 import re
 from pathlib import Path
 
-try:
-    import yaml  # type: ignore
-except ImportError:
-    # Keep this script dependency-light: if PyYAML isn't installed, fail with a
-    # clear error message rather than crashing at import time.
-    class _YamlStub:
-        class YAMLError(Exception):
-            pass
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-        @staticmethod
-        def safe_load(_: str):
-            raise _YamlStub.YAMLError("PyYAML is required (pip install pyyaml)")
+from scripts.utils import parse_skill_md
 
-    yaml = _YamlStub()
+
+ALLOWED_PROPERTIES = {'name', 'description', 'license', 'allowed-tools', 'metadata', 'compatibility'}
+
+
+def extract_frontmatter(content):
+    """Extract the frontmatter body from a SKILL.md file."""
+    match = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
+    if not match:
+        raise ValueError("Invalid frontmatter format")
+    return match.group(1)
+
+
+def parse_top_level_frontmatter(frontmatter_text):
+    """Parse the top-level frontmatter properties without external dependencies."""
+    frontmatter = {}
+    lines = frontmatter_text.splitlines()
+    i = 0
+
+    while i < len(lines):
+        line = lines[i]
+        if not line.strip():
+            i += 1
+            continue
+        if line.startswith((" ", "\t")):
+            return None, f"Invalid frontmatter line: {line}"
+        if ":" not in line:
+            return None, f"Invalid frontmatter line: {line}"
+
+        key, raw_value = line.split(":", 1)
+        key = key.strip()
+        value = raw_value.strip()
+
+        if not key:
+            return None, "Frontmatter keys cannot be empty"
+
+        if value in (">", "|", ">-", "|-"):
+            i += 1
+            continuation_lines = []
+            while i < len(lines) and (lines[i].startswith("  ") or lines[i].startswith("\t")):
+                continuation_lines.append(lines[i].strip())
+                i += 1
+            frontmatter[key] = " ".join(continuation_lines).strip()
+            continue
+
+        if value == "":
+            i += 1
+            has_nested_content = False
+            while i < len(lines) and (lines[i].startswith("  ") or lines[i].startswith("\t")):
+                has_nested_content = True
+                i += 1
+            frontmatter[key] = {} if has_nested_content else ""
+            continue
+
+        frontmatter[key] = value.strip('"').strip("'")
+        i += 1
+
+    return frontmatter, None
 
 def validate_skill(skill_path):
     """Basic validation of a skill"""
@@ -33,27 +80,14 @@ def validate_skill(skill_path):
         return False, "SKILL.md not found"
 
     # Read and validate frontmatter
-    content = skill_md.read_text()
-    if not content.startswith('---'):
-        return False, "No YAML frontmatter found"
-
-    # Extract frontmatter
-    match = re.match(r'^---\n(.*?)\n---', content, re.DOTALL)
-    if not match:
-        return False, "Invalid frontmatter format"
-
-    frontmatter_text = match.group(1)
-
-    # Parse YAML frontmatter
     try:
-        frontmatter = yaml.safe_load(frontmatter_text)
-        if not isinstance(frontmatter, dict):
-            return False, "Frontmatter must be a YAML dictionary"
-    except yaml.YAMLError as e:
-        return False, f"Invalid YAML in frontmatter: {e}"
-
-    # Define allowed properties
-    ALLOWED_PROPERTIES = {'name', 'description', 'license', 'allowed-tools', 'metadata', 'compatibility'}
+        name, description, content = parse_skill_md(skill_path)
+        frontmatter = extract_frontmatter(content)
+        frontmatter, error = parse_top_level_frontmatter(frontmatter)
+        if error:
+            return False, error
+    except ValueError as e:
+        return False, str(e)
 
     # Check for unexpected properties (excluding nested keys under metadata)
     unexpected_keys = set(frontmatter.keys()) - ALLOWED_PROPERTIES
@@ -70,7 +104,6 @@ def validate_skill(skill_path):
         return False, "Missing 'description' in frontmatter"
 
     # Extract name for validation
-    name = frontmatter.get('name', '')
     if not isinstance(name, str):
         return False, f"Name must be a string, got {type(name).__name__}"
     name = name.strip()
@@ -85,7 +118,6 @@ def validate_skill(skill_path):
             return False, f"Name is too long ({len(name)} characters). Maximum is 64 characters."
 
     # Extract and validate description
-    description = frontmatter.get('description', '')
     if not isinstance(description, str):
         return False, f"Description must be a string, got {type(description).__name__}"
     description = description.strip()
@@ -107,11 +139,12 @@ def validate_skill(skill_path):
 
     return True, "Skill is valid!"
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python quick_validate.py <skill_directory>")
         sys.exit(1)
-    
+
     valid, message = validate_skill(sys.argv[1])
     print(message)
     sys.exit(0 if valid else 1)
