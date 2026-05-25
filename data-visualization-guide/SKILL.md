@@ -14,7 +14,7 @@ description: >
 license: MIT
 metadata:
   author: kayaman
-  version: "1.1.0"
+  version: "1.0.0"
   type: knowledge
   domain: data-visualization
 ---
