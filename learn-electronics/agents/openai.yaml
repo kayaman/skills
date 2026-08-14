@@ -1,0 +1,14 @@
+interface:
+  display_name: Learn Electronics
+  short_description: Explain and design beginner electronics safely
+  default_prompt: Use $learn-electronics to teach me how to analyze and build a simple
+    electronic circuit.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
