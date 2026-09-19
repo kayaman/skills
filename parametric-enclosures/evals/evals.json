@@ -1,0 +1,26 @@
+{
+  "skill_name": "parametric-enclosures",
+  "evals": [
+    {
+      "id": 1,
+      "name": "esp32-sensor-node-with-bme280",
+      "prompt": "I need a case for an ESP32-C3 sensor node. Custom PCB 45x35mm, 1.6mm thick, M3 mounting holes 4mm in from each corner. USB-C on the short edge, centred, 3.2mm above the board. BME280 on the board at about 10mm from the opposite short edge. Chip antenna on the corner nearest the USB. Sits on a shelf indoors. Give me the SCAD and the STL exports.",
+      "expected_output": "A .scad file plus enclosure_lib.scad, per-part export commands, BUILD NOTES with orientation and fastener BOM, ASSUMPTIONS list, SELF-CHECK. The BME280 must get its own divided chamber with vents at both bottom and top, positioned away from the regulator. No structure within 20mm of the antenna corner. Insert bosses at least 9.5mm OD with 3 filleted gussets.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "vented-psu-case-child-reachable",
+      "prompt": "Enclosure for a small buck converter board, 60x45mm, dissipating around 3W. It'll be on the floor in a room with a toddler and a cat. Wall-mountable would be a bonus.",
+      "expected_output": "Ventilation sized for >1W (open area >=25% of the vented wall) with a bottom-inlet/top-outlet chimney path, but every opening <=4mm and offset louvres so nothing lines up above the PCB. Keyhole wall mounts. Should raise the child/animal constraint explicitly rather than silently assuming.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "oversized-part-must-split",
+      "prompt": "I want a single enclosure for a 190x120mm carrier board with a fan and a PIR on the front face.",
+      "expected_output": "Must detect that 190mm exceeds the 170mm A1 Mini envelope, split the part, and join with M3 bolts plus dowel pins — explicitly not glue. PIR lens flush in the front face, not recessed. Fan treated as a heat source for the sensor decoupling rule.",
+      "files": []
+    }
+  ]
+}
