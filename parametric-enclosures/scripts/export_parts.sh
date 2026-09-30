@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Render each part of an enclosure to STL (or 3MF) plus PNG previews.
+# Render each part of an enclosure to STL (or 3MF), run the interference check
+# and write PNG previews. Exits non-zero on a failed render, a render WARNING
+# (non-manifold output included), or interference between the parts.
 # Usage: export_parts.sh enclosure.scad [part ...]
 #   default parts: base lid
-#   FORMAT=3mf   export 3MF instead of STL
+#   FORMAT=3mf   export 3MF instead of STL (OpenSCAD 2021.01 may lack it)
 #   OUT=dir      output directory (default ./out)
 #   BACKEND=manifold   pass --backend=manifold (development snapshots only)
 set -euo pipefail
@@ -17,35 +19,43 @@ if ! command -v openscad >/dev/null 2>&1; then
   exit 127
 fi
 EXTRA=(); [ -n "${BACKEND:-}" ] && EXTRA+=("--backend=${BACKEND}")
+scad() { openscad ${EXTRA[@]+"${EXTRA[@]}"} "$@"; }
 mkdir -p "$OUT"
 
 status=0
 for p in "${PARTS[@]}"; do
-  f="$OUT/${NAME}_${p}.${FORMAT}"
+  f="$OUT/${NAME}_${p}.${FORMAT}"; log="$OUT/${NAME}_${p}.log"
   echo "-- $p → $f"
-  if ! openscad "${EXTRA[@]}" -o "$f" -D "part=\"$p\"" "$SCAD" 2>"$OUT/${NAME}_${p}.log"; then
-    echo "   FAILED (see $OUT/${NAME}_${p}.log)"; status=1; continue
+  if ! scad -o "$f" -D "part=\"$p\"" "$SCAD" 2>"$log"; then
+    echo "   FAILED (see $log)"; grep -E "ERROR|WARNING" "$log" | sed 's/^/   /' || true
+    status=1; continue
   fi
-  grep -E "WARNING|ERROR" "$OUT/${NAME}_${p}.log" || true
+  if grep -v '^ECHO' "$log" | grep -qE "WARNING|Simple:[[:space:]]+no"; then
+    echo "   NOT CLEAN — the slicer would be guessing (see $log):"
+    grep -v '^ECHO' "$log" | grep -E "WARNING|Simple:" | sed 's/^/   /'
+    status=1
+  fi
 done
 
-# interference check: must be empty
-if openscad "${EXTRA[@]}" -o "$OUT/${NAME}_check.stl" -D 'part="check"' "$SCAD" \
-     2>"$OUT/${NAME}_check.log"; then
-  if grep -qi "empty" "$OUT/${NAME}_check.log"; then
+# design notes echoed by the model (sizes, BOM, NOTE/WARNING lines)
+grep -h '^ECHO' "$OUT/${NAME}_${PARTS[0]}.log" 2>/dev/null | sed 's/^ECHO: "\(.*\)"$/   \1/' || true
+
+# interference check: part="check" must be empty
+log="$OUT/${NAME}_check.log"
+if scad -o "$OUT/${NAME}_check.stl" -D 'part="check"' "$SCAD" 2>"$log" \
+     || grep -qi "top level object is empty" "$log"; then
+  if grep -qi "top level object is empty" "$log"; then
     echo "-- interference check: OK (empty)"
   else
-    echo "-- interference check: parts overlap! open part=\"check\""; status=1
+    echo "-- interference check: parts overlap! render part=\"check\" to see where"; status=1
   fi
 else
-  grep -qi "empty" "$OUT/${NAME}_check.log" \
-    && echo "-- interference check: OK (empty)" \
-    || { echo "-- interference check could not run (see log)"; }
+  echo "-- interference check could not run (see $log)"; status=1
 fi
 
-for view in assembly exploded; do
-  openscad "${EXTRA[@]}" -o "$OUT/${NAME}_${view}.png" --imgsize=1200,900 \
-    --viewall --autocenter -D "part=\"$view\"" "$SCAD" 2>/dev/null \
+for view in assembly exploded section; do
+  scad -o "$OUT/${NAME}_${view}.png" --imgsize=1200,900 --viewall --autocenter \
+       --colorscheme=Tomorrow -D "part=\"$view\"" "$SCAD" 2>/dev/null \
     && echo "-- preview $OUT/${NAME}_${view}.png" || true
 done
 exit $status

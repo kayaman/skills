@@ -61,7 +61,8 @@ Board-mounted tactile switches (6×6 mm, 12×12 mm) under a wall or lid:
 - Library: `label_cut()` (deboss) and `label()` (emboss). Default font
   "Liberation Sans:style=Bold" (bundled with OpenSCAD).
 - Always deboss part name + version (0.4 mm deep, ≥ 3 mm tall) on an internal face
-  — the template puts it on the base floor. Future-you will hold three similar lids.
+  — the template puts it on the base floor (not with keyholes, which use that floor).
+  Future-you will hold three similar lids.
 - Top faces (lid printed face-down on the bed): **debossed** 0.4–0.6 mm
   reads well and needs no supports. Model text on the outer face in the
   assembled frame; the print flip is a rotation, not a mirror, so the text
@@ -77,8 +78,8 @@ Board-mounted tactile switches (6×6 mm, 12×12 mm) under a wall or lid:
 
 | Method | Geometry |
 |---|---|
-| Keyhole slots (wall hanging) | Ø7 head / Ø3.5 slot / 8 mm travel for small screws (Ø8.5 / 4.5 / 9 for M4/#8); head space behind the slot; two slots ≥ 60 mm apart, level; library `keyhole_cut` / `keyhole_2d`, template `wall_mount` |
-| Mounting ears/tabs | tabs extending from the base, hole Ø4.5 (M4/#8 screws), tab thickness ≥ 3 mm with a gusset |
+| Keyhole slots (wall hanging) | Ø7 head / Ø3.5 slot / 8 mm travel for small screws (Ø8.5 / 4.5 / 9 for M4/#8); head space behind the slot; two slots ≥ 60 mm apart, level. Template `wall_mount = "keyholes"`: on the board centreline with the slot toward the back face, so the front face and its cables hang down; it raises the standoffs so the heads fit under the board, skips the floor label, and asserts clearance to the standoffs. Needs a board ≥ ~30 mm deep — on smaller boards use ears |
+| Mounting ears/tabs | tabs extending from the base, hole Ø4.5 (M4/#8 screws), tab thickness ≥ 3 mm with a gusset or root fillet. Template `wall_mount = "ears"`: 4 mm tabs on both X ends at floor level, countersunk, filleted to the wall; nothing inside can collide with them, so it is the safe choice for small boxes |
 | DIN rail (TS35) | clip gripping a 35 mm rail, 7.5 mm (or 15 mm) deep, 1 mm flanges; one fixed hook + one flexible snap side; print with the snap in XY |
 | Magnets | pockets per closures reference; for steel surfaces (fridges, cabinets) |
 | Zip-tie slots | two slots 5 × 2 mm on the base, ≥ 10 mm apart |
@@ -96,23 +97,10 @@ Board-mounted tactile switches (6×6 mm, 12×12 mm) under a wall or lid:
 
 ## 7. Cable entry and strain relief
 
-A cable that leaves the box needs three things: a hole that does not chew the jacket,
-a stop 10–20 mm inside the wall so a pull never reaches a solder joint, and room to
-bend. Geometry is here; the electrical side (gauge, connectors, harness layout) is in
-`electronics-and-wiring.md`.
-
-- Template: `bay_front` / `bay_back` for the floor the run sits on; `cable_exits` for
-  the hole and its zip-tie anchor. Library: `cable_exit_cut()`, `tie_anchor()`,
-  `cable_channel()`.
-- Hole = cable Ø + 0.3–0.5 mm, with a 45° chamfer on both faces. From `teardrop_min`
-  up, the hole gets a teardrop roof so it prints unsupported.
-- Put the bay on the long side without connector cutouts: a socket behind a bay is
-  out of reach.
-- Notch split between base and lid (half-circle in each) for a cable that shouldn't
-  be unplugged, or whose moulded plug is bigger than the hole.
-- Cable glands for sealed boxes (environment-and-safety.md §4).
+- Notch split between base and lid (half-circle in each) for a cable that
+  shouldn't be unplugged; Ø = cable + 0.3.
+- Strain relief: a zig-zag channel, a zip-tie anchor bar inside, or a clamp
+  plate with two screws. The connector on the board must not carry the pull.
 - TPU grommet in a round hole for a clean look.
-- Leave room inside for connector bodies and wire bend radius (≥ 5 × cable Ø for a
-  jacketed cable; ≥ 3 × Ø for a single hookup wire).
-- A part on the lid (display, buttons) gets a keyed connector at the board, or a
-  service loop long enough to lay the open lid beside the base.
+- Cable glands for sealed boxes (environment-and-safety.md §4).
+- Leave room inside for connector bodies and wire bend radius (≥ 5 × cable Ø).

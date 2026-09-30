@@ -36,7 +36,9 @@ margin (PLA ~50 °C!), switch material or ventilate.
 
 ## 2. Ventilation
 
-- Needed above ~0.3 W or when the brief names a heat source (template `vents = "auto"`).
+- Needed above ~0.3 W or when the brief names a heat source (template `vents = "auto"`;
+  the vent faces default to walls without connectors, and an assert stops a vent band
+  that would overlap a cutout).
 - **Chimney**: inlets in the lowest 25 % of one wall, outlets in the top 25 % of the
   opposite wall or the lid, so air crosses the heat source.
 - Outlet area ≥ inlet area; above 1 W aim for ≥ 25 % open area on the vented wall,
@@ -105,7 +107,7 @@ resistance:
 - Battery doors that are easy to open are fine for adults; see §9 for
   children/pets.
 - Charging circuits (TP4056 etc.) get warm — ventilate, don't sandwich them
-  against the cell. Charge current, polarity and fuse: `electronics-and-wiring.md` §2.
+  against the cell.
 - Never fully seal a lithium cell airtight in a tiny volume; if it vents,
   gas must escape.
 
@@ -130,8 +132,9 @@ For toys, pet devices, and anything left within reach:
   any battery type in these products.
 - No opening larger than 4 mm in any direction (vents included), and none
   directly above the PCB — use offset louvres so there is no straight line from
-  outside to electronics (template `child_pet_safe`). Say that connector openings
-  are the exception and should face away from reach.
+  outside to electronics. Template `child_pet_safe` caps slot width and length at
+  4 mm; the louvres are yours to add. Say that connector openings are the exception
+  and should face away from reach.
 - Round all exposed edges (r ≥ 1 mm), no pinch points in moving parts.
 - Chewing: PETG/nylon/TPU survive better than PLA; thick walls (≥ 2.4 mm);
   no loose cables reachable — route them internally or armor them.

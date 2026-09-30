@@ -295,20 +295,21 @@ are short and don't cross.
 
 ## 8. Using the template's wiring bay
 
-`bay_front` and `bay_back` add floor between the board and that wall, along its whole
-length. Put the bay on the long side without connector cutouts: a socket behind a bay is
-out of reach, and the full template asserts it. A smaller template may expose only
-`bay_back` and a single `cable_d`; extra exits are more `tie_anchor()` / `cable_exit_cut()`
-calls in `base()`.
+`bay_front` and `bay_back` set the floor between the board and the front or back wall,
+along its whole length; a column zone on that side already counts toward it. Put the bay
+on a side without connector cutouts, turning the board with `pcb_rot` if needed: a
+socket behind a bay is out of reach, and the template asserts it.
 
-`cable_exits` entries are `[face, pos, z, cable_d]`. The face is the bay's side, `pos` is
-the board X of the exit centre, and `z` is the centre height above the floor. Each exit
-gets a hole of `cable_d + exit_clear` with anti-chafe chamfers (a teardrop roof from
-`teardrop_min` up) and a `tie_anchor()` on the floor `tie_offset` inside the wall, its
-tunnel along X, for a `tie_w` strap. The template asserts that the bay fits the anchor,
-and that every exit stays clear of the floor, the lid split, the corner columns, the
-chamber divider, the vent bands, the keyholes and the antenna keepout. It echoes the
-exit height for a straight run over the anchor.
+`cable_exits` entries are `[face, pos, z, cable_d]`. The face is `"front"` or `"back"`,
+`pos` is the X of the exit centre from the board's left edge (board x when
+`pcb_rot = 0`), and `z` is the centre height above the floor. Each exit gets a hole of
+`cable_d + exit_clear` with anti-chafe chamfers (a teardrop roof from `teardrop_min` up)
+and a `tie_anchor()` on the floor `tie_offset` inside the wall, its tunnel along X, for
+a `tie_w` strap. The template asserts that the floor on that side fits the anchor, and
+that every exit stays clear of the floor, the lid split, the corner columns and the ribs
+that run along the wall, the board stops, the chamber divider, the vent bands and the
+antenna keepout. It echoes the exit height for a straight run over the anchor, and a
+cable tie per exit in the BOM.
 
 For more tie points or a channel along a run, place `tie_anchor()` or `cable_channel()`
 in `base()` the same way, outside the board footprint and at least 1 mm from the PCB

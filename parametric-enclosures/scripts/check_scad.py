@@ -4,8 +4,29 @@
 Usage: python3 check_scad.py file.scad [more.scad ...]
 Exit code 1 if any ERROR is found; warnings don't fail.
 """
+import os
 import re
 import sys
+
+BUILTINS = {
+    # statements and keywords
+    "module", "function", "if", "else", "for", "intersection_for", "let", "each",
+    "assert", "echo", "children", "render", "group", "parent_module",
+    # 2D / 3D primitives and transforms
+    "cube", "sphere", "cylinder", "polyhedron", "square", "circle", "polygon", "text",
+    "import", "projection", "linear_extrude", "rotate_extrude", "surface", "translate",
+    "rotate", "scale", "resize", "mirror", "multmatrix", "color", "offset", "hull",
+    "minkowski", "union", "difference", "intersection", "roof", "fill",
+    # functions
+    "abs", "sign", "sin", "cos", "tan", "asin", "acos", "atan", "atan2", "floor",
+    "round", "ceil", "ln", "log", "pow", "sqrt", "exp", "len", "min", "max", "norm",
+    "cross", "concat", "lookup", "str", "chr", "ord", "search", "version",
+    "version_num", "rands", "is_undef", "is_bool", "is_num", "is_string", "is_list",
+    "is_function", "is_object", "object", "has_key", "textmetrics", "fontmetrics",
+}
+LIB_DIRS = [os.path.expanduser(p) for p in (
+    "~/.local/share/OpenSCAD/libraries", "~/Documents/OpenSCAD/libraries",
+    "/usr/share/openscad/libraries", "/usr/local/share/openscad/libraries")]
 
 
 def strip_comments_and_strings(src):
@@ -31,10 +52,26 @@ def strip_comments_and_strings(src):
     return "".join(out)
 
 
+def resolve(name, base_dir):
+    paths = [base_dir] + os.environ.get("OPENSCADPATH", "").split(os.pathsep) + LIB_DIRS
+    for d in paths:
+        if d and os.path.isfile(os.path.join(d, name)):
+            return os.path.join(d, name)
+    return None
+
+
+def definitions(code):
+    names = set(re.findall(r"\bmodule\s+(\w+)\s*\(", code))
+    names |= set(re.findall(r"\bfunction\s+(\w+)\s*\(", code))
+    names |= set(re.findall(r"\b(\w+)\s*=\s*function\s*\(", code))
+    return names
+
+
 def check(path):
     errors, warnings = [], []
     src = open(path, encoding="utf-8").read()
     code = strip_comments_and_strings(src)
+    base_dir = os.path.dirname(os.path.abspath(path))
 
     # bracket balance with line numbers
     pairs = {")": "(", "]": "[", "}": "{"}
@@ -63,16 +100,38 @@ def check(path):
             warnings.append("no assert(): add fit/build-volume checks")
         if "ASSUMPTION" not in src:
             warnings.append("no '// ASSUMPTION:' tags: list chosen defaults so the user can correct them")
-        for p in ("base", "lid"):
+        for p in ("base", "lid", "check"):
             if not re.search(rf'part\s*==\s*"{p}"', src):
-                warnings.append(f'no part == "{p}" branch')
-        if re.search(r"\bcable_exits\s*=", code) and not re.search(r"\btie_anchor\s*\(", code):
-            warnings.append("cable_exits without a tie_anchor: a pull on the cable reaches the joint")
+                warnings.append(f'no part == "{p}" branch'
+                                + (": add the body/lid interference check" if p == "check" else ""))
 
+    # libraries: must be findable, and every call must resolve to something
+    known = definitions(code)
+    unresolved = []
+    for kind, name in re.findall(r"\b(use|include)\s*<([^>]+)>", code):
+        lib = resolve(name, base_dir)
+        if lib is None:
+            unresolved.append(name)
+            warnings.append(f"{kind} <{name}>: not found beside this file or on OPENSCADPATH; "
+                            "every module from it will silently render as nothing")
+        else:
+            known |= definitions(strip_comments_and_strings(open(lib, encoding="utf-8").read()))
     if re.search(r"\buse\s*<", code):
         for v in ("EPS", "eps"):
             if re.search(rf"\b{v}\b", code) and not re.search(rf"^\s*{v}\s*=", code, re.M):
                 errors.append(f"'use <...>' does not import variables: define {v} in this file")
+    if not unresolved:
+        seen = set()
+        for m in re.finditer(r"(?<![\w$.])([A-Za-z_]\w*)\s*\(", code):
+            name = m.group(1)
+            if name in BUILTINS or name in known or name in seen:
+                continue
+            if re.search(r"\b(module|function)\s+$", code[max(0, m.start() - 12):m.start()]):
+                continue
+            seen.add(name)
+            ln = code[: m.start()].count("\n") + 1
+            warnings.append(f"line {ln}: '{name}' is not defined here or in a used library; "
+                            "OpenSCAD skips unknown modules with only a warning")
 
     for m in re.finditer(r"\$fn\s*=\s*(\d+)", code):
         if int(m.group(1)) > 128:

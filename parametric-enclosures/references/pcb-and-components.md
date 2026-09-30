@@ -27,16 +27,16 @@ edge, tallest part above and below.
 
 ```
 floor_t                     profile value (3.0 on PETG-CF; ≥ 1.2 generic)
-standoff_h                  ≥ 4 mm (solder tails); more with bottom-side parts
+standoff_h                  ≥ 4 mm (solder tails); template: max(standoff_min, comp_bot + 1,
+                            comp_bot + 3.5 with keyholes)
 pcb_t                       1.6 typical (1.0 Pico, ~1.4 Raspberry Pi)
 comp_top                    measure; + 2 mm headroom (+ wire bend room if cables plug in from above)
+lid split                   template: the higher of the component stack and the tallest
+                            cutout (with its lead-in and roof) + 1 mm
 lid                         ceil_t + tongue/groove
 ```
 
-Headers with Dupont wires plugged from above need ~15–20 mm above the pins. Side-entry
-headers, JST-XH (~15 mm) and JST-PH (~10 mm) need less. A wiring bay (template
-`bay_front` / `bay_back`) holds the extra height without growing `comp_top` over the
-whole board. Details: `electronics-and-wiring.md` §7.
+Headers with Dupont wires plugged from above need ~15–20 mm above the pins.
 
 ## 3. Holding the board
 
@@ -45,7 +45,8 @@ whole board. Details: `electronics-and-wiring.md` §7.
 | Standoffs + screws | board has holes | default; M2.5 for Raspberry Pi, M3 for most others; self-tap pilot 2.1 (M2.5) / 2.4 (M3) |
 | Standoffs + heat-set inserts | board removed often | insert hole per vendor spec; standoff Ø ≥ insert hole + 3 |
 | Pins (locating) + lid posts | quick, no screws | pin Ø = hole − 0.3; lid posts press the board with 0.2 mm interference |
-| Card-guide slots/rails | board without holes (ESP32 DevKit, XIAO) | slot width = pcb_t + 0.3; rails 2 mm deep; a stop at the end |
+| Floor rails + stops | board without holes (ESP32 DevKit, XIAO), top-loading box | the template's default when `mount_holes = []`: rails under the front/back edges at standoff height, a stop on each side that has a column zone; the lid limits lift to its headroom. Move or drop a rail (`rail_w`) where header pins run under the edge |
+| Card-guide slots | board without holes, box that opens at one end | slot width = pcb_t + 0.3; rails 2 mm deep; a stop at the end |
 | Snap clips over the board edge | holes absent, board rarely removed | see closures reference for strain |
 | Header sockets on a carrier board | dev boards | the carrier gets the holes |
 
@@ -72,9 +73,28 @@ Coordinates: origin at the bottom-left corner of the board in top view.
 ## 5. Connector cutouts
 
 Size the opening = connector body + `cutout_clear` (0.5 mm) per side (+0.25 more and a
-1 mm 45° lead-in on user-facing ports), corner radius = body radius + clearance. In the
-template each cutout is `[face, pos, z_above_board, w, h, r, user_facing, overmold]`,
-with pos/z in board coordinates. Typical bodies (verify):
+1 mm 45° lead-in on user-facing ports), corner radius = body radius + clearance.
+
+In the template each cutout is
+`[edge, pos, z, w, h, r, user_facing, overmold, overhang]`, all in board coordinates
+read straight off the board drawing:
+
+- `edge` is the board edge the connector sits on: `"x0"` (the edge at x = 0), `"x1"`,
+  `"y0"` or `"y1"`. `pcb_rot` turns the board, which picks the wall each edge meets.
+- `pos` is the connector centre along that edge (board y on an x-edge, x on a y-edge);
+  `z` is its centre above the board top.
+- `overhang` is how far the body sticks out past the board edge (Uno USB-B ≈ 6.2,
+  DC jack ≈ 1.8, Pi 4 USB/Ethernet ≈ 2.5). The template moves the board in by it.
+
+The template then lays the box out from the connectors: a wall that carries a
+connector sits `pcb_clear` from the board, and the column zones take the other sides
+(both X ends if they are free, else front and back, else every free side). A corner
+column exists where at least one of its two sides has a zone, so connectors on two
+adjacent walls (Raspberry Pi) leave three columns, and on three or four walls the
+assert stops you: bring one connector out through the lid, move it, or place a column
+by hand. Vents default to faces without connectors.
+
+Typical bodies (verify):
 
 | Connector | Body opening W × H (mm) | Notes |
 |---|---|---|
@@ -97,15 +117,33 @@ hits the wall and the plug never seats. Fix one of two ways:
 2. Recess the outer face around the opening to overmold size + tol per side,
    leaving ≤ 1 mm of wall at the socket — the template does this when a cutout's
    `overmold` is set (needed on the 2.52 mm PETG-CF wall).
-Say which one you used. In the template the X-end walls sit a full column zone
-(~10 mm) from the board, so connectors belong on the front/back faces — rotate the
-board (swap pcb_x/pcb_y and the hole coordinates) if its ports are on a short edge.
+Say which one you used. The template's walls with connectors already sit
+`pcb_clear` from the board edge; the recess handles the thick PETG-CF wall.
 
 Cutouts must not cross the lid split line unless you design them as notches
-split between base and lid. The template asserts this.
+split between base and lid. The template raises the split above the tallest cutout
+(lead-in and roof included) and asserts it.
 
-When the connector overhangs the board edge (Uno USB/DC, Pi USB stack), shift
-the board inward by the overhang and add the overhang to `pcb_gap` on that side.
+Openings wider than the profile's bridge limit get a 45° roof (`cutout_roof`), so
+their top prints without sagging into the plug's path.
+
+Raspberry Pi 4 B, from drawing RP-008343-DS (verify against the board; heights are
+body tops above the PCB):
+
+```
+cutouts = [
+    ["y0", 11.2, 1.6, 9.0, 3.2, 1.6, true, [12.5, 7.0], 0],  // USB-C power
+    ["y0", 26.0, 1.5, 6.5, 3.0, 0.5, true, [11.0, 7.5], 0],  // micro-HDMI 0
+    ["y0", 39.5, 1.5, 6.5, 3.0, 0.5, true, [11.0, 7.5], 0],  // micro-HDMI 1
+    ["y0", 54.0, 3.0, 6.2, 6.2, 3.1, true, [], 0],           // 3.5 mm AV jack
+    ["x1",  9.0, 8.0, 13.5, 16.0, 0.5, true, [], 2.5],       // USB 2.0 stack
+    ["x1", 27.0, 8.0, 13.5, 16.0, 0.5, true, [], 2.5],       // USB 3.0 stack
+    ["x1", 45.75, 6.75, 16.0, 13.5, 0.5, true, [], 2.5]      // Ethernet
+];
+```
+
+That puts connectors on two adjacent walls: the template leaves the corner between
+them without a column and screws the lid at the other three.
 
 ## 6. Antennas and keepouts
 
@@ -117,7 +155,3 @@ the board inward by the overhang and add the overhang to `pcb_gap` on that side.
 - No metal enclosures; plastic walls ≤ 3 mm are nearly transparent at 2.4 GHz.
 - External antenna (u.FL → SMA): SMA bulkhead hole Ø6.5 with a D-flat if the
   connector has one.
-
-A pin that looks free on the silkscreen can stop the board booting, corrupt its flash,
-or read nothing while Wi-Fi is on. The pin map is in `electronics-and-wiring.md` §4.
-Power budget, supplies, protection, wire gauge and connectors: the same file.

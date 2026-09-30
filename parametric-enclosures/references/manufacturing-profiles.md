@@ -43,6 +43,7 @@ more than neutral plastics.
 | gussets per column | 3 minimum, always root-filleted | |
 | antenna keepout | 20 mm | CF attenuation |
 | `tol` | press 0.15 / slip 0.25 / loose 0.40 | calibrate once, then freeze |
+| `lip_w` | 1.0 mm (≥ 2 × `ew`) | tongue that still leaves one extrusion of land beside the groove on a 6-line wall |
 
 Wall must always be an integer multiple of `ew`. Do not round it to a pretty number.
 
@@ -91,18 +92,21 @@ being peeled apart.
 When the user names a different printer or material, write a new section with the same
 headings and the same override table. The fields that must be filled: build envelope,
 `ew`, layer height, wall, max bridge, max overhang, teardrop threshold, `hole_comp`,
-minimum internal fillet, insert boss OD, antenna keepout, `tol` triple, and whether
-elastic features are allowed.
+minimum internal fillet, insert boss OD, antenna keepout, `tol` triple, `lip_w`, and
+whether elastic features are allowed.
 
 Common variations worth knowing:
 
-- **0.6 mm hardened nozzle on the same A1 Mini.** Set `ew = 0.62`, recompute
-  `wall = 4 * ew = 2.48`, and note that fewer, fatter perimeters actually improve part
-  strength with filled materials. Recompute everything derived from `ew`; do not carry
-  over the 0.4 mm numbers.
+- **0.6 mm hardened nozzle on the same A1 Mini.** Set `ew = 0.62`, `wall_lines = 4`
+  (wall 2.48 mm) and `lip_w = 1.24` (two lines); fewer, fatter perimeters actually
+  improve part strength with filled materials. A centred tongue now needs
+  `lip_w + 2·ew + 2·tol` = 2.98 mm of rim, so the template adds a rim band under it
+  by itself. Recompute everything derived from `ew`; do not carry over the 0.4 mm
+  numbers.
 - **Unfilled PETG or PLA.** Elastic features become allowed; internal fillet can drop to
-  R 0.5 mm; antenna keepout back to 15 mm. PLA's ~55 °C HDT makes it unsuitable for
-  anything in a car, a window, or near a regulator.
+  R 0.5 mm; antenna keepout back to 15 mm; 3–4 wall lines are normal, and the
+  template's rim band keeps the tongue-and-groove printable on them. PLA's ~55 °C HDT
+  makes it unsuitable for anything in a car, a window, or near a regulator.
 - **Unknown printer/material.** Use the generic values in `fdm-design-rules.md` and its
   materials table, and say which numbers are unverified.
 - **ASA / ABS.** Enclosed printer only. Add shrinkage compensation (~0.5–0.7%) to all
@@ -111,8 +115,10 @@ Common variations worth knowing:
 
 ## Calibrating `tol`
 
-Print one fit-test coupon per printer-material pair — a plate with pins at 0.10, 0.15,
-0.20, 0.25, 0.30, 0.40 mm clearance — and pick the value that gives the fit you want by
-hand. Feed that number into every project as `tol` and do not change it per project.
-This single number is the most common cause of assemblies that worked last time and do
-not fit now.
+Print one fit-test coupon per printer-material pair and pick the clearance that gives
+the fit you want by hand. The 3d-printing skill's `assets/fit-coupon.scad` measures
+`hole_comp`, `tol` (holes for a printed pin at 0.10–0.40 mm per side) and the insert
+bore in one print; without it, print a plate with pins at 0.10, 0.15, 0.20, 0.25, 0.30
+and 0.40 mm clearance. Feed the numbers into every project and do not change them per
+project. This single number is the most common cause of assemblies that worked last
+time and do not fit now.

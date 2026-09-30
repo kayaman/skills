@@ -39,11 +39,11 @@ gap fill: 1.2 / 1.6 / 2.0 / 2.4 mm are all good.
 | Press / interference | 0.0–0.1 mm | pins that should stay |
 | Snug / friction | 0.1–0.15 mm | friction lids, light-pipe inserts |
 | Sliding | 0.2–0.3 mm | lid lips, sliding lids, button caps in holes |
+| Loose / print-in-place | 0.35–0.5 mm | hinges and captured parts printed assembled |
 
 A lid with no tongue, lip, or lap is not in this table. Matching the body's outer
 size and resting on the rim does not fit. Open the female feature by the sliding
 clearance on each face; do not leave a zero gap.
-| Loose / print-in-place | 0.35–0.5 mm | hinges and captured parts printed assembled |
 
 Printed part to a bought part: board-to-wall ≥ the slip tol (default 0.5 mm; board
 outlines vary ±0.2 mm), connector bodies +0.5 mm per side, magnets and bearings
@@ -78,8 +78,10 @@ outlines vary ±0.2 mm), connector bodies +0.5 mm per side, magnets and bearings
 
 - Parts are weakest **between layers** (Z). Put tensile and bending loads in
   the XY plane.
-- Base: floor on the bed. Lid: outer face on the bed (smooth top via the
-  build plate, lip prints upward, no supports).
+- Base: floor on the bed. Lid: either face down prints without supports. The
+  template prints it mating face down, so the screw counterbores open upward.
+  Outer face down gives the better show face, but each counterbore then has a
+  downward ledge: add a one-layer sacrificial bridge the user drills through.
 - Snap-fit beams and flexure buttons: bending axis parallel to the layers, i.e.
   beam lying in XY when possible. A vertical cantilever snaps at its root.
 - Screw bosses: screws along Z so tightening compresses rather than peels
@@ -93,7 +95,9 @@ outlines vary ±0.2 mm), connector bodies +0.5 mm per side, magnets and bearings
 - Vertical outer corners: round (r 2–5 mm) — better looking, stronger,
   less warping.
 - Bottom edges on the bed: 0.4–0.6 mm × 45° chamfer (hides elephant's foot).
-  Don't fillet bottom edges; a fillet is an overhang that starts flat.
+  Don't fillet bottom edges; a fillet is an overhang that starts flat. Where a
+  chamfer would eat a one-extrusion land (the lid's groove on the bed), leave the
+  edge square and keep the slicer's elephant-foot compensation on.
 - Top edges: fillets or chamfers are both fine.
 - Inner corners where walls meet the floor: a small fillet/chamfer (1 mm)
   strengthens and stops cracks.
@@ -120,6 +124,8 @@ so. See environment-and-safety.md for mains/battery implications.
 ## 8. Calibration print
 
 When fits matter (sliding lid, snap-fits, press-fit magnets), offer a small
-test coupon (a strip with holes and pegs at 0.1 mm steps of clearance) before
-the full print. It costs 10 minutes and sets `tol` and `hole_comp` for
-every future design on that printer/material.
+test coupon before the full print. It costs one short print and sets `tol`,
+`hole_comp` and the insert bore for every future design on that
+printer/material. If the 3d-printing skill is installed, use its
+`assets/fit-coupon.scad`; otherwise print a strip of holes and pegs at 0.05 mm
+steps of clearance.
