@@ -21,9 +21,9 @@ Bambu recommends a 0.6 mm hardened nozzle for this filament to cut clogs. Stay o
 | Max bridge | 5 mm | PETG-CF sags where PLA still spans |
 | Max overhang | 45° from vertical, target 40° | |
 | Teardrop threshold | Horizontal holes ≥ 5 mm | |
-| Bed-edge chamfer | 0.8 mm × 45° | Elephant's foot on a textured plate |
-| `hole_comp` | +0.15 mm on diameter | Functional holes only |
-| Internal fillet | R ≥ 1.0 mm everywhere | A square internal corner starts the crack |
+| Bed-parallel edges | Chamfer. Bed edge 0.8 mm × 45° | A fillet on the bed, or under a lip, starts as a flat overhang |
+| Vertical corners | Fillet, R ≥ 1.0 mm | Sharp corners ring, and a square inside corner starts the crack. Keep the wall thickness through the bend |
+| `hole_comp` | +0.15 mm on diameter | Functional holes only. Insert bores use the coupon, often +0.2–0.3 mm over the datasheet |
 | M3 insert boss | OD ≥ 9.5 mm | ≥ 2.5 mm of plastic around a ~4.0–4.2 mm bore |
 | `tol` per side | press 0.15 / slip 0.25 / loose 0.40 | Freeze after one coupon. Do not retune per part |
 
@@ -49,6 +49,7 @@ If a brief explicitly demands a clip, the arm length is at least 10 × thickness
 - Do not run this filament through the AMS Lite. Feed from the spool holder so the fiber does not abrade the tubes.
 - Glue stick on textured PEI is a release agent, not an adhesive. PETG can bond to bare smooth PEI hard enough to tear the sheet. The A1 Mini's textured plate is the right surface; still mention release if they swap to a smooth plate.
 - Keep the part fan modest. Overcooling is a common reason PETG-CF splits between layers. Bambu's own note for this filament is that an open-frame printer and a high fan both hurt Z strength, so design the load path accordingly instead of expecting enclosed-printer layer bonds.
+- Slice in Bambu Studio with printer `Bambu Lab A1 mini 0.4 nozzle`, process `0.20mm Standard @BBL A1M`, plate `Textured PEI Plate`, and the PETG-CF filament preset. The setting list is in `slicer-and-troubleshooting.md`. The STL is already one solid on z = 0; Studio should not offer Repair and should not be asked to auto-orient.
 
 ## Other profiles worth having ready
 

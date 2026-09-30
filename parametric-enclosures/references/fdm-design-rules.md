@@ -98,9 +98,13 @@ outlines vary ±0.2 mm), connector bodies +0.5 mm per side, magnets and bearings
   Don't fillet bottom edges; a fillet is an overhang that starts flat. Where a
   chamfer would eat a one-extrusion land (the lid's groove on the bed), leave the
   edge square and keep the slicer's elephant-foot compensation on.
-- Top edges: fillets or chamfers are both fine.
-- Inner corners where walls meet the floor: a small fillet/chamfer (1 mm)
-  strengthens and stops cracks.
+- Any other edge parallel to the bed, including the top lip and the underside of
+  a ledge: chamfer. A fillet there steps with the layers and, facing down, starts
+  as a flat overhang.
+- Vertical edges: fillet. A sharp corner rings. Inside a loaded corner, keep the
+  wall thickness constant through the bend (outside radius = inside radius + wall).
+- Inner corners where walls meet the floor: fillet, about 1 mm. That corner is
+  supported by the floor, and a square corner there is where a brittle wall cracks.
 
 ## 7. Materials
 
