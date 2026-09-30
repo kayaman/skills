@@ -38,19 +38,26 @@ rim, is not a closure: it slides, and a zero gap binds after printing. See the
 skill's "Body and lid must fit" rule. Summary:
 
 - Screws along Z through the lid into gusseted insert columns in the base corners
-  (template). Columns run floor to mating face and never pass through the board.
+  (template). Columns run floor to mating face and never pass through the board;
+  the template only places one where a column zone can hold it, so a board with
+  connectors on two adjacent walls gets three.
 - Tongue on the base rim (about 1.0–1.2 mm wide × 2 mm tall). Groove in the lid,
   opened by the slip clearance on each face (house slip 0.25 mm per side; the
   published FDM band for a hand-seated lid is about 0.2–0.4 mm per side) and one
   slip deeper than the tongue. `lip_groove_cut` adds its `tol` argument to the
   width once, so pass `2 * tol` for a full slip on each flank.
 - Keep at least one extrusion of plastic on both sides of the groove
-  (`wall >= lip_w + 2 * ew + 2 * tol`). If the wall cannot, narrow the tongue or
-  add a perimeter. Do not close the gap. On a thin wall, hang a locating lip from
-  the lid inside the cavity, notched around the columns, instead of centering the
-  tongue on the wall.
+  (`rim >= lip_w + 2 * ew + 2 * tol`). Do not close the gap to get there. When the
+  wall is thinner, the template thickens the rim inward (`rim_band`: a band under
+  the tongue with a 45° underside, so it prints without support). Outside the
+  template, do the same or hang a locating lip from the lid inside the cavity,
+  notched around the columns.
 - A short 45° lead-in, and a small relief in the groove's inside corners. FDM
   rounds those corners and a sharp tongue binds.
+- The lid prints mating face down, so the groove mouth is on the bed and its
+  first layer spreads into the groove. The land beside it is one extrusion, so
+  there is no room for a chamfer: keep the slicer's elephant-foot compensation on
+  for the lid (Bambu Studio default 0.15 mm) and say so in the build notes.
 - Spacing ≤ 60–80 mm between screws for a stiff lid; ≤ 50 mm for a gasket.
 - Counterbores (head recess) need `top_t ≥ head height + 1.2`; otherwise let
   pan heads sit on top.

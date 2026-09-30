@@ -15,9 +15,12 @@
 python3 scripts/check_scad.py path/to/enclosure.scad
 ```
 
-Catches unbalanced braces/brackets, missing `part` branches, tolerance or wall
-parameters, `ASSUMPTION` tags and asserts, huge `$fn`, `minkowski()`, and `use`
-without a local `EPS`. Not a substitute for rendering.
+Catches unbalanced braces/brackets, missing `part` branches (including `check`),
+tolerance or wall parameters, `ASSUMPTION` tags and asserts, huge `$fn`,
+`minkowski()`, `use` without a local `EPS`, a `use`/`include` file that isn't beside
+the project, and calls to modules or functions defined nowhere. That last one matters:
+OpenSCAD skips an unknown module with a warning and the feature silently vanishes from
+the STL. Not a substitute for rendering.
 
 After any change to `enclosure_lib.scad`, render `assets/selftest.scad`
 (`openscad -o selftest.stl selftest.scad`) before touching product files.
@@ -41,7 +44,11 @@ openscad -o log.echo enclosure.scad
 ```
 
 - **Renders must be clean.** Treat every WARNING as a defect —
-  "Object may not be a valid 2-manifold" means the slicer is guessing.
+  "Object may not be a valid 2-manifold" means the slicer is guessing. In 2021.01
+  the render summary prints `Simple: yes` for a clean solid; `Simple: no` is the
+  same defect. `ECHO:` lines are the model's own notes, not render warnings.
+- An empty result is reported as "Current top level object is empty." and 2021.01
+  exits with status 1 without writing a file. For `part = "check"` that is the pass.
 - `-D var=value` overrides top-level variables (strings need quotes, escaped
   for the shell; on Windows `-D "part=\"lid\""`).
 - PNG uses preview mode by default; add `--render` for an exact render.
@@ -49,8 +56,12 @@ openscad -o log.echo enclosure.scad
 - Development snapshots render far faster with the Manifold backend
   (`--backend=manifold` in recent snapshots; older snapshots used
   `--enable=manifold`). Stable 2021.01 doesn't have it.
-- `scripts/export_parts.sh enclosure.scad [parts…]` wraps all of this and
-  writes `out/<name>_<part>.stl` plus previews.
+- `scripts/export_parts.sh enclosure.scad [parts…]` wraps all of this: it writes
+  `out/<name>_<part>.stl`, prints the design echoes (size, BOM, notes), runs the
+  interference check, and writes assembly, exploded and section PNGs. It exits
+  non-zero on a failed render, any render WARNING or `Simple: no`, or interference.
+- CGAL in 2021.01 takes about a minute for a typical base; the lid takes seconds.
+  Render parts in parallel when you have the cores.
 
 ## 3. Interference and fit checks
 
@@ -82,8 +93,9 @@ This expands the SKILL.md self-check into things to trace in the code:
 2. Every `difference()` cutter overshoots by EPS (library `*_cut` modules do).
 3. Board fits: cavity ≥ board + 2 × pcb_clear (+ connector overhang); stack height
    covers comp_top + 2 mm; standoffs ≥ 4 mm and taller than comp_bot.
-4. Each cutout traces to board coordinates, sits on a front/back face, doesn't cross
-   the lid split, and its plug can reach the socket (overmold recess set if needed).
+4. Each cutout traces to board coordinates through its edge, meets a wall with no
+   column zone, doesn't cross the lid split, and its plug can reach the socket
+   (overmold recess set if needed; roof on openings wider than the bridge limit).
 5. Columns: gusseted, filleted, fused to walls, ribs clear of the board, bore =
    insert length + 1.0; enough columns for the span.
 6. Standoffs start at `floor_t − EPS`; no column passes through the board footprint.
@@ -98,10 +110,6 @@ This expands the SKILL.md self-check into things to trace in the code:
     keepout (asserted).
 11. Fits the build envelope (asserted); tall parts flagged for a brim.
 12. Every `part` value produces geometry, and `check` produces none.
-13. More than one module, a battery, a switched load or a cable out: a power
-    budget, a pin map, a wiring table (electronics-and-wiring.md §9); a fuse at
-    the source; a keyed/latched or screwed power connection; each cable exit has
-    a zip-tie anchor and an anti-chafe hole. `heat_w` matches the budget.
 
 ## 6. Delivering in chat
 
@@ -109,7 +117,9 @@ This expands the SKILL.md self-check into things to trace in the code:
   file `use`s it, or inline the modules into one file (preferred for users who
   paste into the OpenSCAD editor or an online renderer — say which you did).
 - When file tools exist, write the files to the outputs and present them;
-  include exported STL/3MF/PNG only if you actually rendered them.
+  include exported STL/3MF/PNG only if you actually rendered them. When the chat
+  shows images, embed the exploded or section PNG: the user checks connector
+  placement and fit faster from a picture than from a parameter list.
 - Never claim a render/export succeeded if it didn't run. Say "not rendered
   here — run F6" when OpenSCAD isn't available.
 - For follow-up edits, keep parameter names; list changed parameters.

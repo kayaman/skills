@@ -71,6 +71,10 @@ decision before the slicer does.
 
 - **Scope surprises.** A variable assigned twice in one scope takes the *last* value
   everywhere in that scope (with a warning). Never "update" a variable; name a new one.
+- **Assignment order.** Top-level assignments are evaluated in file order, so a
+  derived value that reads a variable assigned further down gets `undef`, even
+  through a function call. Keep the derived block in dependency order. Function and
+  module definitions are exempt; they can sit anywhere.
 - **`use` doesn't import variables.** A project file that references `EPS` without
   defining it gets `undef`, and every cutter built from it silently vanishes. Watch the
   console for "unknown variable".

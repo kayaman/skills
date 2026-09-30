@@ -1,5 +1,5 @@
 // enclosure_lib.scad — reusable geometry for 3D-printed electronics enclosures
-// v2.1 (adds wiring helpers). Target OpenSCAD 2021.01+. Units: mm.
+// v2.2 (rim band, wiring helpers). Target OpenSCAD 2021.01+. Units: mm.
 //
 // Usage:  use <enclosure_lib.scad>
 // `use` imports modules and functions but NOT variables, so the project file stays
@@ -21,7 +21,7 @@
 //   2D   rrect, rrect_inset, rrect_c, teardrop_2d, hole_2d, slot_pattern_2d,
 //        hex_pattern_2d, keyhole_2d, lip_2d
 //   3D   rbox, rbox_c, fillet_lin, fillet_ring, boss, insert_boss, pcb_standoff,
-//        lip_tongue, snap_hook, label, tie_anchor, cable_channel
+//        lip_tongue, rim_band, snap_hook, label, tie_anchor, cable_channel
 //   cut  screw_cut, hex_nut_trap_cut, teardrop_cut, lip_groove_cut, keyhole_cut,
 //        foot_recess_cut, label_cut, cable_exit_cut
 //   face face_frame, wall_cut, wall_cut_chamfer
@@ -148,22 +148,26 @@ module rbox_c(size, r = 2, cb = 0.8, ct = 0.8) {
 // ---------------------------------------------------------------------------
 
 // Along a straight concave edge between the z=0 floor and a wall in the YZ plane
-// at x=0; material toward +X/+Z, running along +Y for len.
+// at x=0; material toward +X/+Z, running along +Y for len. Overlaps the floor and
+// the wall by EPS so the union fuses instead of touching.
 module fillet_lin(r, len) {
-    rotate([-90, 0, 0]) linear_extrude(len)
+    translate([0, len, 0]) rotate([90, 0, 0]) linear_extrude(len)
         difference() {
-            square([r, r]);
+            translate([-EPS, -EPS]) square([r + EPS, r + EPS]);
             translate([r, r]) circle(r = r, $fn = 32);
         }
 }
 
-// Ring at the base of a cylinder of radius R standing on z=0.
+// Ring at the base of a cylinder of radius R standing on z=0. Reaches up to r
+// inside the cylinder, so the union fuses whatever the cylinder's facet count,
+// and EPS below z = 0 into the floor.
 module fillet_ring(r, R) {
+    x0 = max(R - r, 0);
     rotate_extrude($fn = 64)
-        translate([R, 0])
+        translate([x0, 0])
             difference() {
-                square([r, r]);
-                translate([r, r]) circle(r = r, $fn = 32);
+                translate([0, -EPS]) square([R + r - x0, r + EPS]);
+                translate([R + r - x0, r]) circle(r = r, $fn = 32);
             }
 }
 
@@ -172,13 +176,13 @@ module fillet_ring(r, R) {
 // ---------------------------------------------------------------------------
 
 // Gusseted screw column — the load-bearing element, deliberately opinionated:
-//   ribs are tapered by a cone so their tops slope and never overhang;
+//   ribs are tapered by a cone, so every layer sits inside the one below;
 //   rib/column junctions are filleted in plan by a morphological closing;
 //   the column/floor junction gets a fillet ring.
 // h           column height (floor to mating face)
 // od          column outer diameter
 // bore        blind hole Ø (insert bore or pilot); 0 = none
-// bore_depth  from the top face
+// bore_depth  from the top face; >= h makes it a through hole
 // gussets     rib count; rib i points at angle0 + i*spread (spread default 360/gussets)
 // gusset_h/l  rib height at the column / reach from the column wall (default 0.7h, = h: 45°)
 // gusset_t    rib thickness (use the wall thickness)
@@ -193,7 +197,7 @@ module boss(h, od, bore = 0, bore_depth = 0,
 
     assert(od > bore + 2, "boss: bore too close to the outer wall");
     assert(gh <= h, "boss: ribs taller than the column");
-    assert(gh >= gl, "boss: rib slope shallower than 45° — it would need support");
+    assert(gh >= gl, "boss: ribs reach further than they rise; raise gusset_h or shorten gusset_l");
 
     difference() {
         union() {
@@ -211,14 +215,15 @@ module boss(h, od, bore = 0, bore_depth = 0,
                                             translate([0, -gusset_t / 2])
                                                 square([od / 2 + gl, gusset_t]);
                                 }
-                            circle(d = od - EPS);
+                            circle(d = od - 1);
                         }
                     cylinder(r1 = od / 2 + gl, r2 = od / 2, h = gh);
                 }
         }
         if (bore > 0) {
-            translate([0, 0, h - bore_depth])
-                cylinder(d = bore, h = bore_depth + EPS);
+            bz = bore_depth >= h ? -EPS : h - bore_depth;
+            translate([0, 0, bz])
+                cylinder(d = bore, h = h - bz + EPS);
             if (mouth > 0)
                 translate([0, 0, h - mouth])
                     cylinder(d1 = bore, d2 = bore + 2 * mouth, h = mouth + EPS);
@@ -252,6 +257,22 @@ module pcb_standoff(h, od = 6, bore = 2.4, bore_depth = 6,
 // Raised tongue on the base's mating face.
 module lip_tongue(size, r = 2, inset = 1.2, w = 1.2, h = 2) {
     linear_extrude(h) lip_2d(size, r, inset, w);
+}
+
+// Inward thickening of a thin wall's rim so a tongue-and-groove still leaves one
+// extrusion of land each side. Ring from inset `wall` to inset `rim_w`, h tall,
+// with a 45° chamfer below it so it prints without support. Top at z = 0: place
+// it at the mating face.
+module rim_band(size, r = 2, wall = 1.6, rim_w = 2.5, h = 1.5) {
+    ch = rim_w - wall;
+    translate([0, 0, -h - ch])
+        difference() {
+            linear_extrude(h + ch) rrect_inset(size, r, wall - EPS);
+            hull() {
+                translate([0, 0, -EPS]) linear_extrude(EPS) rrect_inset(size, r, wall);
+                translate([0, 0, ch]) linear_extrude(h + EPS) rrect_inset(size, r, rim_w);
+            }
+        }
 }
 
 // Matching groove cutter for the lid underside (cuts from z=0 upward by h).

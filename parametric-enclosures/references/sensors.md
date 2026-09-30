@@ -170,9 +170,7 @@ HC-SR04, JSN-SR04T.
 
 `sensor_chamber = true` adds a two-skin divider (air gap `chamber_gap`, a wire notch at
 the top) and a chamber of `chamber_len` at the +X end, vented low and high on the +X
-face. The main cavity's chimney outlet moves to the back face. List the heat sources in
-`heat_sources` (board coordinates) so the 15 mm rule is asserted. Sensors that must be
-sealed (PIR) or aimed (ToF, camera) don't use this chamber — build their aperture per
-the sections above. Route wires, not connectors, through the notch (`wire_pass`); crimp
-after passing, or keep the connector on the chamber side. Plug the notch with foam when
-the chamber must stay thermally or optically isolated.
+face. No connector may face +X (turn the board with `pcb_rot`), and the main cavity's
+chimney moves to the free faces. List the heat sources in `heat_sources` (board
+coordinates) so the 15 mm rule is asserted. Sensors that must be sealed (PIR) or aimed
+(ToF, camera) don't use this chamber — build their aperture per the sections above.

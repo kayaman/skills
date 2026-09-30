@@ -1,6 +1,6 @@
 ---
 name: "parametric-enclosures"
-description: Design 3D-printable electronics enclosures as parametric OpenSCAD and export STL/3MF, with the wiring and power inside them. Produces a .scad file plus shared library, per-part export commands, build notes, fastener BOM, a wiring plan (power budget, pin map, wiring table) and a self-check, with hard rules for gusseted insert columns, PCB standoffs, connector cutouts plugs can reach, vents, isolated sensor chambers, antenna keepouts, support-free printing, closures, sealing, batteries, cable exits, mounting and child/pet safety. Use whenever the user mentions an enclosure, case, housing, box or "caixa" for a PCB, ESP32/Arduino/Raspberry Pi/Pico project or sensor node; asks for OpenSCAD/.scad/STL/3MF for one; wants to modify one (resize, move a cutout, add vents, a sensor bay, a button, mounting, waterproofing); or asks how to wire or power one (pins, supply, battery, relay, servo, LED strip, wire gauge, connectors). Trigger even without "OpenSCAD" or "3D printing" — "I need a case for this board" is enough.
+description: Design 3D-printable electronics enclosures as parametric OpenSCAD and export STL/3MF, with the wiring and power inside them. Produces a .scad file plus shared library, per-part export commands, build notes, fastener BOM, a wiring plan and a self-check, with hard rules for gusseted insert columns, a locating lid, PCB standoffs, connector cutouts plugs can reach, vents, isolated sensor chambers, antenna keepouts, support-free printing, closures, sealing, batteries, cable exits, mounting and child/pet safety. Use whenever the user mentions an enclosure, case, housing, box or "caixa" for a PCB, ESP32/Arduino/Raspberry Pi/Pico project or sensor node; asks for OpenSCAD/.scad/STL/3MF for one; wants to modify one (resize, move a cutout, add vents, a button, mounting, waterproofing); or asks how to wire or power one (pins, supply, battery, relay, servo, LED strip, wire gauge, connectors). Trigger even without "OpenSCAD" or "3D printing" — "I need a case for this board" is enough.
 ---
 
 # Parametric enclosures for electronics
@@ -34,15 +34,21 @@ in `references/` and is loaded when the task touches it:
 Assets and tools (copy, don't re-derive):
 
 - `assets/enclosure_lib.scad` — reusable modules: chamfered rounded boxes, gusseted
-  filleted columns, standoffs, tongue-and-groove, face-frame cutters with lead-in
-  chamfers, vent patterns, teardrops, keyholes, nut traps, snap hooks, labels,
-  zip-tie anchors, cable channels, anti-chafe cable exits.
+  filleted columns, standoffs, tongue-and-groove and the rim band for thin walls,
+  face-frame cutters with lead-in chamfers, vent patterns, teardrops, keyholes,
+  nut traps, snap hooks, labels, zip-tie anchors, cable channels and chamfered
+  cable exits.
   Reusing it keeps geometry consistent across the user's product line.
-- `assets/template.scad` — complete base + lid enclosure on the default profile,
-  with column zones, standoffs, optional sensor chamber, chimney vents, cutouts with
-  plug recesses, wiring bays with tie-anchored cable exits, feet/keyholes, asserts,
-  and `part` views (assembly, exploded, base, lid, section, check). Start every new
-  design from it.
+- `assets/template.scad` — complete base + lid enclosure on the default profile. You give the board in its
+  own coordinates (outline, holes, antenna, heat sources) and each connector by
+  board edge; the template lays out the box from that: board against every wall
+  with a connector, corner columns in the other sides, zones stretched to clear the
+  antenna keepout, lid split above the tallest cutout, vents on free faces. It also
+  has plug recesses, roofed openings, rails for boards without holes, an optional
+  sensor chamber, wiring bays with cable exits and tie anchors, feet, ears or
+  keyholes, asserts, a fastener BOM echo, and `part` views (assembly, exploded,
+  base, lid, section, check). Start every new design from it; most briefs are
+  parameter edits.
 - `assets/selftest.scad` — renders every library module; run after any library change.
 - `scripts/check_scad.py` — static check that runs without OpenSCAD.
 - `scripts/export_parts.sh` — renders parts, the interference check and PNG previews.
@@ -71,8 +77,8 @@ Ask for nothing the conversation already answers. Defaults in brackets.
 the board's bottom-left corner, tallest component on top and bottom, keepouts
 (antenna, HV, moving parts). Known dev boards: use the footprint table.
 
-**Interfaces** — connectors (face, position, height above the board), display,
-buttons, LEDs, switches, cable exits.
+**Interfaces** — connectors (board edge, position along it, height above the board,
+overhang past the edge), display, buttons, LEDs, switches, cable exits.
 
 **Sensors** — type and what each must sense (airflow, field of view, acoustic port,
 light path).
@@ -107,9 +113,10 @@ file, grouped with `/* [Group] */`; below `/* [Hidden] */` there are only derive
 values — no magic numbers. That is what makes a design reusable at a different PCB size.
 
 One coordinate frame: origin at the outer bottom-left-front corner of the base, +Z up.
-Board features are given in board coordinates and converted through `pcb_origin`, so
-every cutout is dimensioned from the PCB origin, never from the wall (wall-referenced
-cutouts drift when the wall changes). Expose `part` = assembly | exploded | base | lid |
+Board features are given in board coordinates, as on the board's drawing, and
+converted through `to_world()` (which applies `pcb_rot`), so every cutout is
+dimensioned from the PCB origin, never from the wall (wall-referenced cutouts drift
+when the wall changes). Expose `part` = assembly | exploded | base | lid |
 section | check; only base/lid (and extra printable parts) are exported.
 
 ### Printability — supports are a defect, not an option
@@ -122,8 +129,11 @@ Every part prints on a flat face with nothing under it.
 - No overhang steeper than 45° from vertical. Horizontal round holes above the
   profile's teardrop threshold get a teardrop or 45° roof. Downward-facing screw
   recesses get a 45° cone.
-- Bridges stay under the profile's limit; say so when a cutout top exceeds it.
-- Chamfer every plate-touching edge (elephant-foot relief) and visible top edges.
+- Bridges stay under the profile's limit. Wider openings get a 45° roof (template
+  `cutout_roof`); if you turn it off, say which tops will sag.
+- Chamfer every plate-touching edge (elephant-foot relief) and visible top edges,
+  unless the chamfer would eat a one-extrusion land (the lid's groove side). There,
+  rely on the slicer's elephant-foot compensation and say so in the build notes.
 - Nothing solid thicker than ~4 mm — hollow and rib it.
 - Minimum feature 0.8 mm; minimum free-standing pin Ø 2 mm.
 
@@ -134,8 +144,10 @@ shell. Never a thin flange, never a boss floating on a wall — that is a lever 
 a layer line at its root.
 
 - 2–4 triangular gussets per column, thickness = wall, height 60–80 % of the column,
-  sloped top ≥ 45° so it prints unsupported. Route ribs away from the board (the
-  template runs them along the end walls inside the column zone).
+  reaching about as far as they rise. The 45° is for stiffness: a rib standing on the
+  floor prints at any slope, because each layer sits inside the one below. Route ribs
+  away from the board (the template runs them along the wall of the zone that holds
+  the column).
 - Fillet gusset roots and the column-to-floor junction.
 - Boss OD = hole Ø + 2 × wall, and at least the profile's minimum.
 - Heat-set inserts: check the insert datasheet. Typical M3 (4.6 × 5.7 mm): blind bore
@@ -144,20 +156,25 @@ a layer line at its root.
 - Mating part: clearance hole (3.4 mm for M3, + hole_comp) plus counterbore/countersink.
 - ≥ 4 columns up to a 100 mm span, one more per additional ~70 mm, plus one beside
   any connector that takes insertion force — a USB port pushed 200 times is a fatigue
-  test of whatever holds that wall.
+  test of whatever holds that wall. The exception is the corner where two connector
+  walls meet (Raspberry Pi): the board fills it, so three columns plus the register
+  close the lid; add a fourth by hand if the lid must seal.
 - Lid columns and PCB standoffs are separate: a column must never pass through the
   board's footprint.
 
 ### PCB fit and connectors
 
 - Lateral clearance ≥ the profile's slip `tol` per side (template default 0.5 mm;
-  clones vary), located by standoffs or retention ribs. Never press-fit a PCB.
+  clones vary), located by standoffs, or by rails and stops when the board has no
+  holes (template `mount_holes = []`). Never press-fit a PCB.
 - ≥ 2 mm above the tallest top-side component; standoffs ≥ 4 mm for solder tails.
 - Cutouts +0.5 mm all round; +0.75 mm and a 1 mm lead-in chamfer on user-facing ports.
 - **Plugs must reach their sockets.** A plug's overmold is wider than the socket; if
   the socket sits more than ~1.5 mm behind the outer surface, recess the outer face to
-  overmold size so ≤ 1 mm of wall remains (template `overmold` field). Put connectors
-  on faces where the board edge is close to the wall.
+  overmold size so ≤ 1 mm of wall remains (template `overmold` field). A connector
+  also needs its wall close to the board edge: the template puts the board against
+  every wall that carries a connector and moves the columns to the other sides. Give
+  each cutout by board edge and set `pcb_rot` to choose which wall that edge meets.
 - Cutouts never cross the lid split unless deliberately split between both halves.
 - Headers with Dupont wires plugged from above need ~15–20 mm in `comp_top`. Wiring
   that leaves the box, a second module, a battery or a switched load: the electronics
@@ -188,7 +205,8 @@ air pockets; serviceable without desoldering.
 ### RF
 
 No conductive material, insert, column or rib inside the profile's antenna keepout
-radius. Antenna over open plastic near an edge, minimum plastic in front of it.
+radius. Antenna over open plastic near an edge, minimum plastic in front of it; set
+`antenna` and the template stretches the column zones until the inserts clear it.
 Filled materials attenuate 2.4 GHz — say so and recommend an RSSI check.
 
 ### Electrical and safety
@@ -218,9 +236,9 @@ reject a boss with no gusset.
   flank receives half. Pass `2 * tol` when `tol` is the per-side slip, and a
   depth of tongue height plus one slip so the tongue does not bottom. The
   plastic left on both sides of that groove must still be at least one
-  extrusion: `wall >= lip_w + 2 * ew + 2 * tol`. If it is not, narrow the tongue
-  toward 1.0 mm or add a perimeter. Do not delete the clearance to save the land.
-  On a thin wall, hang the lip inside the cavity instead of centering it.
+  extrusion: `rim >= lip_w + 2 * ew + 2 * tol`. On a thinner wall the template
+  thickens the rim inward under the tongue (`rim_band`, 45° underside). Do not
+  delete the clearance to save the land.
 - Tongue about 1.0–1.2 mm wide and 2 mm tall, with a short 45° lead-in so the
   lid finds the opening before the screws do. Relieve the groove's inside
   corners; FDM rounds them and a sharp tongue corner binds.
@@ -229,8 +247,10 @@ reject a boss with no gusset.
 - Assembled, `intersection()` of body and lid is empty (`part = "check"`). A
   section shows the gap, and the lid cannot shift in XY without the register
   stopping it.
-- Chamfer a mating edge that prints on the bed. The first layer spreads and
-  closes the gap.
+- A mating face that prints on the bed spreads on its first layer and closes
+  the gap. Chamfer that edge when the land allows it; the template's lid prints
+  groove side down with a one-extrusion land, so it relies on elephant-foot
+  compensation instead, and the build notes must say to keep it on.
 
 ### Assembly and serviceability
 
@@ -239,8 +259,12 @@ reject a boss with no gusset.
   elastic feature.
 - One `tol` drives the fit table (press / slip / loose), calibrated once per
   printer–material pair.
-- Screws from the least visible face; hide the parting seam on a chamfer.
-- Rubber-foot recesses (Ø 8 × 1 mm) or keyholes (Ø 7 / 3.5 mm) for wall mounting.
+- Screws from the least visible face (the template drives them down through the
+  lid; the closures reference covers screwing up through the floor). Hide the
+  parting seam on a chamfer (template `seam_ch`).
+- Rubber-foot recesses (Ø 8 × 1 mm). For a wall, ears (`wall_mount = "ears"`,
+  nothing inside can collide with them) or keyholes (Ø 7 / 3.5 mm, hidden, need a
+  board deep enough to leave floor between the standoffs).
 - Strain relief on every cable exit: a zip-tie anchor 10–20 mm inside the wall, so a
   pull never reaches a solder joint. `tie_anchor()` and `cable_exit_cut()` are in the
   library; the template places one of each per `cable_exits` entry.
@@ -257,8 +281,9 @@ and fail in assembly (fit, minimums, envelope, keepouts, cutouts vs split).
 State the verdict on each: (a) no part needs supports; (b) no overhang beyond 45°;
 (c) every screw has a gusseted, filleted column that avoids the board; (d) every
 sensor has a vented, thermally decoupled chamber; (e) antenna keepout respected;
-(f) all cutouts referenced to the PCB origin, and plugs can reach their sockets;
-(g) `assert()` statements present; (h) export commands match the `part` values;
+(f) all cutouts referenced to the PCB origin through their board edge, and plugs can
+reach their sockets;
+(g) `assert()` statements present and passing; (h) export commands match the `part` values;
 (i) every part fits the profile's build envelope; (j) context rules applied
 (heat/vents, sealing, batteries, children/pets) or not applicable; (k) body and
 lid locate each other with the slip clearance on each mating face. A rim-to-rim
@@ -282,8 +307,7 @@ For a new design, deliver in this order:
    `openscad -D 'part="base"' -o base.stl <product>_enclosure.scad`
 4. **BUILD NOTES** — per part: orientation and why, brim yes/no, bounding box vs
    envelope; layer height, material, supports (must read "none"), profile operator
-   notes; fastener BOM with quantities and lengths, including one zip tie per
-   `tie_anchor`.
+   notes; fastener BOM with quantities and lengths (the template echoes one).
 5. **WIRING** — when the brief has more than one module, a battery, a switched load
    or a cable leaving the box: power budget, pin map, wiring table, protection, harness
    notes, as in `electronics-and-wiring.md` §9. For a wiring question with no box,
@@ -302,9 +326,10 @@ The user will iterate ("move the USB 3 mm left", "thinner", "add a button"):
 2. **Keep parameter names stable** so Customizer presets and `-D` overrides keep
    working. Add parameters; don't rename them.
 3. **Change the minimum** — prefer a parameter or list entry over restructuring.
-4. Reply with a short **CHANGES** list naming the parameters touched, any new
+4. Re-run the static check and re-render what changed before replying.
+5. Reply with a short **CHANGES** list naming the parameters touched, any new
    assumption, and the self-check items affected — not the full contract again.
-5. If a request conflicts with a rule (1 mm walls, snap-fits in PETG-CF), do it if it
+6. If a request conflicts with a rule (1 mm walls, snap-fits in PETG-CF), do it if it
    is merely suboptimal and name the consequence; push back only when the part would
    fail to print or fail its job.
 

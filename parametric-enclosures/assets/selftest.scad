@@ -7,6 +7,7 @@
 
 use <enclosure_lib.scad>
 
+EPS = 0.01;
 $fa = 1;
 $fs = 0.4;
 P = 40;  // grid pitch
@@ -23,7 +24,7 @@ cell(5, 0) linear_extrude(2) rrect_c([20, 10], 2);
 cell(6, 0) linear_extrude(2) rrect([20, 10], 0);
 
 // Row 1 — fillets and patterns
-cell(0, 1) union() { cube([2, 20, 12]); translate([2, 0, 0]) fillet_lin(1.5, 20); }
+cell(0, 1) union() { cube([20, 20, 2]); cube([2, 20, 12]); translate([2, 0, 2]) fillet_lin(1.5, 20); }
 cell(1, 1) union() { cylinder(d = 10, h = 12); fillet_ring(1.5, 5); }
 cell(2, 1) linear_extrude(2) slot_pattern_2d([30, 20], 2, 4.5);
 cell(3, 1) linear_extrude(2) hex_pattern_2d([30, 30], 4, 1.6);
@@ -63,6 +64,15 @@ cell(4, 4) difference() { translate([-14, -6, 0]) cube([28, 12, 3]);
                           translate([0, 0, 3]) label_cut("TEST v2", 4, 0.4); }
 cell(5, 4) label("EMB", 6, 0.6);
 cell(6, 4) snap_hook(12, 1.6, 6, 0.8, 2);
+cell(7, 4) {
+    o = [30, 24, 12]; w = 1.26;
+    difference() {
+        rbox(o, 3);
+        translate([w, w, 1.2]) rbox([o[0] - 2 * w, o[1] - 2 * w, o[2]], 3 - w);
+    }
+    translate([0, 0, o[2]]) rim_band([o[0], o[1]], 3, w, 2.34, 1.5);
+    translate([0, 0, o[2] - EPS]) lip_tongue([o[0], o[1]], 3, 0.67, 1.0, 2 + EPS);
+}
 
 // Row 5 — face frames on a hollow box (all six faces)
 cell(0, 5) {
