@@ -8,6 +8,7 @@ These skills are published to [agentskills](https://github.com/kayaman/agentskil
 
 | Skill | Description |
 | ----- | ----------- |
+| [3d-printing](3d-printing/SKILL.md) | Designs, reviews, and prepares parts for FDM, resin, and SLS printing: process and material choice, orientation, walls, fits, fasteners, mesh checks, and a print plan. Ships a fit-test coupon that calibrates clearances and heat-set insert bores. |
 | [aws-genai-lens](aws-genai-lens/SKILL.md) | Enforces AWS Well-Architected Generative AI Lens best practices for foundation model workloads on Amazon Bedrock and SageMaker AI. |
 | [aws-well-architected](aws-well-architected/SKILL.md) | Enforces AWS Well-Architected Framework best practices across all six pillars (Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, Sustainability). |
 | [aws-well-architected-framework](aws-well-architected-framework/SKILL.md) | Comprehensive AWS Well-Architected Framework knowledge covering all six pillars, design principles, review process, and the Well-Architected Tool. |
