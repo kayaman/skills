@@ -16,7 +16,8 @@
 //     The smallest bore that takes the insert flush, without a cracked boss or a spinning
 //     insert, is the bore for that insert.
 
-part = "all"; // plate | pin | all
+part = "plate"; // plate | pin | all
+// Export plate and pin as separate STLs. part="all" is two solids and fails check_stl.py.
 
 hole_comp = 0.15;
 pin_d = 6.0;

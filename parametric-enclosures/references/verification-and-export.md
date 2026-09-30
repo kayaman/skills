@@ -127,7 +127,8 @@ This expands the SKILL.md self-check into things to trace in the code:
 ## 7. Slicer hand-off notes (put in the reply)
 
 Per part: orientation, "no supports", layer height (0.2 mm; 0.12–0.16 for fine
-text), perimeters (3–4; 4+ around inserts), infill (15–25 % gyroid; 40 %+ for
-bosses/snap roots via modifier), brim for ABS/ASA, material temperatures from
+text), wall loops (6 on house PETG-CF; the insert boss is solid perimeters, not
+dense infill), sparse infill 15–20% gyroid (cubic if the machine shakes; not grid
+or lightning), brim for ABS/ASA, material temperatures from
 the spool. Mention any pause-at-height for captured magnets/nuts with the Z
 value.

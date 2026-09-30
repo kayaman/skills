@@ -150,8 +150,11 @@ a layer line at its root.
   the column).
 - Fillet gusset roots and the column-to-floor junction.
 - Boss OD = hole Ø + 2 × wall, and at least the profile's minimum.
-- Heat-set inserts: check the insert datasheet. Typical M3 (4.6 × 5.7 mm): blind bore
-  Ø 4.0–4.2, depth = insert length + 1.0 mm relief, 0.5–1.0 mm lead-in chamfer.
+- Heat-set inserts: the datasheet hole is the hole after printing. CAD is larger
+  by the printed-hole shrink, often 0.2–0.3 mm, so a typical short M3 (4.6 × 5.7 mm)
+  starts at Ø 4.0–4.2. Straight bore. Depth = insert length + 1.0 mm relief.
+  No mouth chamfer; the top knurl needs that plastic. A lead-in of at most 0.4 mm
+  only if the insert will not start.
 - Self-tapping: pilot ≈ 0.8 × major Ø (2.4 mm for M3), engagement ≥ 2 × Ø, boss wall ≥ 2 mm.
 - Mating part: clearance hole (3.4 mm for M3, + hole_comp) plus counterbore/countersink.
 - ≥ 4 columns up to a 100 mm span, one more per additional ~70 mm, plus one beside

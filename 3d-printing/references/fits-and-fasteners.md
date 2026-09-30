@@ -31,11 +31,11 @@ Both parts share one set of dimensions. A screw hole that is merely near its bos
 
 ## Heat-set inserts
 
-Use inserts for anything that will be unscrewed more than a few times. The hole diameter is the insert vendor's number, not a universal M3 number. Printed holes come out small, so confirm on a coupon in the same material and orientation.
+Use inserts for anything that will be unscrewed more than a few times. The hole diameter is that insert's datasheet number, not a universal M3 number. The datasheet is the hole you want after printing. Printed holes come out small, so the CAD diameter is larger. CNC Kitchen's insert tests put that offset at about 0.2–0.3 mm for a small insert: their M3 datasheet hole of 4.0 mm wanted about 4.2 mm in CAD, and pull-out there was still about 90% of the tightest hole. Past that the hold falls off quickly. Confirm on a coupon in the same material, walls, and orientation. The hole that lets the pilot pre-seat, and leaves no burr under the insert, is the one to keep.
 
-Starting points for common short brass inserts, when the datasheet is not in front of you:
+Starting CAD diameters for common short brass inserts, when the datasheet is not in front of you. These already include a typical printed-hole shrink. A coupon replaces the column.
 
-| Thread | Typical hole Ø | Blind depth | Min plastic around the bore |
+| Thread | CAD hole Ø | Blind depth | Min plastic around the bore |
 |---|---|---|---|
 | M2 | 3.1–3.2 | length + 1 mm | 2.0 mm |
 | M2.5 | 3.6–3.8 | length + 1 mm | 2.0 mm |
@@ -43,11 +43,11 @@ Starting points for common short brass inserts, when the datasheet is not in fro
 | M4 | 5.4–5.6 | length + 1 mm | 2.5 mm |
 | M5 | 6.4–6.8 | length + 1 mm | 2.8 mm |
 
-The extra millimetre of depth is where displaced plastic goes. An insert that bottoms out splits the boss. A short lead-in, about 0.5 mm, helps the insert start straight; a big chamfer removes the plastic that should grip the top knurl, so keep it small.
+The bore is straight. A tapered hole grips on a ring and splits above it. The extra millimetre of depth is where displaced plastic goes. An insert that bottoms out splits the boss. A through hole is only as long as the insert. Leave the mouth square. A chamfer there removes the plastic the top knurl should bite. If the insert will not start, a lead-in no bigger than about 0.4 mm.
 
-Install with a soldering iron near the plastic's print temperature, pressing straight, not twisting. Stop flush. A spinning insert means the hole was large or the knurl never bit. A cracked boss means the wall was thin, the hole was small, or the plastic was brittle.
+Install with a soldering iron 10–20 °C above the spool's nozzle temperature, about 245 °C for unfilled PETG. Melt the insert about 90% of the way, then press it flush with a flat tool and hold it until the plastic sets. Inserts creep back out while the plastic is soft. Press straight. Do not twist. An M5 insert needs a thick tip or the brass never gets hot. A spinning insert means the hole was large or the knurl never bit. A burr under the insert, or a screw that binds at the bottom, means the hole was small. A cracked boss means the wall was thin, the hole was small, or the plastic was brittle. On PETG-CF, take the easy-install end of the hole range. A tight hole in a brittle boss splits before it holds better.
 
-Perimeters around the boss do the holding, not infill. Four to six perimeters locally. Tie the boss into a wall or a floor with a filleted gusset. A boss stuck on the side of a thin wall is a lever with a layer line at the root.
+Perimeters around the boss do the holding, not infill. The wall of the boss is solid rings: four to six perimeters, with no infill gap inside that wall. Tie the boss into a wall or a floor with a filleted gusset. A boss stuck on the side of a thin wall is a lever with a layer line at the root.
 
 Put the screw axis along Z when you can, so the pull is trying to yank the insert out of a column of perimeters rather than peeling a flange.
 

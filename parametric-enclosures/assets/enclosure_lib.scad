@@ -186,10 +186,11 @@ module fillet_ring(r, R) {
 // gussets     rib count; rib i points at angle0 + i*spread (spread default 360/gussets)
 // gusset_h/l  rib height at the column / reach from the column wall (default 0.7h, = h: 45°)
 // gusset_t    rib thickness (use the wall thickness)
-// mouth       lead-in chamfer at the bore mouth
+// mouth       lead-in at the bore mouth. 0 on a heat-set insert: a chamfer
+//             removes the plastic the top knurl should bite.
 module boss(h, od, bore = 0, bore_depth = 0,
             gussets = 3, gusset_h = 0, gusset_l = 0, gusset_t = 2.52,
-            angle0 = 0, spread = 0, fillet_r = 1.0, mouth = 1.0) {
+            angle0 = 0, spread = 0, fillet_r = 1.0, mouth = 0) {
 
     gh = (gusset_h > 0) ? gusset_h : 0.7 * h;
     gl = (gusset_l > 0) ? gusset_l : gh;
@@ -236,11 +237,11 @@ module boss(h, od, bore = 0, bore_depth = 0,
 // bottoms out and splits the column.
 module insert_boss(h, od = 9.5, bore = 4.1, insert_len = 5.7,
                    gussets = 3, gusset_h = 0, gusset_l = 0, gusset_t = 2.52,
-                   angle0 = 0, spread = 0, fillet_r = 1.0) {
+                   angle0 = 0, spread = 0, fillet_r = 1.0, mouth = 0) {
     boss(h = h, od = od, bore = bore, bore_depth = insert_len + 1.0,
          gussets = gussets, gusset_h = gusset_h, gusset_l = gusset_l,
          gusset_t = gusset_t, angle0 = angle0, spread = spread,
-         fillet_r = fillet_r, mouth = 1.0);
+         fillet_r = fillet_r, mouth = mouth);
 }
 
 // PCB standoff: same family, light duty.

@@ -16,7 +16,9 @@ Extrusion width `ew` is about 0.42–0.45 mm on a 0.4 mm nozzle. Design widths a
 | Free-standing pin | Ø 2 mm | Ø 3 mm | Thin pins snap at the layer line where they meet the body |
 | Embossed or debossed text | 0.4 mm deep, ≥ 3 mm tall, stroke ≥ 2 lines | 5 mm tall on a side wall | Shallow detail disappears into layer lines |
 
-A wall thinner than one `ew` will not print. Detect-thin-walls in the slicer is a rescue, not a design.
+A wall thinner than one `ew` will not print. Detect thin wall in the slicer is a rescue, not a design.
+
+A feature that only touches the body is not part of the body. Overlap bosses, ribs, pins, and embossed letters into the solid, and keep that neck at least two extrusion widths. The mesh rules in `mesh-and-export.md` are what keep the STL a single closed solid.
 
 ## Overhangs, bridges, holes
 
@@ -42,12 +44,15 @@ Each layer is a weld, and the weld is the weak plane. Filled filaments are often
 - Tall walls under about 1.6 mm and over about 60 mm wobble as they print. Thicken them or rib them.
 - Sharp corners on a large base lift as the plastic shrinks. Round them (R ≥ 3 mm) and use a brim on warp-prone materials.
 
-## Edges
+## Corners
 
-- Bed contact: chamfer 0.4–0.8 mm × 45°. Never a fillet on the bed edge.
-- Outer vertical corners: round them. They warp less and crack less.
-- Internal corners: fillet, at least R 0.5 mm in unfilled plastics and R 1 mm in filled or brittle ones.
-- Top edges: chamfer or fillet, both print.
+Which edge treatment to use depends on the edge's direction, not on taste. Prusa's modeling guide and ordinary FDM practice agree on the split.
+
+- **Parallel to the bed: chamfer.** That includes the bed contact, the top lip, and the underside of any ledge. A fillet on those edges opens as a near-horizontal overhang and the curve shows every layer step. Bed contact is 0.4–0.8 mm × 45°. A downward-facing fillet is the same defect as a fillet on the bed.
+- **Vertical: fillet.** The nozzle traces this edge. A sharp corner stops the head and leaves a ring. The radius has to be large enough to be a curve, about two extrusion widths (≈ 1 mm). Smaller than that prints as a blob. On a large base that wants to warp, use R ≥ 3 mm.
+- **A corner that carries a bend: fillet, and keep the wall thickness.** Inside radius at least R 0.5 mm in unfilled plastic and R 1 mm in filled or brittle plastic, and at least half the local wall thickness when that corner is the hinge of the load. The outside radius shares the same center, so it is the inside radius plus the wall thickness. A fillet that thins the wall moves the crack to the thin spot. Hubs' thin-wall guide uses the same idea: round the inside corner or it cracks.
+
+A chamfer on two parts that slide together is also the lead-in. It does not replace the clearance.
 
 ## First layer and solid mass
 
