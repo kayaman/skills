@@ -13,7 +13,7 @@ Numbers in the references are starting points from printer vendors (Prusa, Bambu
 
 This is the process skill: which machine, which material, which way up, what the slicer must do, and whether the shape can survive that.
 
-Electronics enclosures, cases, housings, and "caixa" jobs belong to the parametric-enclosures skill. That skill already has the house printer profile, screw columns, PCB clearances, vents, and the OpenSCAD library. Do not invent a second enclosure. If that skill is not available, say so and answer only the print-process part of the question.
+Electronics enclosures, cases, housings, and "caixa" jobs belong to the parametric-enclosures skill. That skill already has the house printer profile, screw columns, PCB clearances, vents, the OpenSCAD library, and the wiring and power rules. Do not invent a second enclosure. If that skill is not available, say so and answer only the print-process part of the question.
 
 Match the length of the reply to the question. A material comparison does not need a print plan. The full contract below is for a part you are designing or clearing to print.
 
