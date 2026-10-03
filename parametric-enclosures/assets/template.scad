@@ -49,8 +49,13 @@ pcb_y       = 30;                                     // ASSUMPTION
 pcb_t       = 1.6;
 pcb_rot     = 0;      // [0, 90, 180, 270] CCW in top view: picks the face each board edge meets
 pcb_clear   = 0.5;    // per side (>= tol; clones vary ±0.2)
-comp_top    = 8;      // tallest component, top side  // ASSUMPTION
-comp_bot    = 2;      // tallest component, bottom side
+comp_top    = 8;      // tallest rigid component above PCB top, excluding wiring // ASSUMPTION
+comp_bot    = 2;      // tallest rigid component below PCB bottom, excluding header pins
+wiring_top_h = 28;    // seated top-entry Dupont + relaxed bend above PCB top; 0 if none // ASSUMPTION
+pin_tail_h   = 4;     // soldered header protrusion below PCB; 0 if none          // ASSUMPTION
+// Extra lateral envelope beyond each board edge [x0, x1, y0, y1], before pcb_rot.
+// Use for one-sided/right-angle headers and Dupont housings; values may be asymmetric.
+header_edge_clear = [0, 0, 0, 0]; // e.g. [0, 12, 0, 0] for wiring only on x1
 standoff_min = 5;     // raised automatically for comp_bot and keyhole heads
 standoff_od = 6;
 standoff_bore = 2.4;  // thread-forming pilot: 2.4 M3, 2.1 M2.5, 1.6 M2
@@ -192,6 +197,11 @@ function edge_normal(e) =
 function vec_face(n) =
     n == [0, -1] ? "front" : n == [0, 1] ? "back" : n == [-1, 0] ? "left" : "right";
 function cut_face(c) = vec_face(rot_vec(edge_normal(c[0])));
+function header_edge_extra(e) =
+    e == "x0" ? header_edge_clear[0] : e == "x1" ? header_edge_clear[1]
+  : e == "y0" ? header_edge_clear[2] : header_edge_clear[3];
+function header_face_extra(f) =
+    max0([for (e = ["x0", "x1", "y0", "y1"]) if (cut_face([e]) == f) header_edge_extra(e)]);
 function cut_overhang(c) = len(c) > 8 ? c[8] : 0;
 function cut_grow(c) = cutout_clear + (c[6] ? user_port_extra : 0);
 function cut_round(c) = c[3] == c[4] && c[5] >= c[3] / 2;
@@ -221,14 +231,20 @@ oh_l = face_oh("left");
 oh_r = face_oh("right");
 oh_f = face_oh("front");
 oh_b = face_oh("back");
+hc_l = header_face_extra("left");
+hc_r = header_face_extra("right");
+hc_f = header_face_extra("front");
+hc_b = header_face_extra("back");
 
-// heights: board stack, then the lid split above the tallest cutout
-standoff_h = max(standoff_min, comp_bot + 1,
-                 wall_mount == "keyholes" ? comp_bot + 3.5 : 0);
+// heights: assembled board stack, then the lid split above the tallest cutout
+bottom_stack_h = max(comp_bot, pin_tail_h);
+top_stack_h    = max(comp_top, wiring_top_h);
+standoff_h = max(standoff_min, bottom_stack_h + 1,
+                 wall_mount == "keyholes" ? bottom_stack_h + 3.5 : 0);
 pcb_z    = floor_t + standoff_h;
 pcb_top  = pcb_z + pcb_t;
 cut_top  = max0([for (c = cutouts) pcb_top + c[2] + cut_top_off(c) + (c[6] ? lead_in : 0)]);
-base_h   = max(pcb_top + comp_top + 2, cut_top + 1);  // mating face
+base_h   = max(pcb_top + top_stack_h + 2, cut_top + 1);  // 2 mm closure margin
 cav_z    = base_h - floor_t;
 lid_h    = ceil_t + lip_h + tol;
 
@@ -245,37 +261,40 @@ ant = len(antenna) == 2 ? rot_pt(antenna) : undef;   // footprint coordinates
 kk  = antenna_keepout * antenna_keepout;
 yf0      = max(zf0, bay_front);   // a wiring bay deepens the zone on its side
 yb0      = max(zb0, bay_back);
-outer_y0 = 2 * wall + yf0 + yb0 + 2 * pcb_clear + oh_f + oh_b + fp_y;
-ant_y0   = is_undef(ant) ? 0 : wall + yf0 + pcb_clear + oh_f + ant[1];
+outer_y0 = 2 * wall + yf0 + yb0 + 2 * pcb_clear + oh_f + oh_b + hc_f + hc_b + fp_y;
+ant_y0   = is_undef(ant) ? 0 : wall + yf0 + pcb_clear + oh_f + hc_f + ant[1];
 function x_need(yc, far) = let(dy = ant_y0 - yc)
-    sqrt(max(0, kk - dy * dy)) - pcb_clear - (far ? fp_x - ant[0] : ant[0]) + boss_od_actual / 2;
+    sqrt(max(0, kk - dy * dy)) - pcb_clear
+    - (far ? hc_r + fp_x - ant[0] : hc_l + ant[0]) + boss_od_actual / 2;
 left_zone  = is_undef(ant) || zl0 < boss_zone ? zl0
            : max(zl0, x_need(boss_inset, false), x_need(outer_y0 - boss_inset, false));
 right_zone = is_undef(ant) || zr0 < boss_zone ? zr0
            : max(zr0, x_need(boss_inset, true), x_need(outer_y0 - boss_inset, true));
-cav_x   = left_zone + right_zone + 2 * pcb_clear + oh_l + oh_r + fp_x;
+cav_x   = left_zone + right_zone + 2 * pcb_clear + oh_l + oh_r + hc_l + hc_r + fp_x;
 outer_x = cav_x + 2 * wall;
 
-ant_x  = is_undef(ant) ? 0 : wall + left_zone + pcb_clear + oh_l + ant[0];
+ant_x  = is_undef(ant) ? 0 : wall + left_zone + pcb_clear + oh_l + hc_l + ant[0];
 y_only = [for (k = [[boss_inset, left_zone], [outer_x - boss_inset, right_zone]])
           if (k[1] < boss_zone) k[0]];
 function y_need(xc, far) = let(dx = ant_x - xc)
-    sqrt(max(0, kk - dx * dx)) - pcb_clear - (far ? fp_y - ant[1] : ant[1]) + boss_od_actual / 2;
+    sqrt(max(0, kk - dx * dx)) - pcb_clear
+    - (far ? hc_b + fp_y - ant[1] : hc_f + ant[1]) + boss_od_actual / 2;
 front_zone = is_undef(ant) || zf0 < boss_zone ? zf0
            : max(zf0, max0([for (xc = y_only) y_need(xc, false)]));
 back_zone  = is_undef(ant) || zb0 < boss_zone ? zb0
            : max(zb0, max0([for (xc = y_only) y_need(xc, true)]));
 gap_f   = max(front_zone, bay_front);
 gap_b   = max(back_zone, bay_back);
-cav_y   = gap_f + gap_b + 2 * pcb_clear + oh_f + oh_b + fp_y;
+cav_y   = gap_f + gap_b + 2 * pcb_clear + oh_f + oh_b + hc_f + hc_b + fp_y;
 outer_y = cav_y + 2 * wall;
 
 outer   = [outer_x, outer_y, base_h];
 ears_on = wall_mount == "ears";
 span_x  = outer_x + (ears_on ? 2 * ear_len : 0);
 
-pcb_origin = [wall + left_zone + pcb_clear + oh_l, wall + gap_f + pcb_clear + oh_f, pcb_z];
-divider_x0 = pcb_origin[0] + fp_x + pcb_clear;
+pcb_origin = [wall + left_zone + pcb_clear + oh_l + hc_l,
+              wall + gap_f + pcb_clear + oh_f + hc_f, pcb_z];
+divider_x0 = pcb_origin[0] + fp_x + pcb_clear + hc_r;
 chamber_x0 = divider_x0 + divider_t;
 
 function to_world(p) = [pcb_origin[0], pcb_origin[1]] + rot_pt(p);
@@ -321,10 +340,10 @@ stop_h   = pcb_top + 1.5 - floor_t;
 fp_cx    = pcb_origin[0] + fp_x / 2;
 fp_cy    = pcb_origin[1] + fp_y / 2;
 stops    = concat(   // [x, y, size x, size y]
-    left_zone > 0                     ? [[pcb_origin[0] - pcb_clear - 2, fp_cy - 2, 2, 4]] : [],
-    right_zone > 0 && !sensor_chamber ? [[divider_x0, fp_cy - 2, 2, 4]] : [],
-    gap_f > 0                         ? [[fp_cx - 2, pcb_origin[1] - pcb_clear - 2, 4, 2]] : [],
-    gap_b > 0                         ? [[fp_cx - 2, pcb_origin[1] + fp_y + pcb_clear, 4, 2]] : []);
+    left_zone > 0                     ? [[pcb_origin[0] - pcb_clear - hc_l - 2, fp_cy - 2, 2, 4]] : [],
+    right_zone > 0 && !sensor_chamber ? [[pcb_origin[0] + fp_x + pcb_clear + hc_r, fp_cy - 2, 2, 4]] : [],
+    gap_f > 0                         ? [[fp_cx - 2, pcb_origin[1] - pcb_clear - hc_f - 2, 4, 2]] : [],
+    gap_b > 0                         ? [[fp_cx - 2, pcb_origin[1] + fp_y + pcb_clear + hc_b, 4, 2]] : []);
 
 // keyholes: on the board centreline, slot toward the back face (+Y), so the
 // front face and its cables point down on the wall

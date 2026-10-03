@@ -104,7 +104,11 @@ Ask for nothing the conversation already answers. Defaults in brackets.
 
 **PCB** — outline X × Y × thickness [1.6 mm], mounting hole Ø and coordinates from
 the board's bottom-left corner, tallest component on top and bottom, keepouts
-(antenna, HV, moving parts). Known dev boards: use the footprint table.
+(antenna, HV, moving parts). Known dev boards: use the footprint table. Measure the
+board **as assembled**, including soldered header pins above and below the PCB.
+Record which board edge each header occupies and which side of the PCB carries the
+plastic spacer, solder joint, exposed pin and Dupont housing. Never assume the two
+header rows or four board edges are symmetric.
 
 **Interfaces** — connectors (board edge, position along it, height above the board,
 overhang past the edge), display, buttons, LEDs, switches, cable exits.
@@ -114,8 +118,9 @@ light path).
 
 **Power and wiring** — supply (USB, adapter, battery, mains), every module and load
 with its peak current, how they connect, and each cable that leaves the box [USB 5 V,
-one board, no cables out]. The power budget sets `heat_w`, the supply and the wiring
-bay.
+one board, no cables out]. Record whether devkits have soldered pins and whether
+Dupont leads enter from above or from the side. The power budget sets `heat_w`, the
+supply and the wiring bay.
 
 **Thermal** — heat sources and rough dissipation, from the power budget [assume
 < 0.3 W if nothing is said].
@@ -198,7 +203,22 @@ a layer line at its root.
 - Lateral clearance ≥ the profile's slip `tol` per side (template default 0.5 mm;
   clones vary), located by standoffs, or by rails and stops when the board has no
   holes (template `mount_holes = []`). Never press-fit a PCB.
-- ≥ 2 mm above the tallest top-side component; standoffs ≥ 4 mm for solder tails.
+- ≥ 2 mm above the tallest rigid top-side component. For a devkit with soldered
+  headers and top-entry Dupont leads, use the **assembled wiring envelope**, not the
+  bare-board component height: default `wiring_top_h = 28 mm` above the PCB top when
+  no physical measurement exists, plus the normal 2 mm closure margin. Treat
+  22 mm as a tight minimum only when the leads are pre-bent and restrained.
+- Soldered pins below the PCB are part of the bottom stack, separately from
+  `comp_bot`: default `pin_tail_h = 4 mm` when unmeasured. Set standoff height to
+  at least pin-tail height + 1 mm; 5 mm is the normal minimum for pinned devkits.
+  Pins and solder joints must not touch the floor, rails, keyhole heads or cable ties.
+- Header placement is per board edge, before `pcb_rot`: `x0`, `x1`, `y0`, `y1`.
+  One-sided soldering and right-angle headers are asymmetric geometry. Set
+  `header_edge_clear = [x0, x1, y0, y1]` to the connector/harness projection beyond
+  each edge; zero on unused edges. Expand only the affected face, and keep its
+  envelope clear of rails, stops, columns, vents and the lid register. Do not centre
+  the board to hide an asymmetric header unless that still preserves every port and
+  antenna constraint.
 - Cutouts +0.5 mm all round; +0.75 mm and a 1 mm lead-in chamfer on user-facing ports.
 - **Plugs must reach their sockets.** A plug's overmold is wider than the socket; if
   the socket sits more than ~1.5 mm behind the outer surface, recess the outer face to
@@ -207,11 +227,14 @@ a layer line at its root.
   every wall that carries a connector and moves the columns to the other sides. Give
   each cutout by board edge and set `pcb_rot` to choose which wall that edge meets.
 - Cutouts never cross the lid split unless deliberately split between both halves.
-- Headers with Dupont wires plugged from above need ~15–20 mm in `comp_top`. Wiring
-  that leaves the box, a second module, a battery or a switched load: the electronics
-  and wiring reference. Give those runs a wiring bay (`bay_front` / `bay_back`) on the
-  long side without connector cutouts, a zip-tie anchor at each exit, and a hole
-  chamfered so the jacket cannot chafe. Keep a service loop to every part on the lid.
+- Headers with Dupont wires plugged from above use `wiring_top_h`, independently of
+  `comp_top`; do not hide connector and bend allowance inside a guessed component
+  height. Top-entry Dupont defaults to 28 mm above the PCB top, while a measured,
+  restrained side-entry harness may use less. Wiring that leaves the box, a second
+  module, a battery or a switched load: the electronics and wiring reference. Give
+  those runs a wiring bay (`bay_front` / `bay_back`) on the long side without
+  connector cutouts, a zip-tie anchor at each exit, and a hole chamfered so the
+  jacket cannot chafe. Keep a service loop to every part on the lid.
 
 ### Ventilation
 
@@ -323,6 +346,13 @@ plate fails (k) even when the two solids do not intersect. (l) when the brief ha
 more than one module, a battery, a switched load or a cable out: a power budget,
 a pin map, a wiring table, a fuse at the source, and a keyed/latched or screwed
 power connection; each cable exit has a zip-tie anchor and an anti-chafe hole.
+(m) the vertical stack uses the assembled board: bottom soldered-pin envelope,
+standoffs, PCB, top header/Dupont envelope, bend radius, and 2 mm closure margin;
+with the actual harness installed, a section/check view shows no contact with the
+lid, seam, columns or floor. A bare-board height check fails (m). (n) every soldered
+header is assigned to its actual PCB face and edge; asymmetric top/bottom and
+`x0`/`x1`/`y0`/`y1` envelopes are preserved through `pcb_rot`, and unused sides do
+not receive invented clearance. A single symmetric header allowance fails (n).
 
 If a check fails, fix the design before replying. Don't ship a caveat where geometry
 was the answer. If the native renderer or slicer was unavailable, identify the checks that remain unverified. Never infer a mesh or physical-fit pass from static source checks.

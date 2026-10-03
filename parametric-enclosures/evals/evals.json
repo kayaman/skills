@@ -49,6 +49,13 @@
       "prompt": "In this existing FreeCAD enclosure project, resize the heat-set insert boss to fit a different insert and add a vent pattern on the free side wall. Keep it parametric and re-export STEP and STL.",
       "expected_output": "Preserves the existing .FCStd document and object names; edits the PARAMS dict rather than hard-coding a new literal; derives boss OD from the new bore plus twice the required radial wall, keeps the gusseted/filleted boss shape (not a bare cylinder); uses execute_code for the document edit (not execute_code_async, which must not touch the document directly); checks Shape.isValid()/isNull()/Volume on the rebuilt boss and the interference volume between base and lid after recompute; exports STEP then STL to reported paths; reports only checks actually run via the MCP connection and flags anything unverified; does not claim a print-fit test.",
       "files": []
+    },
+    {
+      "id": 8,
+      "name": "pinned-devkit-dupont-height",
+      "prompt": "Make a case for my ESP32 DevKit. I solder straight header pins only on the right-hand long edge of the board and connect the sensors with female Dupont jumpers from above. My last case was too low and would not close.",
+      "expected_output": "Uses assembled rather than bare-board height. With no measurements, defaults pin_tail_h to 4mm below the PCB and wiring_top_h to 28mm above the PCB top, standoff at least bottom stack +1mm, and 2mm closure margin above the relaxed Dupont wire bend. Assigns the header to the actual board edge and uses an asymmetric header_edge_clear value only on that edge after pcb_rot; it does not mirror clearance onto the unused side. Keeps housings and wires out of columns, rails and the lid register, and requires a closed section or physical dry-fit. Does not reuse the old 15-20mm allowance or propose scaling the STL in Z.",
+      "files": []
     }
   ]
 }
