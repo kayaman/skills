@@ -24,7 +24,8 @@ OpenSCAD skips an unknown module with a warning and the feature silently vanishe
 the STL. Not a substitute for rendering.
 
 After any change to `enclosure_lib.scad`, render `assets/selftest.scad`
-(`openscad -o selftest.stl selftest.scad`) before touching product files.
+(`openscad -o selftest.stl selftest.scad`) before touching product files. After any
+change to `scripts/check_stl.py`, run `scripts/test_check_stl.py`.
 
 ## 2. CLI rendering and export
 
@@ -93,7 +94,8 @@ This expands the SKILL.md self-check into things to trace in the code:
    in the Process group match `manufacturing-profiles.md`.
 2. Every `difference()` cutter overshoots by EPS (library `*_cut` modules do).
 3. Board fits: cavity ≥ board + 2 × pcb_clear (+ connector overhang); stack height
-   covers comp_top + 2 mm; standoffs ≥ 4 mm and taller than comp_bot.
+   covers max(comp_top, wiring_top_h) + 2 mm; standoffs ≥ bottom stack (pin tails,
+   comp_bot) + 1 mm, and ≥ 5 mm for pinned devkits.
 4. Each cutout traces to board coordinates through its edge, meets a wall with no
    column zone, doesn't cross the lid split, and its plug can reach the socket
    (overmold recess set if needed; roof on openings wider than the bridge limit).

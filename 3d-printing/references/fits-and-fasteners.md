@@ -1,35 +1,112 @@
-# Fits and fasteners
+# Fits, closures and fasteners
 
-Clearances are per side unless a row says diameter. The house profile's `tol` (press 0.15 / slip 0.25 / loose 0.40 mm) replaces the generic table when that profile is in force. One coupon in `assets/fit-coupon.scad` sets `tol` for the printer-material pair; after that, leave it alone.
+Clearances are per side unless a row says diameter. The house profile's `tol`
+(press 0.15 / slip 0.25 / loose 0.40 mm) replaces the generic table when that profile
+is in force. One coupon in `assets/fit-coupon.scad` sets `tol` for the printer-material
+pair; after that, leave it alone.
 
-Vertical gaps only exist in whole layers. A 0.25 mm step at 0.2 mm layers becomes 0.2 or 0.4. Design Z clearances as a multiple of the layer height.
+Vertical gaps only exist in whole layers. A 0.25 mm step at 0.2 mm layers becomes 0.2
+or 0.4. Design Z clearances as a multiple of the layer height.
 
-## Fit table (generic 0.4 mm nozzle, per side)
+## Contents
+1. Fit table
+2. Choosing a closure
+3. Body and lid, screwed lids
+4. Heat-set inserts
+5. Self-tapping screws
+6. Nuts, nut traps, clearance holes
+7. Snap-fits
+8. Sliding lids
+9. Hinges
+10. Threads and twist-lock
+11. Magnets
+12. Split lines and alignment
+
+## 1. Fit table (generic 0.4 mm nozzle, per side)
 
 | Fit | Clearance | Use |
 |---|---|---|
 | Press | 0.00–0.10 mm | Pins and magnets that must stay. Too much interference splits a brittle boss |
-| Snug | 0.10–0.15 mm | Friction lids, light press of a cap |
-| Slip | 0.20–0.30 mm | Sliding lids, shafts, buttons in holes |
+| Snug | 0.10–0.15 mm | Friction lids, light press of a cap, light-pipe inserts |
+| Slip | 0.20–0.30 mm | Sliding lids, lid lips, shafts, buttons in holes |
 | Loose / print-in-place | 0.30–0.50 mm | Hinges and parts printed already assembled. Below about 0.3 mm a 0.4 mm nozzle tends to fuse them |
 
-Printed part against a bought part: leave the slip clearance, and a little more when the bought part's own tolerance is unknown. A lead-in chamfer on the pin or the hole mouth stops the edge catching on layer lines.
+Printed part against a bought part: leave the slip clearance, and a little more when
+the bought part's own tolerance is unknown (board-to-wall ≥ 0.5 mm; board outlines
+vary ±0.2 mm). A lead-in chamfer on the pin or the hole mouth stops the edge catching
+on layer lines.
 
-Elephant's foot eats a fit that includes the bed edge. Chamfer that edge or keep the mating diameter off the first layer.
+Elephant's foot eats a fit that includes the bed edge. Chamfer that edge or keep the
+mating diameter off the first layer.
 
-## Body and lid
+## 2. Choosing a closure
 
-A lid that is a copy of the body's outline, sitting on the rim, does not fit. Nothing locates it sideways. A zero gap in CAD becomes a bind or a rattle after printing, because the first layer spreads and inside corners come out round.
+| Closure | Opens | Sealing | Strength | Tolerance sensitivity | Pick when |
+|---|---|---|---|---|---|
+| Screwed lid + inserts, tongue-and-groove | often | good (with gasket) | high | low | **default**; anything that gets serviced |
+| Screwed lid, self-tap | rarely | good | medium | low | cheap, few openings |
+| Snap-fit | often | poor | low–medium | high | toys, quick access, no tools wanted |
+| Friction lid (lip only) | often | poor | low | high | dust covers, prototypes |
+| Sliding lid | often | poor | low | medium | battery doors, pencil-box style |
+| Hinged | often | poor–medium | medium | medium | display/keypad covers |
+| Threaded / bayonet | often | good (O-ring) | high | medium | round sensors, outdoor pods |
+| Magnetic | very often | poor | low | low | access panels |
 
-Give the pair a continuous register: a tongue in a groove, a lip that drops inside the opening, or a stepped lap. A butt joint is not a fit.
+Check the profile first: the default PETG-CF profile forbids elastic features
+(snap-fits, living hinges, flexing tabs) — use screws, tongue-and-groove and dowels.
+Children/pet products: battery compartments must need a tool (screw) — see
+`environment-and-safety.md`.
 
-Fix the male feature and open only the female, by the slip clearance on each face. On the house profile that is 0.25 mm per side. Published FDM practice for a lid that seats by hand is about 0.2–0.4 mm per side (tighter binds, past about 0.5 mm it rattles and the seam leaks light). Leave the depth one slip deeper than the tongue so it does not bottom out. Vertical gaps still have to land on a whole layer.
+## 3. Body and lid, screwed lids
 
-The wall has to afford that gap. Plastic left on both sides of the groove stays at least one extrusion wide: wall ≥ tongue width + two extrusion widths + two slip gaps. If it does not, narrow the tongue toward 1.0 mm or add a perimeter. Do not close the clearance to save the land. A short 45° lead-in lets the lid find the opening. Relieve the groove's inside corners so the tongue's corner has somewhere to go.
+A lid that is a copy of the body's outline, sitting on the rim, does not fit. Nothing
+locates it sideways. A zero gap in CAD becomes a bind or a rattle after printing,
+because the first layer spreads and inside corners come out round.
 
-Both parts share one set of dimensions. A screw hole that is merely near its boss misses. In the assembled position the two solids do not intersect, a section shows the gap, and the lid cannot shift sideways without the register stopping it. Chamfer whichever mating edge is printed on the bed.
+Give the pair a continuous register: a tongue in a groove, a lip that drops inside
+the opening, or a stepped lap. A butt joint is not a fit.
 
-## Heat-set inserts
+Fix the male feature and open only the female, by the slip clearance on each face. On
+the house profile that is 0.25 mm per side. Published FDM practice for a lid that
+seats by hand is about 0.2–0.4 mm per side (tighter binds, past about 0.5 mm it
+rattles and the seam leaks light). Leave the depth one slip deeper than the tongue so
+it does not bottom out. Vertical gaps still have to land on a whole layer.
+
+The wall has to afford that gap. Plastic left on both sides of the groove stays at
+least one extrusion wide: `rim >= lip_w + 2 * ew + 2 * tol`. If it does not, narrow
+the tongue toward 1.0 mm, add a perimeter, or thicken the rim inward under the tongue
+(the enclosure template's `rim_band`, with a 45° underside so it prints without
+support) — or hang a locating lip from the lid inside the cavity, notched around the
+columns. Do not close the clearance to save the land. A short 45° lead-in lets the
+lid find the opening. Relieve the groove's inside corners: FDM rounds them and a
+sharp tongue corner binds.
+
+Both parts share one set of dimensions. A screw hole that is merely near its boss
+misses. In the assembled position the two solids do not intersect, a section shows
+the gap, and the lid cannot shift sideways without the register stopping it. Chamfer
+whichever mating edge is printed on the bed.
+
+Screwed-lid specifics (the enclosure default):
+
+- Screws along Z through the lid into gusseted insert columns in the base corners.
+  Columns run floor to mating face and never pass through the board; the template
+  only places one where a column zone can hold it, so a board with connectors on two
+  adjacent walls gets three.
+- Tongue on the base rim, about 1.0–1.2 mm wide × 2 mm tall. Groove in the lid,
+  opened by the slip clearance on each face and one slip deeper than the tongue.
+  `lip_groove_cut` adds its `tol` argument to the width once, so pass `2 * tol` for a
+  full slip on each flank.
+- The lid prints mating face down, so the groove mouth is on the bed and its first
+  layer spreads into the groove. The land beside it is one extrusion, so there is no
+  room for a chamfer: keep the slicer's elephant-foot compensation on (Bambu Studio
+  default 0.15 mm) and say so in the build notes.
+- Spacing ≤ 60–80 mm between screws for a stiff lid; ≤ 50 mm for a gasket.
+- Counterbores (head recess) need `top_t ≥ head height + 1.2`; otherwise let pan
+  heads sit on top.
+- Screws in the bottom (through the base floor into the lid) hide the hardware;
+  bosses then hang from the lid.
+
+## 4. Heat-set inserts
 
 Thread size does not identify the insert body. Record vendor/part number,
 body and pilot diameters, length, recommended hole diameter/shape, and installation
@@ -56,56 +133,129 @@ Do not derive an iron temperature from nozzle temperature as a universal rule.
 Inspect seating, cracking, spinning and application-appropriate pull-out/torque
 before relying on the assembly. A visual fit test does not establish load capacity.
 
-
-## Self-tapping screws
+## 5. Self-tapping screws
 
 For parts opened rarely.
 
-- Pilot ≈ 0.8 × major diameter. M3 → about 2.4–2.5 mm. M4 → about 3.2 mm.
-- Engagement ≥ 2 × diameter. Boss outer diameter about 2.2–2.5 × major diameter.
-- Thread-forming screws for plastic hold better than a machine screw driven into a pilot.
-- Expect a handful of reassemblies, then stripped threads. That is the moment to switch to an insert.
+- Pilot Ø ≈ 0.8 × thread major: M2 → 1.6, M2.5 → 2.0–2.1, M3 → 2.4–2.5, M4 → ~3.2.
+- Engagement ≥ 2 × diameter. Boss OD ≈ 2.2–2.5 × thread diameter, boss wall ≥ 2 mm.
+- Thread-forming screws for plastic (Plastite/PT) hold far better than a machine
+  screw driven into a pilot.
+- Expect a handful of reassemblies (~5–10), then stripped threads. That is the moment
+  to switch to an insert.
 
-## Nuts and clearance holes
+## 6. Nuts, nut traps, clearance holes
 
-| Thread | Clearance hole | Hex nut across flats / thickness | Printed trap across flats / depth |
-|---|---|---|---|
-| M3 | 3.4 | 5.5 / 2.4 | 5.8 / 2.6 |
-| M4 | 4.5 | 7.0 / 3.2 | 7.3 / 3.4 |
-| M5 | 5.5 | 8.0 / 4.0 | 8.3 / 4.2 |
+| Thread | Clearance hole | Head Ø (socket/pan) | Hex nut AF / thickness | Printed trap AF / depth |
+|---|---|---|---|---|
+| M2 | 2.4 | 3.8 | 4.0 / 1.6 | 4.2 / 1.8 |
+| M2.5 | 2.9 | 4.5 | 5.0 / 2.0 | 5.2 / 2.2 |
+| M3 | 3.4 | 5.5–5.7 | 5.5 / 2.4 | 5.7–5.8 / 2.6 |
+| M4 | 4.5 | 7.0 | 7.0 / 3.2 | 7.2–7.3 / 3.4 |
+| M5 | 5.5 | 8.5 | 8.0 / 4.0 | 8.3 / 4.2 |
 
-A nut slot that opens on a vertical face prints clean. A hexagonal pocket under a horizontal ceiling has to bridge; keep that span inside the profile's bridge limit or open the pocket from the side.
+Nut trap: `cylinder(d = poly_d(af_trap, 6), $fn = 6)` (library:
+`hex_nut_trap_cut(af, depth)`). Add the clearance hole plus counterbore or
+countersink on the mating part.
 
-## Snap fits
+A nut slot that opens on a vertical face (side-slide) prints clean. A hexagonal
+pocket under a horizontal ceiling has to bridge: keep that span inside the profile's
+bridge limit, open the pocket from the side, or add a sacrificial 0.2 mm layer the
+user drills through.
 
-Not on the house PETG-CF profile: use screws, or switch to unfilled PETG. If the user insists, the house profile's clip limits apply. Allowed in PLA (barely), PETG, ABS, ASA, nylon, and TPU.
+## 7. Snap-fits (cantilever)
 
-For a rectangular cantilever, strain is about:
+Only when the profile allows elastic features. Not on house PETG-CF: use screws, or
+switch to unfilled PETG; if the user insists, the profile's clip limits apply and the
+fatigue risk goes in the build notes. Allowed in PLA (barely), PETG, ABS, ASA, nylon,
+and TPU.
+
+Geometry: beam length L, thickness t (in the bending direction), hook depth y
+(deflection needed to pass the catch). For a constant rectangular section:
 
 ```
-ε = 1.5 · y · t / L²
+strain ε = 1.5 · y · t / L²          (keep below the material limit)
 ```
 
-`y` is how far the hook must deflect, `t` is thickness in the bending direction, `L` is arm length. Keep repeated-use strain under about 1% for PLA, 2% for PETG/ABS/ASA, and 3% for nylon. Example: t = 1.6, y = 0.8, ε = 0.02 gives L ≈ 10 mm, so make the arm 12–15 mm.
+| Material | Allowable ε (repeated use) |
+|---|---|
+| PLA | ≤ 1 % (brittle; single-use snaps up to ~2 %) |
+| PETG, ABS, ASA | ≤ 2 % |
+| Nylon | ≤ 3–4 % |
 
-- Lay the arm in XY so it bends across lines, not along a single layer.
-- Root fillet ≥ 0.5 × t. A taper toward the tip spreads strain.
-- Lead-in face around 30–45°. A 90° return face is permanent; 45–60° can be opened again.
-- Leave a way to release a permanent catch, or the user will pry the arm off.
+Example: t = 1.6, y = 0.8 → L ≥ sqrt(1.5 · 0.8 · 1.6 / 0.02) ≈ 9.8 mm for PETG. Make
+the arm 12–15 mm to be safe.
 
-Living hinges that fold flat are a polypropylene (and sometimes nylon or TPU) feature. PLA, PETG, and PETG-CF crack. Do not call a thin PETG bridge a living hinge.
+Design rules:
+- Beam in the XY plane when possible (bending across a single layer breaks beams). If
+  it must stand vertically, go thicker/longer and use PETG or nylon.
+- Root fillet ≥ 0.5 × t; tapering the beam (t at root → 0.5 t at tip) spreads the
+  strain more evenly — or simply make the beam longer.
+- Lead-in face around 30–45°; a 90° return face is permanent, 45–60° can be opened
+  again. Provide a release slot for a screwdriver if the face angle is 90°, or the
+  user will pry the arm off.
+- Catch windows in the opposite wall: hook height + 0.3 mm clearance.
+- Library: `snap_hook(length, thick, width, hook_depth, hook_h)`.
 
-## Printed threads and pins
+Living hinges that fold flat are a polypropylene (and sometimes nylon or TPU)
+feature. PLA, PETG, and PETG-CF crack. Do not call a thin PETG bridge a living hinge.
 
-- Printed threads: pitch at least 2 mm, trapezoidal profile, about 0.3–0.4 mm radial clearance, chamfer the first turn. Fine machine threads below about M5 belong in an insert.
-- Print the thread axis along Z when cosmetics and fit matter. A horizontal thread is a stack of overhangs.
-- Print-in-place hinges: 0.4–0.5 mm clearance, hinge axis parallel to the bed, conical knuckle ends so they self-support.
-- A separate pin can be a screw, a bit of 1.75 mm filament, or a cut length of rod. Size the knuckle hole to the pin plus the slip clearance.
+## 8. Sliding lids
 
-## Magnets
+- Rails: 45° dovetail or a rectangular groove 1.5–2 mm deep in the walls, clearance
+  0.25 mm per side.
+- Print the lid flat (lid plate on the bed); print grooves with 45° upper flanks so
+  the base needs no supports.
+- Add a detent bump (0.3–0.5 mm) near the closed position and a finger grip.
 
-Pocket diameter = magnet + 0.1–0.2 mm for a press, or +0.3 mm if it will be glued. Depth = magnet thickness + 0.2 mm. Chamfer the mouth.
+## 9. Hinges
 
-Fully captured magnets: pause at the layer that closes the pocket, drop the magnet in, resume. Tell the user the Z height; how to set the pause is in `mesh-and-export.md`. Magnet polarity is part of the design when two parts meet; mark it in the reply.
+- Pin hinge with separate pin: knuckle OD ≥ pin Ø + 3; pin hole = pin + 0.3. A
+  1.75 mm filament strand or an M2/M3 screw makes a good pin. Size the knuckle hole
+  to the pin plus the slip clearance.
+- Print-in-place hinge: 0.4–0.5 mm clearance, cone-shaped pin tips (45°) so the
+  knuckles self-support; print with the hinge axis parallel to the bed.
+- Living hinges only in PP/TPU/nylon, never PLA/PETG.
+- Add a stop to limit the opening angle.
 
-On a brittle material, a press fit that is too tight cracks the pocket. Prefer the loose pocket plus a drop of glue, or a thin printed cap, over a heroic interference.
+## 10. Threads and twist-lock
+
+- Don't hand-write thread profiles; use BOSL2 `threaded_rod()/threaded_nut()` if the
+  user has it, or a bayonet (2–3 L-slots with a detent bump), which is easy to model
+  and prints well.
+- Printed threads: pitch ≥ 2 mm, trapezoidal/buttress profile, 0.3–0.4 mm radial
+  clearance, first turn chamfered. Fine machine threads below about M5 belong in an
+  insert.
+- Print the thread axis along Z when cosmetics and fit matter. A horizontal thread is
+  a stack of overhangs.
+- O-ring in a face groove for sealing (see `environment-and-safety.md`).
+
+## 11. Magnets
+
+- Round neodymium magnets: pocket Ø = magnet + 0.1–0.2 mm (press) or +0.3 mm with
+  glue; depth = magnet thickness + 0.2 mm. Chamfer the mouth.
+- On a brittle material, a press fit that is too tight cracks the pocket. Prefer the
+  loose pocket plus a drop of glue, or a thin printed cap, over a heroic interference.
+- Fully captured magnets: pause the print at the layer that closes the pocket, drop
+  the magnet in, resume. Tell the user the Z height; confirming the pause layer is
+  covered in `mesh-and-export.md`.
+- Mark polarity; opposite poles on the two parts. Polarity is part of the design when
+  two parts meet.
+- Keep magnets away from compasses and hall sensors, and ≥ 15 mm from antennas.
+- Products for children/pets: magnets must be fully enclosed, never glued in a pocket
+  where they can come loose.
+
+## 12. Split lines and alignment
+
+- Horizontal split with the lid on top is the default: each half prints without
+  supports.
+- Split just above the tallest side connector so all side cutouts live in the base;
+  or split through the connector and make matching half-notches in base and lid.
+- Deep enclosures: a mid split (two shells) keeps each part short and gives full
+  access to the board.
+- Alignment is not optional. Tongue-and-groove (default; also helps sealing), an
+  internal lip, or a stepped lap. A butt joint fails the fit rule. Dowel pins
+  (printed Ø 4 mm pockets, 0.20 mm clearance per side) are for parts split to fit the
+  envelope, in addition to the lid register, not instead of it.
+- Parts too big for the envelope: split and join with M3 bolts + ≥ 2 dowels, never
+  glue (PETG doesn't bond reliably).

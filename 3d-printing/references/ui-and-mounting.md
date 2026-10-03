@@ -81,7 +81,7 @@ Board-mounted tactile switches (6×6 mm, 12×12 mm) under a wall or lid:
 | Keyhole slots (wall hanging) | Ø7 head / Ø3.5 slot / 8 mm travel for small screws (Ø8.5 / 4.5 / 9 for M4/#8); head space behind the slot; two slots ≥ 60 mm apart, level. Template `wall_mount = "keyholes"`: on the board centreline with the slot toward the back face, so the front face and its cables hang down; it raises the standoffs so the heads fit under the board, skips the floor label, and asserts clearance to the standoffs. Needs a board ≥ ~30 mm deep — on smaller boards use ears |
 | Mounting ears/tabs | tabs extending from the base, hole Ø4.5 (M4/#8 screws), tab thickness ≥ 3 mm with a gusset or root fillet. Template `wall_mount = "ears"`: 4 mm tabs on both X ends at floor level, countersunk, filleted to the wall; nothing inside can collide with them, so it is the safe choice for small boxes |
 | DIN rail (TS35) | clip gripping a 35 mm rail, 7.5 mm (or 15 mm) deep, 1 mm flanges; one fixed hook + one flexible snap side; print with the snap in XY |
-| Magnets | pockets per closures reference; for steel surfaces (fridges, cabinets) |
+| Magnets | pockets per `fits-and-fasteners.md`; for steel surfaces (fridges, cabinets) |
 | Zip-tie slots | two slots 5 × 2 mm on the base, ≥ 10 mm apart |
 | Camera thread 1/4"-20 | hex nut trap 11.2 mm AF (7/16") + Ø6.5 hole |
 | GoPro-style | 3 prongs 3 mm thick with 3.2 mm gaps, Ø5 hole — copy exact dims if the user needs compatibility |

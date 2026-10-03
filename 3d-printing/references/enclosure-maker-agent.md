@@ -1,8 +1,8 @@
 # Dimension and printing guidance for enclosure-maker
 
-Maintained in the parametric-enclosures skill at references/enclosure-maker-agent.md;
+Maintained in the 3d-printing skill at references/enclosure-maker-agent.md;
 copy this resource verbatim into the app's docs/printing-guidance.md when updating it.
-This is focused guidance from parametric-enclosures and 3d-printing. It grants no
+This is focused guidance from the 3d-printing skill. It grants no
 additional tools or filesystem access. User choices override house defaults.
 
 ## Native source and adjustable dimensions
