@@ -19,7 +19,7 @@
 part = "plate"; // plate | pin | all
 // Export plate and pin as separate STLs. part="all" is two solids and fails check_stl.py.
 
-hole_comp = 0.15;
+hole_comp = 0.15; // UNCALIBRATED diameter compensation, used once
 pin_d = 6.0;
 pin_h = 10.0;
 clearances = [0.10, 0.15, 0.20, 0.25, 0.30, 0.40];
@@ -27,6 +27,9 @@ comp_trials = [0.00, 0.10, 0.15, 0.20, 0.30];
 ref_d = 3.0;
 insert_bores = [3.9, 4.0, 4.1, 4.2, 4.3];
 insert_len = 5.7;
+insert_relief = 1.0;
+boss_wall = 2.52; // radial material in production boss
+boss_floor_min = 2.0;
 boss_od = 9.5;
 boss_h = 9.0;
 
@@ -34,7 +37,7 @@ plate_t = 4.0;
 corner_r = 3.0;
 bed_chamfer = 0.8;
 mouth_chamfer = 0.4;
-insert_lead = 0.5;
+insert_lead = 0; // match production mouth; override only for the actual insert drawing
 boss_fillet = 1.0;
 label_depth = 0.4;
 label_size = 3.2;
@@ -49,11 +52,15 @@ row_c = 14;
 eps = 0.01;
 $fn = 96;
 
+boss_od_actual = max(boss_od, max(insert_bores) + 2 * boss_wall);
+assert(boss_h - insert_len - insert_relief >= boss_floor_min,
+       "coupon insert bore leaves too little floor material");
+assert(pitch > boss_od_actual + 2 * boss_fillet, "increase pitch for wider coupon bosses");
 cols = max(len(clearances), len(comp_trials), len(insert_bores));
-plate_w = 2 * margin + (cols - 1) * pitch + boss_od;
+plate_w = 2 * margin + (cols - 1) * pitch + boss_od_actual;
 plate_d = row_a + (pin_d / 2 + 0.5) + margin;
 
-function col_x(i) = margin + boss_od / 2 + i * pitch;
+function col_x(i) = margin + boss_od_actual / 2 + i * pitch;
 function fmt2(v) = let(c = round(v * 100)) str(".", c < 10 ? "0" : "", c);
 function fmt1(v) = let(t = round(v * 10)) str(floor(t / 10), ".", t % 10);
 
@@ -82,14 +89,14 @@ module label(s, x, y) {
 }
 
 module boss() {
-    cylinder(d = boss_od, h = boss_h);
-    translate([0, 0, plate_t - eps]) cylinder(d1 = boss_od + 2 * boss_fillet, d2 = boss_od, h = boss_fillet);
+    cylinder(d = boss_od_actual, h = boss_h);
+    translate([0, 0, plate_t - eps]) cylinder(d1 = boss_od_actual + 2 * boss_fillet, d2 = boss_od_actual, h = boss_fillet);
 }
 
 module insert_bore(d) {
-    depth = insert_len + 1;
+    depth = insert_len + insert_relief;
     translate([0, 0, boss_h - depth]) cylinder(d = d, h = depth + eps);
-    translate([0, 0, boss_h - insert_lead]) cylinder(d1 = d, d2 = d + 2 * insert_lead, h = insert_lead + eps);
+    if (insert_lead > 0) translate([0, 0, boss_h - insert_lead]) cylinder(d1 = d, d2 = d + 2 * insert_lead, h = insert_lead + eps);
 }
 
 module plate() {

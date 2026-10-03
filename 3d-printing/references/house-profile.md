@@ -23,11 +23,11 @@ Bambu recommends a 0.6 mm hardened nozzle for this filament to cut clogs. Stay o
 | Teardrop threshold | Horizontal holes ≥ 5 mm | |
 | Bed-parallel edges | Chamfer. Bed edge 0.8 mm × 45° | A fillet on the bed, or under a lip, starts as a flat overhang |
 | Vertical corners | Fillet, R ≥ 1.0 mm | Sharp corners ring, and a square inside corner starts the crack. Keep the wall thickness through the bend |
-| `hole_comp` | +0.15 mm on diameter | Functional holes only. Insert bores use the coupon, often +0.2–0.3 mm over the datasheet |
+| `hole_comp` | +0.15 mm on diameter | Functional holes only. Insert bores use the final CAD size selected on the coupon |
 | M3 insert boss | OD ≥ 9.5 mm | ≥ 2.5 mm of plastic around a ~4.0–4.2 mm bore |
-| `tol` per side | press 0.15 / slip 0.25 / loose 0.40 | Freeze after one coupon. Do not retune per part |
+| `tol` per side | press 0.15 / slip 0.25 / loose 0.40 | Starting values; record coupon conditions |
 
-Wall thickness is always an integer multiple of `ew`. Do not round 2.52 to 2.5.
+Use 2.52 mm as the house wall target, then inspect actual slicer paths and overlap.
 
 ### No elastic features
 
@@ -49,7 +49,7 @@ If a brief explicitly demands a clip, the arm length is at least 10 × thickness
 - Do not run this filament through the AMS Lite. Feed from the spool holder so the fiber does not abrade the tubes.
 - Glue stick on textured PEI is a release agent, not an adhesive. PETG can bond to bare smooth PEI hard enough to tear the sheet. The A1 Mini's textured plate is the right surface; still mention release if they swap to a smooth plate.
 - Keep the part fan modest. Overcooling is a common reason PETG-CF splits between layers. Bambu's own note for this filament is that an open-frame printer and a high fan both hurt Z strength, so design the load path accordingly instead of expecting enclosed-printer layer bonds.
-- Slice in Bambu Studio with printer `Bambu Lab A1 mini 0.4 nozzle`, process `0.20mm Standard @BBL A1M`, plate `Textured PEI Plate`, and the PETG-CF filament preset. The setting list is in `slicer-and-troubleshooting.md`. The STL is already one solid on z = 0; Studio should not offer Repair and should not be asked to auto-orient.
+- Slice in Bambu Studio with printer `Bambu Lab A1 mini 0.4 nozzle`, process `0.20mm Standard @BBL A1M`, plate `Textured PEI Plate`, and the PETG-CF filament preset. The setting list is in `slicer-and-troubleshooting.md`. The generated part is intended to be one solid on z = 0. Confirm the exported STL in Studio; the mesh checker cannot guarantee that every slicer will accept it without repair.
 
 ## Other profiles worth having ready
 
@@ -65,3 +65,21 @@ Fill the same override table when the user names one of these. Until they do, do
 Print `assets/fit-coupon.scad` once per printer-material pair, with the same walls, layer height, and filament as the real part. It has three rows: 3 mm holes that set `hole_comp` against a drill shank, holes for a printed pin at each per-side clearance, and blind bores for the M3 insert. Read them in that order, because the clearance row already includes `hole_comp`. The hole that gives the fit you want by hand sets `tol` for every later part.
 
 For a different printer, nozzle, or insert, edit the parameters at the top of the file (`hole_comp`, `clearances`, `insert_bores`, `insert_len`, `boss_od`) and keep the layout. A hole that is tight on one part is almost never a reason to change `tol` globally; check hole compensation and elephant's foot first.
+
+## Calibration status and source
+
+All fit/compensation numbers above are uncalibrated house starting values.
+Manufacturer ratings, conservative house targets, and measured printer results
+are different things. Label them accordingly. Use the dimension/calibration
+reference and store measured results with the project; revalidate after material,
+nozzle, orientation or process changes. A positive nominal gap does not guarantee
+a press fit, and a perimeter-width calculation does not certify wall strength.
+
+The default remains a 0.4 mm hardened nozzle. Bambu allows it for its PETG-CF and
+recommends 0.6 mm to reduce clogging. Use the actual filament vendor's drying,
+printing and plate guidance rather than treating all PETG-CF blends as identical.
+[Bambu PETG-CF](https://us.store.bambulab.com/collections/bambu-lab-3d-printer-filament/products/petg-cf)
+
+For inserts, 4.1 mm is a starting **final CAD bore**, not the insert OD and not a
+universal manufacturer requirement. Do not apply general hole compensation on
+it again. Bore geometry and lead-in follow the selected insert's drawing.

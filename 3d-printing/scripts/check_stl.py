@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Check an STL for the defects that make Bambu Studio offer Repair or print a floating piece.
+"""Inspect STL topology and sample layers for possible unsupported islands.
 
-Exit 0 only when every file is one closed solid: each edge shared by two
-oppositely wound faces, no degenerate triangles, no second solid, and no
-island that starts in mid-air. A void inside that solid is allowed.
+Exit 1 for measured errors, 2 for invalid arguments; warnings need slicer review.
+This is not a self-intersection, minimum-wall, bridge-span or strength validator.
+STL has no units: coordinates are interpreted as millimetres.
 """
 
+import argparse
 import math
 import struct
 import sys
@@ -19,27 +20,48 @@ BED = 0.05
 
 
 def load_stl(path):
-    data = open(path, "rb").read()
+    with open(path, "rb") as stream:
+        data = stream.read()
     if len(data) >= 84:
         count = struct.unpack_from("<I", data, 80)[0]
         if 84 + count * 50 == len(data):
             tris = []
-            off = 84
-            for _ in range(count):
+            for off in range(84, len(data), 50):
                 nums = struct.unpack_from("<12fH", data, off)
                 tris.append((nums[3:6], nums[6:9], nums[9:12]))
-                off += 50
-            return tris
-    text = data.decode("utf-8", errors="replace")
-    tris = []
-    verts = []
+            return finite_triangles(tris)
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError as err:
+        raise ValueError("malformed or truncated binary STL") from err
+    tris, verts = [], None
+    opened = closed = False
     for line in text.splitlines():
         parts = line.split()
-        if len(parts) >= 4 and parts[0] == "vertex":
-            verts.append(tuple(float(p) for p in parts[1:4]))
-            if len(verts) == 3:
-                tris.append(tuple(verts))
-                verts = []
+        if not parts:
+            continue
+        word = parts[0]
+        if word == "solid" and not opened:
+            opened = True
+        elif word == "facet" and opened and not closed and verts is None:
+            verts = []
+        elif word == "vertex" and verts is not None and len(parts) == 4:
+            verts.append(tuple(float(p) for p in parts[1:]))
+        elif word == "endfacet" and verts is not None and len(verts) == 3:
+            tris.append(tuple(verts))
+            verts = None
+        elif word == "endsolid" and opened and verts is None:
+            closed = True
+        elif word not in ("outer", "endloop"):
+            raise ValueError("malformed ASCII STL")
+    if not opened or not closed or verts is not None:
+        raise ValueError("incomplete ASCII STL")
+    return finite_triangles(tris)
+
+
+def finite_triangles(tris):
+    if any(not math.isfinite(c) for tri in tris for p in tri for c in p):
+        raise ValueError("non-finite vertex coordinates")
     return tris
 
 
@@ -204,16 +226,16 @@ def plane_segments(verts, faces, z):
     return segments
 
 
-def filled_cells(segments):
+def filled_cells(segments, grid=GRID):
     rows = defaultdict(list)
     for (x0, y0), (x1, y1) in segments:
         if y0 == y1:
             continue
         y_lo, y_hi = (y0, y1) if y0 < y1 else (y1, y0)
-        j0 = math.floor(y_lo / GRID)
-        j1 = math.floor(y_hi / GRID)
+        j0 = math.floor(y_lo / grid)
+        j1 = math.floor(y_hi / grid)
         for j in range(j0, j1 + 1):
-            y = (j + 0.5) * GRID
+            y = (j + 0.5) * grid
             if y_lo < y <= y_hi:
                 t = (y - y0) / (y1 - y0)
                 rows[j].append(x0 + t * (x1 - x0))
@@ -221,8 +243,8 @@ def filled_cells(segments):
     for j, xs in rows.items():
         xs.sort()
         for left, right in zip(xs[0::2], xs[1::2]):
-            i0 = math.floor(left / GRID)
-            i1 = math.floor(right / GRID)
+            i0 = math.floor(left / grid)
+            i1 = math.floor(right / grid)
             for i in range(i0, i1 + 1):
                 cells.add((i, j))
     return cells
@@ -238,7 +260,7 @@ def dilate(cells):
     return out
 
 
-def floating_islands(verts, faces):
+def floating_islands(verts, faces, layer_height=LAYER_H, grid=GRID):
     zs = [p[2] for p in verts]
     if not zs:
         return ["empty mesh"]
@@ -246,12 +268,12 @@ def floating_islands(verts, faces):
     z1 = max(zs)
     previous = set()
     islands = []
-    z = z0 + LAYER_H * 0.5
+    z = z0 + layer_height * 0.5
     steps = 0
     first = True
     while z < z1 and steps < 4000:
         steps += 1
-        cells = filled_cells(plane_segments(verts, faces, z))
+        cells = filled_cells(plane_segments(verts, faces, z), grid)
         if cells and not first:
             seen = set()
             supported = dilate(previous)
@@ -276,7 +298,7 @@ def floating_islands(verts, faces):
                         return islands
         previous = cells
         first = False
-        z += LAYER_H
+        z += layer_height
     return islands
 
 
@@ -287,68 +309,96 @@ def bounds(verts):
     return min(xs), min(ys), min(zs), max(xs), max(ys), max(zs)
 
 
-def check(path):
-    problems = []
+def check(path, *, layer_height=LAYER_H, grid=GRID, envelope=None,
+          require_bed=False, bed_tolerance=BED, strict_topology=False):
+    result = {"errors": [], "warnings": [], "size": None, "triangles": 0,
+              "lowest_z": None, "cavities": 0}
+    errors, warnings = result["errors"], result["warnings"]
     try:
         raw = load_stl(path)
-    except OSError as err:
-        return [str(err)]
-    if not raw:
-        return ["no triangles"]
-    verts, faces = weld(raw)
-    degenerate = sum(1 for face in faces if len(set(face)) < 3 or area2(verts, face) < 1e-24)
-    faces = [face for face in faces if len(set(face)) == 3 and area2(verts, face) >= 1e-24]
-    if degenerate:
-        problems.append(f"degenerate triangles: {degenerate}")
+        if not raw:
+            raise ValueError("no triangles")
+        verts, faces = weld(raw)
+    except (OSError, ValueError, OverflowError, struct.error) as err:
+        errors.append(str(err))
+        return result
+    valid_faces = [face for face in faces if len(set(face)) == 3 and area2(verts, face) >= 1e-24]
+    if len(valid_faces) != len(faces):
+        warnings.append(f"degenerate facets removed for inspection: {len(faces) - len(valid_faces)}")
+    faces = valid_faces
     if not faces:
-        problems.append("no triangles left after dropping degenerates")
-        return problems
+        errors.append("no non-degenerate triangles")
+        return result
+    x0, y0, z0, x1, y1, z1 = bounds(verts)
+    size = (x1-x0, y1-y0, z1-z0)
+    result.update(size=size, triangles=len(faces), lowest_z=z0)
+    if envelope and any(s > e + WELD for s, e in zip(size, envelope)):
+        errors.append("part exceeds the specified envelope in this orientation")
+    if abs(z0) > bed_tolerance:
+        message = f"lowest z={z0:.3f} mm; print orientation must place the bed face at z=0"
+        (errors if require_bed else warnings).append(message)
     open_edges, nonmanifold, inconsistent, groups = components(faces)
     if open_edges:
-        problems.append(f"open edges: {open_edges}")
-    if nonmanifold:
-        problems.append(f"non-manifold edges: {nonmanifold}")
-    if inconsistent:
-        problems.append(f"inconsistent winding: {inconsistent}")
-    if open_edges or nonmanifold or inconsistent or degenerate:
-        problems.append("Bambu Studio will offer Repair")
-    else:
+        target = errors if strict_topology else warnings
+        target.append(f"open facet-edge references: {open_edges}; may include unmatched triangulation/T-junctions; inspect the mesh in the target slicer")
+    for label, count in (("non-manifold edges", nonmanifold), ("inconsistent winding", inconsistent)):
+        if count:
+            errors.append(f"{label}: {count}")
+    if not open_edges and not errors:
         cavities, extra = classify_shells(verts, faces, groups)
+        result["cavities"] = cavities
         if extra:
-            problems.append(f"extra solids: {len(extra)} (floating or disconnected)")
-        elif len(groups) != 1 + cavities:
-            problems.append(f"shells: {len(groups)}")
-    islands = floating_islands(verts, faces)
-    if islands:
-        shown = ", ".join(str(z) for z in islands)
-        problems.append(f"floating islands at {shown} mm above the lowest point")
-    x0, y0, z0, x1, y1, z1 = bounds(verts)
-    size = f"{x1 - x0:.2f} x {y1 - y0:.2f} x {z1 - z0:.2f} mm"
-    bed = "bed z=0" if abs(z0) <= BED else f"lowest z={z0:.3f} (drop onto the plate before printing)"
-    return problems, size, len(faces), bed
+            errors.append(f"extra solids: {len(extra)}; export intended parts separately")
+        outer = max(groups, key=lambda group: abs(signed_volume(verts, [faces[i] for i in group])))
+        if signed_volume(verts, [faces[i] for i in outer]) <= 0:
+            errors.append("outer shell has inward winding or zero volume")
+    # Sample only meshes whose topology is sound. Sampling cannot certify
+    # support, bridges or thin walls, and must never be described as doing so.
+    if not errors:
+        if size[2] / layer_height > 4000 or (size[0] / grid) * (size[1] / grid) > 1_000_000:
+            warnings.append("layer sampling skipped: sampling budget exceeded; inspect in slicer")
+        else:
+            islands = floating_islands(verts, faces, layer_height, grid)
+            if islands:
+                shown = ", ".join(str(z) for z in islands)
+                warnings.append(f"suspected unsupported islands at {shown} mm above lowest point; confirm in slicer")
+    return result
+
+
+def positive(value):
+    value = float(value)
+    if not math.isfinite(value) or value <= 0:
+        raise argparse.ArgumentTypeError("must be a finite positive number")
+    return value
 
 
 def main(argv):
-    if len(argv) < 2:
-        print("usage: check_stl.py part.stl [more.stl ...]", file=sys.stderr)
-        return 2
-    failed = 0
-    for path in argv[1:]:
-        result = check(path)
-        if isinstance(result, list):
-            print(f"FAIL {path}")
-            for item in result:
-                print(f"  {item}")
-            failed += 1
-            continue
-        problems, size, count, bed = result
-        status = "FAIL" if problems else "ok"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("files", nargs="+")
+    parser.add_argument("--layer-height", type=positive, default=LAYER_H)
+    parser.add_argument("--grid", type=positive, default=GRID, help="XY sampling spacing in mm")
+    parser.add_argument("--envelope", type=positive, nargs=3, metavar=("X", "Y", "Z"))
+    parser.add_argument("--require-bed", action="store_true")
+    parser.add_argument("--strict-topology", action="store_true",
+                        help="treat open triangle-edge references as errors (may reject CSG T-junctions)")
+    parser.add_argument("--bed-tolerance", type=positive, default=BED)
+    args = parser.parse_args(argv[1:])
+    failed = False
+    for path in args.files:
+        result = check(path, layer_height=args.layer_height, grid=args.grid,
+                       envelope=args.envelope, require_bed=args.require_bed,
+                       bed_tolerance=args.bed_tolerance, strict_topology=args.strict_topology)
+        status = "FAIL" if result["errors"] else "WARN" if result["warnings"] else "ok"
         print(f"{status} {path}")
-        print(f"  size {size}, triangles {count}, {bed}")
-        for item in problems:
-            print(f"  {item}")
-        if problems:
-            failed += 1
+        if result["size"]:
+            size = " x ".join(f"{v:.3f}" for v in result["size"])
+            print(f"  size {size} mm, triangles {result['triangles']}, lowest z={result['lowest_z']:.3f}")
+        for severity in ("errors", "warnings"):
+            for message in result[severity]:
+                print(f"  {severity[:-1]}: {message}")
+        print("  Scope: topology after 0.0001 mm vertex quantization; unmatched facet-edge references are advisory unless --strict-topology is set; sampled layers only.")
+        print("  Not checked: self-intersections, minimum wall thickness, bridge span, strength; confirm slicer layers.")
+        failed |= bool(result["errors"])
     return 1 if failed else 0
 
 

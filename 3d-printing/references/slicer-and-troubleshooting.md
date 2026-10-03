@@ -63,7 +63,7 @@ Prefer `hole_comp` in the model over the slicer's hole compensation. A slicer va
 
 ## Bambu Studio on the A1 Mini
 
-This is the default slicer for the house profile. Write the print plan with these names. The mesh is already one solid on z = 0, so the prepare view is for checking, not for repairing or reorienting.
+This is the default slicer for the house profile. Write the print plan with these names. Generated meshes are intended to be one solid on z = 0. Confirm the exported STL in the prepare view; checker output is only one diagnostic.
 
 | | Use |
 |---|---|
@@ -127,8 +127,8 @@ Name one cause, the observation that would confirm it, and one fix. Geometry fir
 | Echoes after corners | Speed and acceleration | The model is fine; the ghost follows direction changes | Slower outer wall. Input shaping is a printer calibration |
 | Fit face is scarred and undersize | Support was on a working face | The bad face was an overhang | Reorient or chamfer so that face is a bed face or a vertical wall |
 | Layer shift | Mechanical: belt, nozzle crash, warped part catching the nozzle | The shift is a single step in X or Y | Check the machine. A catching overhang is still a geometry problem |
-| Spaghetti after the first layers | Lost adhesion, or a feature printed in air | The first layer let go, or a mid-air island exists | Brim or a cleaner plate for adhesion. An island with no support is a modeling error. `check_stl.py` names the height |
-| Bambu Studio offers Repair, or a warning triangle on the object | Open edges, flipped faces, a zero-thickness skin, or a non-manifold edge | `check_stl.py` reports open edges, non-manifold edges, or degenerate triangles | Fix the CAD: cutters past the surface, features overlapped into the body. Do not click Repair |
+| Spaghetti after the first layers | Lost adhesion, or a feature printed in air | The first layer let go, or a mid-air island exists | Brim or a cleaner plate for adhesion. An island with no support is a modeling error. `check_stl.py` samples for possible floating regions; confirm the location in the slicer |
+| Bambu Studio offers Repair, or a warning triangle on the object | Open edges, flipped faces, a zero-thickness skin, or a non-manifold edge | `check_stl.py` may report open edges, non-manifold edges, or degenerate triangles | Inspect the slicer warning and source geometry. Extend cutters past surfaces and overlap features into the body. If using slicer repair, inspect the changed result against intended dimensions |
 | A second lump, or a piece that starts in the air | Two solids in one file, or a feature joined only at a face or only higher up | `check_stl.py` reports extra solids or a floating island | One solid per file. Overlap the feature in, with a neck of at least two extrusion widths |
 
 If the user sends a photo or a description that matches two rows, take the row that is fixed by drying or by orientation before the row that is fixed by a long calibration.
