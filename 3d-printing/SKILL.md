@@ -15,6 +15,13 @@ This is the process skill: which machine, which material, which way up, what the
 
 Electronics enclosures, cases, housings, and "caixa" jobs belong to the parametric-enclosures skill. That skill already has the house printer profile, screw columns, PCB clearances, vents, the OpenSCAD library, and the wiring and power rules. Do not invent a second enclosure. If that skill is not available, say so and answer only the print-process part of the question.
 
+When an enclosure is "too low", will not close, or does not fit after wiring, treat it
+as a geometry/measurement failure, not a slicer problem. Hand the geometry back with
+the assembled vertical stack: soldered pins below the devkit, standoff, PCB, seated
+Dupont housing, relaxed wire bend, and closure margin. Bare-board dimensions are not
+enough. Preserve which PCB face and edge each header actually occupies; one-sided and
+right-angle headers make the required clearance asymmetric.
+
 Match the length of the reply to the question. A material comparison does not need a print plan. The full contract below is for a part you are designing or clearing to print.
 
 ## Read only what the job needs
@@ -135,6 +142,10 @@ Before sending a design or a clearance:
 - The part fits the envelope, or the split and the fasteners are specified.
 - Profile bans are respected. On house PETG-CF that means no snaps, clips, or living hinges unless the user insisted, the house-profile limits are applied, and the risk is stated.
 - Any exported file is one part per file, in print orientation, with functional holes at `$fn` ≥ 64.
+- For electronics enclosures, the parametric-enclosures check used the assembled
+  wiring envelope. Top-entry Dupont defaults to 28 mm above the PCB top when
+  unmeasured, bottom soldered pins to 4 mm, with 2 mm above and 1 mm below clearance.
+  Header clearances remain per actual board edge rather than being mirrored.
 - Every STL has passed the reported topology, envelope and bed checks. Sampled island findings have been inspected in the slicer; self-intersections, wall thickness and strength are not certified by this checker.
 - The print plan names the Bambu Studio printer, process, and plate presets when that is the slicer, and it leaves hole compensation and overhang rewriting off.
 - Heat, UV, food, and mains were either handled or marked not applicable. Printed plastic is not a certified insulator or a flame barrier unless the spool says so, and layer lines are not food-safe.

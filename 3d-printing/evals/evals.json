@@ -84,6 +84,13 @@
       "prompt": "I do not know the heat-set insert brand or have its drawing. Give me dimensions for an M3 boss on the A1 Mini.",
       "expected_output": "Does not invent a universal press bore, relief, or installation temperature. Clearly labels any provisional example dimensions as uncalibrated, asks the user to identify or measure the insert, and directs them to a fit coupon using the actual insert and tested printer/material/process. Separates CAD bore from slicer compensation and never applies shrink compensation twice.",
       "files": []
+    },
+    {
+      "id": "13",
+      "name": "enclosure-too-low-dupont",
+      "prompt": "My printed ESP32 enclosure ficou muito baixa: it closes without wires, but with the female Dupont jumpers installed the lid does not seat. Can I fix this in the slicer?",
+      "expected_output": "Diagnoses a geometry/measurement failure, not a slicer issue. Hands enclosure geometry to parametric-enclosures and requires the assembled stack: default 4mm soldered pins below the PCB, 28mm top-entry Dupont envelope above the PCB top when unmeasured, 1mm below and 2mm above clearance. Requires each header to retain its actual PCB face and board edge because one-sided or right-angle headers make the clearance asymmetric. Explicitly rejects Z scaling or forcing the lid because that also distorts cutouts, walls and fastener alignment.",
+      "files": []
     }
   ]
 }
