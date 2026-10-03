@@ -42,10 +42,10 @@ more than neutral plastics.
 | min insert boss OD | 9.5 mm for M3 | ≥ 2.5 mm plastic around the insert |
 | gussets per column | 3 minimum, always root-filleted | |
 | antenna keepout | 20 mm | CF attenuation |
-| `tol` | press 0.15 / slip 0.25 / loose 0.40 | calibrate once, then freeze |
+| `tol` | press 0.15 / slip 0.25 / loose 0.40 | starting values; calibrate and record conditions |
 | `lip_w` | 1.0 mm (≥ 2 × `ew`) | tongue that still leaves one extrusion of land beside the groove on a 6-line wall |
 
-Wall must always be an integer multiple of `ew`. Do not round it to a pretty number.
+Use multiples of `ew` as a house wall target; verify actual slicer paths and overlap.
 
 ### No elastic features
 
@@ -122,3 +122,21 @@ bore in one print; without it, print a plate with pins at 0.10, 0.15, 0.20, 0.25
 and 0.40 mm clearance. Feed the numbers into every project and do not change them per
 project. This single number is the most common cause of assemblies that worked last
 time and do not fit now.
+
+## Calibration status and source
+
+All fit/compensation numbers above are uncalibrated house starting values.
+Manufacturer ratings, conservative house targets, and measured printer results
+are different things. Label them accordingly. Use the dimension/calibration
+reference and store measured results with the project; revalidate after material,
+nozzle, orientation or process changes. A positive nominal gap does not guarantee
+a press fit, and a perimeter-width calculation does not certify wall strength.
+
+The default remains a 0.4 mm hardened nozzle. Bambu allows it for its PETG-CF and
+recommends 0.6 mm to reduce clogging. Use the actual filament vendor's drying,
+printing and plate guidance rather than treating all PETG-CF blends as identical.
+[Bambu PETG-CF](https://us.store.bambulab.com/collections/bambu-lab-3d-printer-filament/products/petg-cf)
+
+For inserts, 4.1 mm is a starting **final CAD bore**, not the insert OD and not a
+universal manufacturer requirement. Do not apply general hole compensation on
+it again. Bore geometry and lead-in follow the selected insert's drawing.

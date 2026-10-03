@@ -36,7 +36,7 @@ ew          = 0.42;   // extrusion width
 layer       = 0.2;
 wall_lines  = 6;      // [3:1:10] wall = wall_lines * ew
 envelope    = 170;    // usable build envelope per axis
-tol         = 0.25;   // calibrated slip fit for this printer/filament pair
+tol         = 0.25;   // UNCALIBRATED per-side slip starting point
 hole_comp   = 0.15;   // added to the diameter of FUNCTIONAL holes only
 max_bridge  = 5;      // mm
 teardrop_min = 5;     // horizontal round holes >= this get a teardrop roof
@@ -49,8 +49,13 @@ pcb_y       = 30;                                     // ASSUMPTION
 pcb_t       = 1.6;
 pcb_rot     = 0;      // [0, 90, 180, 270] CCW in top view: picks the face each board edge meets
 pcb_clear   = 0.5;    // per side (>= tol; clones vary ±0.2)
-comp_top    = 8;      // tallest component, top side  // ASSUMPTION
-comp_bot    = 2;      // tallest component, bottom side
+comp_top    = 8;      // tallest rigid component above PCB top, excluding wiring // ASSUMPTION
+comp_bot    = 2;      // tallest rigid component below PCB bottom, excluding header pins
+wiring_top_h = 28;    // seated top-entry Dupont + relaxed bend above PCB top; 0 if none // ASSUMPTION
+pin_tail_h   = 4;     // soldered header protrusion below PCB; 0 if none          // ASSUMPTION
+// Extra lateral envelope beyond each board edge [x0, x1, y0, y1], before pcb_rot.
+// Use for one-sided/right-angle headers and Dupont housings; values may be asymmetric.
+header_edge_clear = [0, 0, 0, 0]; // e.g. [0, 12, 0, 0] for wiring only on x1
 standoff_min = 5;     // raised automatically for comp_bot and keyhole heads
 standoff_od = 6;
 standoff_bore = 2.4;  // thread-forming pilot: 2.4 M3, 2.1 M2.5, 1.6 M2
@@ -98,9 +103,16 @@ tie_len     = 5;      // anchor length along its tunnel
 tie_offset  = 6;      // inner wall to anchor centre
 
 /* [Fasteners] */
-insert_bore = 4.1;    // M3 heat-set insert — check the datasheet
+insert_bore = 4.1;    // final CAD bore; UNCALIBRATED house M3 example, no extra hole_comp
 insert_len  = 5.7;
-boss_od     = 9.5;
+boss_od     = 9.5;    // requested minimum OD; effective OD may grow with bore/wall
+boss_min_od = 9.5;    // house profile minimum for this insert
+boss_wall   = 2.52;   // minimum radial plastic (six nominal 0.42 mm lines)
+insert_relief = 1.0;  // space below insert; confirm manufacturer specification
+insert_mouth = 0;     // house example: square mouth; follow actual insert drawing
+boss_floor_min = 2.0; // remaining solid depth below the blind bore
+screw_engagement_min = 3.0; // house M3 starting target, verify selected insert/load
+screw_bottom_clear = 0.5; // screw tip to bore bottom
 gussets     = 3;
 screw_clear = 3.4;    // M3 (hole_comp added)
 head_d      = 6.0;
@@ -158,10 +170,13 @@ $fs = $preview ? 0.6 : 0.4;
 function max0(l) = len(l) == 0 ? 0 : max(l);
 
 wall      = wall_lines * ew;
+boss_od_actual = max(boss_od, boss_min_od, insert_bore + 2 * boss_wall);
+insert_depth = insert_len + insert_relief;
+$functional_fn = $preview ? 24 : 64;
 rim_w     = max(wall, lip_w + 2 * ew + 2 * tol);  // one extrusion of land each side
 lip_inset = (rim_w - lip_w) / 2;
-boss_zone = boss_od + tol;
-boss_inset = wall + boss_od / 2 - 0.5;            // fuses the column into the corner
+boss_zone = boss_od_actual + tol;
+boss_inset = wall + boss_od_actual / 2 - 0.5;            // fuses the column into the corner
 divider_t = 2 * wall + chamber_gap;
 
 // board footprint after rotation, and board -> footprint mapping
@@ -182,6 +197,11 @@ function edge_normal(e) =
 function vec_face(n) =
     n == [0, -1] ? "front" : n == [0, 1] ? "back" : n == [-1, 0] ? "left" : "right";
 function cut_face(c) = vec_face(rot_vec(edge_normal(c[0])));
+function header_edge_extra(e) =
+    e == "x0" ? header_edge_clear[0] : e == "x1" ? header_edge_clear[1]
+  : e == "y0" ? header_edge_clear[2] : header_edge_clear[3];
+function header_face_extra(f) =
+    max0([for (e = ["x0", "x1", "y0", "y1"]) if (cut_face([e]) == f) header_edge_extra(e)]);
 function cut_overhang(c) = len(c) > 8 ? c[8] : 0;
 function cut_grow(c) = cutout_clear + (c[6] ? user_port_extra : 0);
 function cut_round(c) = c[3] == c[4] && c[5] >= c[3] / 2;
@@ -211,14 +231,20 @@ oh_l = face_oh("left");
 oh_r = face_oh("right");
 oh_f = face_oh("front");
 oh_b = face_oh("back");
+hc_l = header_face_extra("left");
+hc_r = header_face_extra("right");
+hc_f = header_face_extra("front");
+hc_b = header_face_extra("back");
 
-// heights: board stack, then the lid split above the tallest cutout
-standoff_h = max(standoff_min, comp_bot + 1,
-                 wall_mount == "keyholes" ? comp_bot + 3.5 : 0);
+// heights: assembled board stack, then the lid split above the tallest cutout
+bottom_stack_h = max(comp_bot, pin_tail_h);
+top_stack_h    = max(comp_top, wiring_top_h);
+standoff_h = max(standoff_min, bottom_stack_h + 1,
+                 wall_mount == "keyholes" ? bottom_stack_h + 3.5 : 0);
 pcb_z    = floor_t + standoff_h;
 pcb_top  = pcb_z + pcb_t;
 cut_top  = max0([for (c = cutouts) pcb_top + c[2] + cut_top_off(c) + (c[6] ? lead_in : 0)]);
-base_h   = max(pcb_top + comp_top + 2, cut_top + 1);  // mating face
+base_h   = max(pcb_top + top_stack_h + 2, cut_top + 1);  // 2 mm closure margin
 cav_z    = base_h - floor_t;
 lid_h    = ceil_t + lip_h + tol;
 
@@ -235,37 +261,40 @@ ant = len(antenna) == 2 ? rot_pt(antenna) : undef;   // footprint coordinates
 kk  = antenna_keepout * antenna_keepout;
 yf0      = max(zf0, bay_front);   // a wiring bay deepens the zone on its side
 yb0      = max(zb0, bay_back);
-outer_y0 = 2 * wall + yf0 + yb0 + 2 * pcb_clear + oh_f + oh_b + fp_y;
-ant_y0   = is_undef(ant) ? 0 : wall + yf0 + pcb_clear + oh_f + ant[1];
+outer_y0 = 2 * wall + yf0 + yb0 + 2 * pcb_clear + oh_f + oh_b + hc_f + hc_b + fp_y;
+ant_y0   = is_undef(ant) ? 0 : wall + yf0 + pcb_clear + oh_f + hc_f + ant[1];
 function x_need(yc, far) = let(dy = ant_y0 - yc)
-    sqrt(max(0, kk - dy * dy)) - pcb_clear - (far ? fp_x - ant[0] : ant[0]) + boss_od / 2;
+    sqrt(max(0, kk - dy * dy)) - pcb_clear
+    - (far ? hc_r + fp_x - ant[0] : hc_l + ant[0]) + boss_od_actual / 2;
 left_zone  = is_undef(ant) || zl0 < boss_zone ? zl0
            : max(zl0, x_need(boss_inset, false), x_need(outer_y0 - boss_inset, false));
 right_zone = is_undef(ant) || zr0 < boss_zone ? zr0
            : max(zr0, x_need(boss_inset, true), x_need(outer_y0 - boss_inset, true));
-cav_x   = left_zone + right_zone + 2 * pcb_clear + oh_l + oh_r + fp_x;
+cav_x   = left_zone + right_zone + 2 * pcb_clear + oh_l + oh_r + hc_l + hc_r + fp_x;
 outer_x = cav_x + 2 * wall;
 
-ant_x  = is_undef(ant) ? 0 : wall + left_zone + pcb_clear + oh_l + ant[0];
+ant_x  = is_undef(ant) ? 0 : wall + left_zone + pcb_clear + oh_l + hc_l + ant[0];
 y_only = [for (k = [[boss_inset, left_zone], [outer_x - boss_inset, right_zone]])
           if (k[1] < boss_zone) k[0]];
 function y_need(xc, far) = let(dx = ant_x - xc)
-    sqrt(max(0, kk - dx * dx)) - pcb_clear - (far ? fp_y - ant[1] : ant[1]) + boss_od / 2;
+    sqrt(max(0, kk - dx * dx)) - pcb_clear
+    - (far ? hc_b + fp_y - ant[1] : hc_f + ant[1]) + boss_od_actual / 2;
 front_zone = is_undef(ant) || zf0 < boss_zone ? zf0
            : max(zf0, max0([for (xc = y_only) y_need(xc, false)]));
 back_zone  = is_undef(ant) || zb0 < boss_zone ? zb0
            : max(zb0, max0([for (xc = y_only) y_need(xc, true)]));
 gap_f   = max(front_zone, bay_front);
 gap_b   = max(back_zone, bay_back);
-cav_y   = gap_f + gap_b + 2 * pcb_clear + oh_f + oh_b + fp_y;
+cav_y   = gap_f + gap_b + 2 * pcb_clear + oh_f + oh_b + hc_f + hc_b + fp_y;
 outer_y = cav_y + 2 * wall;
 
 outer   = [outer_x, outer_y, base_h];
 ears_on = wall_mount == "ears";
 span_x  = outer_x + (ears_on ? 2 * ear_len : 0);
 
-pcb_origin = [wall + left_zone + pcb_clear + oh_l, wall + gap_f + pcb_clear + oh_f, pcb_z];
-divider_x0 = pcb_origin[0] + fp_x + pcb_clear;
+pcb_origin = [wall + left_zone + pcb_clear + oh_l + hc_l,
+              wall + gap_f + pcb_clear + oh_f + hc_f, pcb_z];
+divider_x0 = pcb_origin[0] + fp_x + pcb_clear + hc_r;
 chamber_x0 = divider_x0 + divider_t;
 
 function to_world(p) = [pcb_origin[0], pcb_origin[1]] + rot_pt(p);
@@ -288,7 +317,7 @@ screw_pts = [for (k = corners) if (k[2] >= boss_zone || k[3] >= boss_zone)
 
 vents_on   = vents == "on" || (vents == "auto" && heat_w > 0.3);
 vent_pitch = vent_slot_w + wall;
-vent_m     = boss_inset + boss_od / 2 + 1.5;   // keep vents clear of the columns
+vent_m     = boss_inset + boss_od_actual / 2 + 1.5;   // keep vents clear of the columns
 function opposite(f) = f == "left" ? "right" : f == "right" ? "left" : f == "front" ? "back" : "front";
 vent_free  = [for (f = ["left", "right", "front", "back"])
               if (!has(cut_faces, f) && !(sensor_chamber && f == "right")) f];
@@ -311,10 +340,10 @@ stop_h   = pcb_top + 1.5 - floor_t;
 fp_cx    = pcb_origin[0] + fp_x / 2;
 fp_cy    = pcb_origin[1] + fp_y / 2;
 stops    = concat(   // [x, y, size x, size y]
-    left_zone > 0                     ? [[pcb_origin[0] - pcb_clear - 2, fp_cy - 2, 2, 4]] : [],
-    right_zone > 0 && !sensor_chamber ? [[divider_x0, fp_cy - 2, 2, 4]] : [],
-    gap_f > 0                         ? [[fp_cx - 2, pcb_origin[1] - pcb_clear - 2, 4, 2]] : [],
-    gap_b > 0                         ? [[fp_cx - 2, pcb_origin[1] + fp_y + pcb_clear, 4, 2]] : []);
+    left_zone > 0                     ? [[pcb_origin[0] - pcb_clear - hc_l - 2, fp_cy - 2, 2, 4]] : [],
+    right_zone > 0 && !sensor_chamber ? [[pcb_origin[0] + fp_x + pcb_clear + hc_r, fp_cy - 2, 2, 4]] : [],
+    gap_f > 0                         ? [[fp_cx - 2, pcb_origin[1] - pcb_clear - hc_f - 2, 4, 2]] : [],
+    gap_b > 0                         ? [[fp_cx - 2, pcb_origin[1] + fp_y + pcb_clear + hc_b, 4, 2]] : []);
 
 // keyholes: on the board centreline, slot toward the back face (+Y), so the
 // front face and its cables point down on the wall
@@ -347,12 +376,13 @@ function exit_wall_xy(e) = [exit_x(e), e[0] == "front" ? wall : outer_y - wall];
 function rib_along(p) = let(a = p[0] < outer_x / 2 ? 0 : 180)
     len([for (i = [0 : max(gussets - 1, 0)]) if (gussets > 0 && (p[2] + 90 * i) % 360 == a) 1]) > 0;
 function wall_cols(f) = [for (p = screw_pts) if (f == "front" ? p[1] < outer_y / 2 : p[1] > outer_y / 2)
-                         [p[0], boss_od / 2 + 1 + (rib_along(p) ? rib_reach : 0)]];
+                         [p[0], boss_od_actual / 2 + 1 + (rib_along(p) ? rib_reach : 0)]];
 
 // fasteners for the BOM
 std_len = [3, 4, 5, 6, 8, 10, 12, 14, 16, 20, 25, 30];
 function pick_len(max_l) = max0([for (l = std_len) if (l <= max_l) l]);
-lid_screw   = pick_len(lid_h - head_h + insert_len + 1.0 - 0.5);
+lid_screw   = pick_len(lid_h - head_h + insert_depth - screw_bottom_clear);
+screw_engagement = min(insert_len, lid_screw - (lid_h - head_h));
 pcb_thread  = standoff_bore <= 1.7 ? "M2" : standoff_bore <= 2.2 ? "M2.5" : "M3";
 pcb_screw   = pick_len(pcb_t + standoff_h - 0.5);
 
@@ -363,10 +393,18 @@ assert(pcb_rot == 0 || pcb_rot == 90 || pcb_rot == 180 || pcb_rot == 270,
 assert(wall >= 3 * ew, str("wall ", wall, " is under 3 perimeters"));
 assert(lip_w >= 2 * ew, "tongue narrower than two extrusions");
 assert(lip_inset - tol >= ew - EPS, "land beside the groove is under one extrusion");
-assert(boss_od >= insert_bore + 2 * 2.5, "column OD too small around the insert");
+assert(insert_bore > 0 && insert_len > 0 && insert_relief >= 0 && insert_mouth >= 0,
+       "insert bore/length must be positive; relief and mouth must be nonnegative");
+assert(boss_wall >= 2.5, "house PETG-CF boss radial wall must be at least 2.5 mm");
+assert(boss_floor_min > 0 && base_h - insert_depth >= boss_floor_min,
+       "insert bore leaves too little material below it: increase height or reduce insert depth");
+assert(lid_h - head_h >= ew * 3, "insufficient lid material below screw head");
+assert(screw_bottom_clear > 0 && screw_engagement_min > 0
+       && screw_engagement >= screw_engagement_min,
+       "no standard screw gives the required insert engagement and bottom clearance");
 assert(standoff_h >= 4, "standoff too short to clear solder tails");
 assert(pcb_clear >= tol, "board clearance below the fit tolerance");
-assert(min(cav_x, cav_y) >= boss_od + 2, "cavity too small for corner columns");
+assert(min(cav_x, cav_y) >= boss_od_actual + 2, "cavity too small for corner columns");
 assert(len(screw_pts) >= 3,
        str("connectors on ", len(screw_pts) < 2 ? "four" : "three", " sides leave only ",
            len(screw_pts), " corner column(s): bring one connector out through the lid, ",
@@ -455,7 +493,11 @@ echo(str("cavity: ", r2(cav_x), " x ", r2(cav_y), " x ", r2(cav_z), " mm; column
          layout, ", ", len(screw_pts), " columns"));
 echo(str("wall: ", wall, " mm (", wall_lines, " lines)",
          rim_w > wall + EPS ? str("; rim band ", rim_w, " mm under the tongue") : ""));
-echo(str("BOM: ", len(screw_pts), " x M3 heat-set insert ", insert_bore, " x ", insert_len,
+echo(str("insert CAD bore: ", insert_bore, " x ", insert_depth,
+         " mm; boss OD: ", boss_od_actual, "; radial wall: ", (boss_od_actual-insert_bore)/2,
+         "; blind floor: ", base_h-insert_depth, "; screw engagement: ", screw_engagement));
+echo("FIT: UNCALIBRATED starting values unless replaced with recorded coupon results");
+echo(str("BOM: ", len(screw_pts), " x M3 heat-set insert, length ", insert_len,
          " mm; ", len(screw_pts), " x M3 x ", lid_screw, " mm socket head (lid)"));
 if (!rails_on)
     echo(str("BOM: ", len(mount_holes), " x ", pcb_thread, " x ", pcb_screw,
@@ -605,8 +647,10 @@ module base() {
             rbox_c([outer_x, outer_y, base_h], corner_r, cb, seam_ch);
             for (p = screw_pts)
                 translate([p[0], p[1], floor_t - EPS])
-                    insert_boss(h = base_h - floor_t + EPS, od = boss_od,
+                    insert_boss(h = base_h - floor_t + EPS, od = boss_od_actual,
                                 bore = insert_bore, insert_len = insert_len,
+                                relief = insert_relief, mouth = insert_mouth,
+                                min_floor = max(0, boss_floor_min - floor_t),
                                 gussets = gussets, gusset_t = wall,
                                 angle0 = p[2], spread = 90, fillet_r = inner_fillet);
         }

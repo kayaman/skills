@@ -64,29 +64,33 @@ skill's "Body and lid must fit" rule. Summary:
 - Screws in the bottom (through the base floor into the lid) hide the
   hardware; bosses then hang from the lid.
 
-## 3. Heat-set inserts (brass, knurled)
+## 3. Heat-set inserts
 
-Hole sizes vary by vendor. The datasheet number is the hole after printing; CAD
-is larger by the printed-hole shrink, often 0.2–0.3 mm. The hole itself is
-straight even when the insert has a tapered pilot. Common CAD starting points
-for short brass inserts:
+Thread size does not identify the insert body. Record vendor/part number,
+body and pilot diameters, length, recommended hole diameter/shape, and installation
+method. Follow the selected product's drawing: some inserts require straight holes,
+others tapered holes. Mouth relief and depth allowance are product-specific.
+[SPIROL's hole-design guidance](https://my.spirol.com/resources/white-papers/how-to-design-the-proper-hole-for-heat-ultrasonic-inserts/)
+explains why hole dimensions and surrounding plastic depend on the insert.
 
-| Thread | Hole Ø | Hole depth | Boss OD (min) |
-|---|---|---|---|
-| M2 | 3.2 | insert length + 1.0 (≈ 4) | 7 |
-| M2.5 | 3.6 | ≈ 5 | 8 |
-| M3 | 4.0–4.2 | 6.7 (for 5.7 mm inserts) | 9 (9.5 on PETG-CF) |
-| M4 | 5.6 | ≈ 9 | 11 |
+Determine whether a quoted dimension is a target manufactured hole or an already
+compensated FDM CAD recommendation. Do not blindly add 0.2–0.3 mm or `hole_comp`.
+A coupon-selected bore is the final CAD dimension. Use the same mouth treatment,
+wall, depth, orientation and material in the coupon and production boss.
 
-Rules: the bore is straight, not tapered. ≥ 2.5 mm of plastic around the bore on
-brittle filled materials (≥ 2 mm otherwise); pocket depth = insert length + 1.0 mm
-relief (displaced plastic needs somewhere to go, and a bottomed-out insert splits
-the column). Leave the mouth square. A chamfer removes the plastic the top knurl
-bites. If the insert will not start, `mouth` on `insert_boss()` may be at most
-0.4 mm. Tie the column to the wall and the floor with filleted gussets. The boss
-wall is solid perimeters, four to six loops, not infill. Keep inserts outside the
-profile's antenna keepout. Install with the iron 10–20 °C above the spool's nozzle
-temperature, melt about 90% of the way, then press flush and hold until the plastic sets.
+For the existing house M3 example only: final CAD bore starts at 4.1 mm,
+insert length 5.7 mm, relief 1.0 mm, no mouth chamfer, boss OD at least 9.5 mm
+and radial plastic at least 2.5 mm. These are **uncalibrated assumptions**, not
+standard M3 dimensions. Confirm or replace them using the actual insert.
+Grow OD to at least `bore + 2 * required_wall`, preserve the blind floor,
+and brace loaded columns into the shell. Check screw engagement and bottom
+clearance; thread size alone does not establish either.
+
+Use the manufacturer's installation temperature/process and a trial boss.
+Do not derive an iron temperature from nozzle temperature as a universal rule.
+Inspect seating, cracking, spinning and application-appropriate pull-out/torque
+before relying on the assembly. A visual fit test does not establish load capacity.
+
 
 ## 4. Self-tapping into plastic
 

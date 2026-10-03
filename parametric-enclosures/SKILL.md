@@ -1,6 +1,6 @@
 ---
 name: "parametric-enclosures"
-description: Design 3D-printable electronics enclosures as parametric OpenSCAD and export STL/3MF, with the wiring and power inside them. Produces a .scad file plus shared library, per-part export commands, build notes, fastener BOM, a wiring plan and a self-check, with hard rules for gusseted insert columns, a locating lid, PCB standoffs, connector cutouts plugs can reach, vents, isolated sensor chambers, antenna keepouts, support-free printing, closures, sealing, batteries, cable exits, mounting and child/pet safety. Use whenever the user mentions an enclosure, case, housing, box or "caixa" for a PCB, ESP32/Arduino/Raspberry Pi/Pico project or sensor node; asks for OpenSCAD/.scad/STL/3MF for one; wants to modify one (resize, move a cutout, add vents, a button, mounting, waterproofing); or asks how to wire or power one (pins, supply, battery, relay, servo, LED strip, wire gauge, connectors). Trigger even without "OpenSCAD" or "3D printing" — "I need a case for this board" is enough.
+description: Design and revise parametric electronics enclosures with dimensioned fits, fasteners, PCB and connector clearances, print-oriented exports, and wiring guidance when needed. Preserve existing OpenSCAD or enclosure-maker Rhai projects; use OpenSCAD for new standalone designs. Pair with 3d-printing for process and calibration.
 ---
 
 # Parametric enclosures for electronics
@@ -12,6 +12,20 @@ module loses 10 dB because an insert sits next to the antenna, a pull on a cable
 its solder joint. Every rule here exists to close one of those failure modes. Follow
 them by default and say so when a brief forces an exception.
 
+## Preserve the project format
+
+Use the existing CAD language and parameter names. For `.rhai` projects read
+`references/rhai-design-and-export.md`; do not replace them with OpenSCAD or use
+OpenSCAD-only syntax. For an existing `.FCStd` project, or whenever the user asks
+for FreeCAD, STEP, the FreeCAD MCP connection, or mechanical-CAD interchange, read
+`references/freecad-design-and-export.md` and preserve that project the same way.
+New standalone designs default to OpenSCAD when the user states no engine
+preference. The Customizer, SCAD library and SCAD export contract below apply to
+OpenSCAD only; the Rhai and FreeCAD references give the equivalent deliverables
+for their engines. Process rules (fits, structural columns, ventilation, sensor
+compartments, closures, safety) apply to all three.
+Read `references/dimensions-and-calibration.md` for critical dimensions and fits.
+
 ## How this skill is organised — read only what the task needs
 
 This file holds the workflow and the rules that apply to every enclosure. Detail lives
@@ -22,6 +36,7 @@ in `references/` and is loaded when the task touches it:
 | **Any geometry** (always, before writing numbers) | `references/manufacturing-profiles.md` — the printer/material profile overrides generic numbers |
 | Generic FDM limits, tolerances, holes, orientation, choosing a material, no profile applies | `references/fdm-design-rules.md` |
 | Writing or debugging OpenSCAD: language, Customizer, libraries | `references/openscad-language.md` |
+| Writing or debugging FreeCAD via the MCP connection: execute_code / _async / _headless choice, the parametric Python library, export, verification | `references/freecad-design-and-export.md` |
 | File layout, assert/echo patterns, pitfalls that make bad STLs | `references/openscad-conventions.md` |
 | Board footprints (Uno, Nano, ESP32, Pi, Pico, XIAO), holding the board, connector sizes, the USB plug trap | `references/pcb-and-components.md` |
 | More than one module, a battery, a switched load or a cable leaving the box: power budget, pins, relays, MOSFETs, servos, LED strips, wire gauge, connectors, harness routing, the wiring bay | `references/electronics-and-wiring.md` |
@@ -52,6 +67,20 @@ Assets and tools (copy, don't re-derive):
 - `assets/selftest.scad` — renders every library module; run after any library change.
 - `scripts/check_scad.py` — static check that runs without OpenSCAD.
 - `scripts/export_parts.sh` — renders parts, the interference check and PNG previews.
+- `assets/enclosure_lib.py` — the same module set as `enclosure_lib.scad`, ported to
+  FreeCAD's Part/Draft API for the live MCP connection: chamfered rounded boxes (real
+  OCCT chamfers), gusseted filleted bosses (real B-rep fillets, not the SCAD ring
+  workaround), standoffs, tongue-and-groove, face-frame placements, vent patterns,
+  cutters and wiring helpers. Load it once per FreeCAD session with `execute_code`
+  (see `references/freecad-design-and-export.md`); `execute_code_headless` does not
+  share that session and must re-load it.
+- `assets/enclosure_template.py` — complete base + lid build on the house profile,
+  parameters in a top-level `PARAMS` dict grouped like the Customizer. Builds named
+  `Part::Feature` objects per part and a `set_view(doc, mode)` helper (assembly,
+  exploded, base, lid, section, check) — the FreeCAD equivalent of the SCAD `part`
+  switch; there is no CLI `-D`, so parameters are edited in the script text.
+- `assets/selftest.py` — exercises every `enclosure_lib.py` function once; run after
+  any library change, the same discipline as `selftest.scad`.
 
 ## Workflow
 
@@ -75,7 +104,11 @@ Ask for nothing the conversation already answers. Defaults in brackets.
 
 **PCB** — outline X × Y × thickness [1.6 mm], mounting hole Ø and coordinates from
 the board's bottom-left corner, tallest component on top and bottom, keepouts
-(antenna, HV, moving parts). Known dev boards: use the footprint table.
+(antenna, HV, moving parts). Known dev boards: use the footprint table. Measure the
+board **as assembled**, including soldered header pins above and below the PCB.
+Record which board edge each header occupies and which side of the PCB carries the
+plastic spacer, solder joint, exposed pin and Dupont housing. Never assume the two
+header rows or four board edges are symmetric.
 
 **Interfaces** — connectors (board edge, position along it, height above the board,
 overhang past the edge), display, buttons, LEDs, switches, cable exits.
@@ -85,8 +118,9 @@ light path).
 
 **Power and wiring** — supply (USB, adapter, battery, mains), every module and load
 with its peak current, how they connect, and each cable that leaves the box [USB 5 V,
-one board, no cables out]. The power budget sets `heat_w`, the supply and the wiring
-bay.
+one board, no cables out]. Record whether devkits have soldered pins and whether
+Dupont leads enter from above or from the side. The power budget sets `heat_w`, the
+supply and the wiring bay.
 
 **Thermal** — heat sources and rough dissipation, from the power budget [assume
 < 0.3 W if nothing is said].
@@ -124,7 +158,7 @@ section | check; only base/lid (and extra printable parts) are exported.
 A part that needs supports has scarred internal surfaces exactly where the fits matter.
 Every part prints on a flat face with nothing under it.
 
-- Wall = integer multiple of the extrusion width, ≥ 3 perimeters. Floor and ceiling
+- Choose wall widths around ≥ 3 extrusion lines; verify actual paths in the slicer. Floor and ceiling
   at least as thick as the wall and ≥ 4 layers.
 - No overhang steeper than 45° from vertical. Horizontal round holes above the
   profile's teardrop threshold get a teardrop or 45° roof. Downward-facing screw
@@ -149,12 +183,11 @@ a layer line at its root.
   away from the board (the template runs them along the wall of the zone that holds
   the column).
 - Fillet gusset roots and the column-to-floor junction.
-- Boss OD = hole Ø + 2 × wall, and at least the profile's minimum.
-- Heat-set inserts: the datasheet hole is the hole after printing. CAD is larger
-  by the printed-hole shrink, often 0.2–0.3 mm, so a typical short M3 (4.6 × 5.7 mm)
-  starts at Ø 4.0–4.2. Straight bore. Depth = insert length + 1.0 mm relief.
-  No mouth chamfer; the top knurl needs that plastic. A lead-in of at most 0.4 mm
-  only if the insert will not start.
+- Boss OD is at least the final CAD bore Ø + 2 × required radial wall and the profile minimum. Derive layout from the resulting OD.
+- Heat-set inserts: use the actual insert manufacturer's hole shape, diameter,
+  depth and installation guidance. Coupon-tested CAD bore dimensions already include
+  process compensation. House M3 defaults are uncalibrated; straight bore, no mouth
+  chamfer, and 1 mm relief are defaults for that example, not all insert products.
 - Self-tapping: pilot ≈ 0.8 × major Ø (2.4 mm for M3), engagement ≥ 2 × Ø, boss wall ≥ 2 mm.
 - Mating part: clearance hole (3.4 mm for M3, + hole_comp) plus counterbore/countersink.
 - ≥ 4 columns up to a 100 mm span, one more per additional ~70 mm, plus one beside
@@ -170,7 +203,22 @@ a layer line at its root.
 - Lateral clearance ≥ the profile's slip `tol` per side (template default 0.5 mm;
   clones vary), located by standoffs, or by rails and stops when the board has no
   holes (template `mount_holes = []`). Never press-fit a PCB.
-- ≥ 2 mm above the tallest top-side component; standoffs ≥ 4 mm for solder tails.
+- ≥ 2 mm above the tallest rigid top-side component. For a devkit with soldered
+  headers and top-entry Dupont leads, use the **assembled wiring envelope**, not the
+  bare-board component height: default `wiring_top_h = 28 mm` above the PCB top when
+  no physical measurement exists, plus the normal 2 mm closure margin. Treat
+  22 mm as a tight minimum only when the leads are pre-bent and restrained.
+- Soldered pins below the PCB are part of the bottom stack, separately from
+  `comp_bot`: default `pin_tail_h = 4 mm` when unmeasured. Set standoff height to
+  at least pin-tail height + 1 mm; 5 mm is the normal minimum for pinned devkits.
+  Pins and solder joints must not touch the floor, rails, keyhole heads or cable ties.
+- Header placement is per board edge, before `pcb_rot`: `x0`, `x1`, `y0`, `y1`.
+  One-sided soldering and right-angle headers are asymmetric geometry. Set
+  `header_edge_clear = [x0, x1, y0, y1]` to the connector/harness projection beyond
+  each edge; zero on unused edges. Expand only the affected face, and keep its
+  envelope clear of rails, stops, columns, vents and the lid register. Do not centre
+  the board to hide an asymmetric header unless that still preserves every port and
+  antenna constraint.
 - Cutouts +0.5 mm all round; +0.75 mm and a 1 mm lead-in chamfer on user-facing ports.
 - **Plugs must reach their sockets.** A plug's overmold is wider than the socket; if
   the socket sits more than ~1.5 mm behind the outer surface, recess the outer face to
@@ -179,11 +227,14 @@ a layer line at its root.
   every wall that carries a connector and moves the columns to the other sides. Give
   each cutout by board edge and set `pcb_rot` to choose which wall that edge meets.
 - Cutouts never cross the lid split unless deliberately split between both halves.
-- Headers with Dupont wires plugged from above need ~15–20 mm in `comp_top`. Wiring
-  that leaves the box, a second module, a battery or a switched load: the electronics
-  and wiring reference. Give those runs a wiring bay (`bay_front` / `bay_back`) on the
-  long side without connector cutouts, a zip-tie anchor at each exit, and a hole
-  chamfered so the jacket cannot chafe. Keep a service loop to every part on the lid.
+- Headers with Dupont wires plugged from above use `wiring_top_h`, independently of
+  `comp_top`; do not hide connector and bend allowance inside a guessed component
+  height. Top-entry Dupont defaults to 28 mm above the PCB top, while a measured,
+  restrained side-entry harness may use less. Wiring that leaves the box, a second
+  module, a battery or a switched load: the electronics and wiring reference. Give
+  those runs a wiring bay (`bay_front` / `bay_back`) on the long side without
+  connector cutouts, a zip-tie anchor at each exit, and a hole chamfered so the
+  jacket cannot chafe. Keep a service loop to every part on the lid.
 
 ### Ventilation
 
@@ -260,8 +311,9 @@ reject a boss with no gusset.
 - Default closure: lid screwed into insert columns and located by the register
   above. Other closures: closures reference — check the profile before any
   elastic feature.
-- One `tol` drives the fit table (press / slip / loose), calibrated once per
-  printer–material pair.
+- One `tol` drives the fit table (press / slip / loose). Measure and record it
+  for the printer, material, and process; reuse it across mating pairs, then
+  revalidate after process changes.
 - Screws from the least visible face (the template drives them down through the
   lid; the closures reference covers screwing up through the floor). Hide the
   parting seam on a chamfer (template `seam_ch`).
@@ -294,9 +346,16 @@ plate fails (k) even when the two solids do not intersect. (l) when the brief ha
 more than one module, a battery, a switched load or a cable out: a power budget,
 a pin map, a wiring table, a fuse at the source, and a keyed/latched or screwed
 power connection; each cable exit has a zip-tie anchor and an anti-chafe hole.
+(m) the vertical stack uses the assembled board: bottom soldered-pin envelope,
+standoffs, PCB, top header/Dupont envelope, bend radius, and 2 mm closure margin;
+with the actual harness installed, a section/check view shows no contact with the
+lid, seam, columns or floor. A bare-board height check fails (m). (n) every soldered
+header is assigned to its actual PCB face and edge; asymmetric top/bottom and
+`x0`/`x1`/`y0`/`y1` envelopes are preserved through `pcb_rot`, and unused sides do
+not receive invented clearance. A single symmetric header allowance fails (n).
 
 If a check fails, fix the design before replying. Don't ship a caveat where geometry
-was the answer. If OpenSCAD wasn't available to render, say the file is unrendered.
+was the answer. If the native renderer or slicer was unavailable, identify the checks that remain unverified. Never infer a mesh or physical-fit pass from static source checks.
 
 ## Output contract
 

@@ -27,16 +27,33 @@ edge, tallest part above and below.
 
 ```
 floor_t                     profile value (3.0 on PETG-CF; ≥ 1.2 generic)
-standoff_h                  ≥ 4 mm (solder tails); template: max(standoff_min, comp_bot + 1,
-                            comp_bot + 3.5 with keyholes)
+standoff_h                  ≥ 5 mm for pinned devkits; template:
+                            max(standoff_min, bottom_stack_h + 1,
+                            bottom_stack_h + 3.5 with keyholes)
 pcb_t                       1.6 typical (1.0 Pico, ~1.4 Raspberry Pi)
-comp_top                    measure; + 2 mm headroom (+ wire bend room if cables plug in from above)
+comp_top                    tallest rigid component, measured
+wiring_top_h                assembled connector + wire envelope above PCB top;
+                            28 mm default for top-entry Dupont when unmeasured
+top_stack_h                 max(comp_top, wiring_top_h), then + 2 mm closure margin
 lid split                   template: the higher of the component stack and the tallest
                             cutout (with its lead-in and roof) + 1 mm
 lid                         ceil_t + tongue/groove
 ```
 
-Headers with Dupont wires plugged from above need ~15–20 mm above the pins.
+Measure from the PCB surfaces, not from the header plastic. Soldered male pins commonly
+leave about 3–4 mm below the board; use 4 mm when unmeasured and keep at least 1 mm
+below them. A straight top-entry Dupont housing plus the first unstrained wire bend
+commonly needs 22–28 mm above the PCB top. Use 28 mm by default because 15–20 mm often
+fits the connector body but not the bend, so the lid compresses the leads or will not
+seat. A lower value needs a measured, pre-bent and restrained harness.
+
+Header geometry is not automatically symmetric. Record each row as an occupied board
+edge (`x0`, `x1`, `y0`, `y1`), which PCB face carries the header spacer and Dupont
+housing, and the projection beyond that edge. In the template,
+`header_edge_clear = [x0, x1, y0, y1]` adds lateral room before `pcb_rot`; for example,
+`[0, 12, 0, 0]` reserves 12 mm only beyond the board's `x1` edge. This is required for
+one-sided headers and right-angle pins. Keep the local envelope out of a rail or stop;
+do not enlarge all four sides or centre the board as a substitute.
 
 ## 3. Holding the board
 

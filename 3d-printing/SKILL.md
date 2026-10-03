@@ -1,6 +1,6 @@
 ---
 name: 3d-printing
-description: Designs, reviews, and prepares parts for 3D printing across FDM, resin, and SLS — process choice, material, orientation, walls, fits, fasteners, and a print plan. Use whenever the user mentions 3D printing, FDM, FFF, SLA, MSLA, resin, SLS, MJF, a slicer (Bambu Studio, OrcaSlicer, PrusaSlicer, Cura) or its print settings, filament, STL or 3MF printability or repair, a mesh Bambu Studio wants to repair, floating or disconnected geometry, non-manifold edges, overhangs, supports, infill, brim, layer lines, heat-set inserts, tolerances, fit tests or calibration, a failed or warped print, or asks whether a part will print, how to orient it, or which material to use. Trigger even when they only describe a bracket, jig, clip, hinge, fixture, or replacement part they intend to print. For an electronics enclosure, case, housing, or caixa, leave the geometry to the parametric-enclosures skill and use this skill for the print process.
+description: Design, review, calibrate, and prepare parts for FDM, resin, or SLS printing. Use for printability, materials, orientation, wall thickness, fits, fasteners, STL/3MF checks, slicer settings, and failed prints. For electronics enclosure geometry, use parametric-enclosures alongside this process skill.
 ---
 
 # 3D printing
@@ -15,12 +15,20 @@ This is the process skill: which machine, which material, which way up, what the
 
 Electronics enclosures, cases, housings, and "caixa" jobs belong to the parametric-enclosures skill. That skill already has the house printer profile, screw columns, PCB clearances, vents, the OpenSCAD library, and the wiring and power rules. Do not invent a second enclosure. If that skill is not available, say so and answer only the print-process part of the question.
 
+When an enclosure is "too low", will not close, or does not fit after wiring, treat it
+as a geometry/measurement failure, not a slicer problem. Hand the geometry back with
+the assembled vertical stack: soldered pins below the devkit, standoff, PCB, seated
+Dupont housing, relaxed wire bend, and closure margin. Bare-board dimensions are not
+enough. Preserve which PCB face and edge each header actually occupies; one-sided and
+right-angle headers make the required clearance asymmetric.
+
 Match the length of the reply to the question. A material comparison does not need a print plan. The full contract below is for a part you are designing or clearing to print.
 
 ## Read only what the job needs
 
 | When the job involves… | Read |
 |---|---|
+| Critical dimensions, holes, mating parts or a fit coupon | `references/dimensions-and-calibration.md` |
 | Any FDM part, before writing dimensions | `references/house-profile.md` — the printer and material override generic numbers |
 | FDM walls, overhangs, holes, orientation, strength | `references/fdm.md` |
 | Choosing or swapping a plastic | `references/materials.md` |
@@ -39,7 +47,7 @@ Copy `assets/fit-coupon.scad` when a clearance has to be measured rather than gu
 3. **Load the profile** in `references/house-profile.md`. Use it without asking. A named printer or material replaces it; write the override down and recompute anything that came from extrusion width.
 4. **Decide orientation before shape.** The bed face, the weak axis, and which face may be sacrificed determine the geometry. Infer the load from how the part is used and tag that inference as an assumption.
 5. **Change the geometry** so the part prints without supports on a working face, so the load does not peel layers, and so the part is one solid with no island in the air. A warning in the reply is not a fix.
-6. **Export and check.** One STL per part, bed face on z = 0. Run `python3 scripts/check_stl.py` on each file. `ok` is the only passing result. If the script is missing a dependency it does not have one; it is standard-library Python. Fix the model until the check passes. Bambu Studio offering Repair means this step failed.
+6. **Export and check.** One STL per part, bed face on z = 0. Run the standard-library `scripts/check_stl.py` with the selected envelope, layer height and `--require-bed`. Fix measured errors; resolve sampled warnings in the slicer. An `ok` result covers only the checks listed in the report; it does not certify printability.
 7. **Deliver** the contract that matches the job, then run the self-check.
 
 ## Process choice
@@ -62,7 +70,7 @@ If the user already has a mesh, review it against the chosen process. Do not reb
 
 The profile overrides the numbers. The reasons live in `references/fdm.md`.
 
-- Walls, floors, and ribs are an integer multiple of the extrusion width. A width the slicer cannot fill with whole lines becomes gap fill and a weak seam.
+- Choose walls and ribs around whole extrusion widths, and floors around whole layer heights. Use this as a house design target; confirm actual perimeter coverage in the slicer, which may vary line width and overlap.
 - Overhangs stay at or under the profile limit, measured from vertical. Steeper than that needs a chamfer, a teardrop, or a different orientation. Supports on a fit, seal, or sliding face are a design failure.
 - Horizontal holes print oval. Above the profile's teardrop threshold, use a teardrop or a flat bridged top, or plan to drill.
 - Vertical holes print small. Add the profile's hole compensation on functional diameters only.
@@ -72,15 +80,15 @@ The profile overrides the numbers. The reasons live in `references/fdm.md`.
 - Every part fits the profile envelope, or it is split and joined with fasteners and dowels. Do not specify cyanoacrylate on PETG or PETG-CF; it does not hold.
 - One named clearance drives each fit. "Make it tight" is not a dimension.
 - A body and a lid must fit. A plate the same size as the box, resting on the rim, is not a fit: it slides, and a zero gap binds once the first layer spreads. Give them a tongue, an internal lip, or a stepped lap, with the slip clearance on each mating face. Details in `references/fits-and-fasteners.md`.
-- Each exported part is one solid. A boss, rib, pin, or letter that only touches the body is a second shell: overlap it into the body, and keep the neck at least two extrusion widths. Share a face and the slicer may split it or offer Repair.
+- Each exported part is one solid. Fuse intended features with a deliberate overlap and check the exported topology. Keep a structural neck wide enough for its load; two extrusion widths is only a geometric starting minimum.
 - Nothing starts in mid-air. In the print orientation every region has plastic under it, down to the bed, or it is a bridge within the profile limit whose ends land on walls. An island is a modeling error, including one that rejoins the body only higher up.
-- The STL is closed before it reaches Bambu Studio. Every edge has two faces, windings agree, and there are no collapsed triangles. Clicking Repair is not a step in the plan. Repair fills holes and deletes thin walls, so the printed part is no longer the model. Details and the checker are in `references/mesh-and-export.md`.
+- The STL topology is checked before it reaches Bambu Studio. Every edge has two faces, windings agree, and there are no collapsed triangles. Clicking Repair is not a step in the plan. Repair can change intended holes or thin walls; inspect the result instead of assuming equivalence. Details and the checker are in `references/mesh-and-export.md`.
 
 ## Fasteners in one pass
 
 Read `references/fits-and-fasteners.md` before drawing a boss. Short version, so a casual answer does not invent a hole:
 
-- Repeated assembly: heat-set insert. The datasheet hole is the hole after printing. CAD is larger by the printed-hole shrink, often 0.2–0.3 mm, so a typical M3 short insert starts at 4.0–4.2 mm in CAD. Straight bore, normally no mouth chamfer. Depth = insert length + 1 mm so the displaced plastic has somewhere to go. Boss wall at least 2 mm of solid perimeters, 2.5 mm on filled or brittle plastics. The house profile wants an M3 boss at least 9.5 mm across. The iron runs 10–20 °C above the spool's nozzle temperature. Press the last stretch flush and hold it.
+- Repeated assembly: heat-set insert. Select bore shape and dimensions from the actual manufacturer and validate the final CAD bore on a coupon. House M3 starts at 9.5 mm boss OD and at least 2.5 mm radial plastic; grow the OD for larger bores. See `references/fits-and-fasteners.md`.
 - A few assemblies, then never again: self-tapping or thread-forming screw. Pilot about 0.8 × major diameter, engagement at least 2 × diameter.
 - Printed threads are for coarse, lightly loaded closures. Below about M5, use an insert.
 - Snaps and living hinges follow the strain limit in the fasteners reference, and only in a material that can flex. On house PETG-CF, offer screws or a switch to unfilled PETG. If the user insists on a PETG-CF clip, apply the limits in `references/house-profile.md` and put the fatigue risk in Watch-out.
@@ -102,7 +110,7 @@ Sacrificed face: <none, or the face that may carry support scars>
 <Walls, fits, fasteners, and the shapes changed so it prints and holds.>
 
 ## Mesh
-<When a file was written: one solid, bed on z = 0, and the check_stl.py line. Bambu Studio must open it with no repair warning.>
+<When a file was written: one solid, bed on z = 0, and the check_stl.py line. Report the actual Bambu Studio result; investigate any repair prompt or warning there, since the mesh checker is advisory for some edge patterns.>
 
 ## Print plan
 <Layer height, walls, infill, brim, supports, nozzle, drying, and any pause-at-layer height. Use Bambu Studio setting names and the A1 Mini preset in references/slicer-and-troubleshooting.md unless the user named another slicer. Supports must read "none" unless a face was sacrificed on purpose. X-Y hole compensation is 0 when the model already has hole_comp. Make overhangs printable stays off.>
@@ -134,7 +142,11 @@ Before sending a design or a clearance:
 - The part fits the envelope, or the split and the fasteners are specified.
 - Profile bans are respected. On house PETG-CF that means no snaps, clips, or living hinges unless the user insisted, the house-profile limits are applied, and the risk is stated.
 - Any exported file is one part per file, in print orientation, with functional holes at `$fn` ≥ 64.
-- `scripts/check_stl.py` prints `ok` for every STL. One solid, no floating island, no open or non-manifold edge. A file that makes Bambu Studio offer Repair does not ship.
+- For electronics enclosures, the parametric-enclosures check used the assembled
+  wiring envelope. Top-entry Dupont defaults to 28 mm above the PCB top when
+  unmeasured, bottom soldered pins to 4 mm, with 2 mm above and 1 mm below clearance.
+  Header clearances remain per actual board edge rather than being mirrored.
+- Every STL has passed the reported topology, envelope and bed checks. Sampled island findings have been inspected in the slicer; self-intersections, wall thickness and strength are not certified by this checker.
 - The print plan names the Bambu Studio printer, process, and plate presets when that is the slicer, and it leaves hole compensation and overhang rewriting off.
 - Heat, UV, food, and mains were either handled or marked not applicable. Printed plastic is not a certified insulator or a flame barrier unless the spool says so, and layer lines are not food-safe.
 

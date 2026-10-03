@@ -259,9 +259,24 @@ are short and don't cross.
   sensors, analog leads and the antenna on the other. Mains in its own compartment
   behind a full-height wall (`environment-and-safety.md` §8).
 - **Room**: wires need floor and height that the board outline doesn't show. Give them a
-  wiring bay beside the board (§8). Above a top-entry connector, allow roughly 20 mm for
-  Dupont, 15 mm for JST-XH, 10 mm for JST-PH and 8 mm for JST-SH, plug plus wire bend,
-  in `comp_top`. Side-entry headers save most of that.
+  wiring bay beside the board (§8). Measure the assembled stack from the PCB surface to
+  the highest relaxed wire, with the connector fully seated. If it cannot be measured,
+  use 28 mm above the PCB top for top-entry Dupont (22 mm only for a pre-bent,
+  restrained harness), 15 mm for JST-XH, 10 mm for JST-PH and 8 mm for JST-SH. Put
+  this in `wiring_top_h`, not `comp_top`, so replacing a devkit does not silently erase
+  the harness allowance. Side-entry headers save most of the height but need lateral
+  room for the housing and bend.
+- **Pinned devkits**: include both sides of every soldered header. Default unmeasured
+  pin-tail protrusion is 4 mm below the PCB, with another 1 mm to the floor or rail.
+  Above the PCB, reserve the full connector/harness envelope even if only some pins are
+  populated. Housing width is the populated pitch span plus about 1 mm per outer side;
+  keep that envelope out of columns and the lid register.
+- **Asymmetric headers**: note the real solder side and board edge for each row.
+  Devkits may have pins on one long edge only, opposite-facing rows, or a right-angle
+  header whose housing and bend project laterally. Use a separate envelope for each
+  occupied edge and PCB face. In the template set `header_edge_clear` in board-edge
+  order `[x0, x1, y0, y1]`; `pcb_rot` maps it to the enclosure face. Never mirror the
+  measured value onto the unused side.
 - **Bends**: ≥ 3 × Ø for single hookup wire, ≥ 5–10 × Ø for jacketed cable, and the first
   5–10 mm behind a connector or solder joint straight.
 - **Tie points**: a zip-tie anchor 10–20 mm inside every cable exit, so a pull stops at
@@ -282,6 +297,11 @@ are short and don't cross.
   notch (template `wire_pass`) is sized for the bundle, so crimp after passing or keep
   the connector on the chamber side. Plug the notch with foam when the chamber must stay
   thermally or optically isolated.
+- **Closure proof**: dry-fit the real devkit and Dupont leads before the full print, or
+  model simple bounding boxes for the soldered pins, housings and relaxed bends. The
+  closed-lid section must retain 2 mm above the harness and at least 1 mm below pin
+  tails. If the lid presses a lead, the enclosure is too low even when it can be
+  forced shut.
 - **Cable exits**: hole = cable Ø + 0.3–0.5 mm with an anti-chafe chamfer on both faces
   (`cable_exit_cut()`); a gland where it is damp or outdoors; a drip loop below the
   entry outdoors. A cable whose moulded plug is bigger than the hole needs a notch split

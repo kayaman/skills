@@ -54,21 +54,42 @@
       "id": 8,
       "name": "calibrate-fits",
       "prompt": "My lids are always either too tight or rattling. How do I dial in tolerances on my A1 Mini?",
-      "expected_output": "Points to assets/fit-coupon.scad with its export commands and explains the reading order: hole_comp row first with a 3 mm drill shank, then the pin clearance row for tol, then the insert bores. Says to freeze tol afterwards and not retune per part. Mentions drying and flow calibration come before the coupon. Uses Bambu Studio setting names if any slicer setting is mentioned.",
+      "expected_output": "Explains a measured, reusable tolerance for the tested printer, material, and process; does not freeze an untested default as calibrated. Mentions drying and flow calibration before the coupon. Uses Bambu Studio setting names if any slicer setting is mentioned.",
       "files": []
     },
     {
       "id": 9,
       "name": "bambu-repair-and-floating",
       "prompt": "Bambu Studio says my bracket STL needs repair, and after slicing there is a little pad floating near the top that is only joined by a thin web. I am printing it on the A1 Mini. Fix the model so I can slice it.",
-      "expected_output": "Treats the repair dialog as a failed mesh, and does not tell the user to click Repair, Split to objects, or auto-orient. Names the likely causes: a cutter that ends on a face, features that only touch, or two shells, plus a region that starts in mid-air. Fixes by overlapping features into the body with a neck of at least two extrusion widths, cutters past the surface by eps, one solid per file, bed on z=0. Runs scripts/check_stl.py and requires an ok result. Print plan uses Bambu Studio names for the A1 Mini preset, with X-Y hole compensation 0 and Make overhangs printable off. Supports none unless a face was sacrificed.",
+      "expected_output": "Names likely causes such as cutters ending on faces, features that only touch, multiple shells, or unsupported floating regions. Fixes source geometry with overlapping features, cutters past surfaces, and one intended solid per file on z=0. Runs scripts/check_stl.py and reports measurements plus limits; unmatched facet-edge references are advisory unless strict mode is requested. Confirms the slicer result rather than treating checker output as acceptance. Print plan uses Bambu Studio names for the A1 Mini preset, with X-Y hole compensation 0 and Make overhangs printable off. Supports none unless a face was sacrificed.",
       "files": []
     },
     {
       "id": 10,
       "name": "corners-inserts-infill",
       "prompt": "I'm designing a PETG-CF bracket for the A1 Mini. How should I do the corners, the M3 heat-set inserts, and the infill?",
-      "expected_output": "Chamfers edges parallel to the bed, including the bed contact and the underside of a lip. Fillets vertical edges and loaded internal corners, R >= 1 mm, without thinning the wall. Insert: datasheet hole plus printed shrink, CAD often 4.0-4.2 mm for a short M3, straight bore, normally no mouth chamfer, depth = length + 1 mm, boss OD >= 9.5 mm of solid perimeters. Install 10-20 C above the spool nozzle temperature, press the last stretch flush and hold. Infill: 6 wall loops first, gyroid at 15-20% (cubic if the machine shakes), not grid, lightning, or 100%. Boss is perimeters, not dense infill. Uses Bambu Studio setting names.",
+      "expected_output": "Chamfers edges parallel to the bed, including bed contact and the underside of a lip. Fillets vertical edges and loaded internal corners, R >= 1 mm, without thinning the wall. Insert sizing follows the chosen manufacturer drawing and measured fit; clearly labels 4.1 mm bore, 1 mm relief, and 9.5 mm boss only as uncalibrated house M3 starting assumptions. Does not double-apply hole compensation or invent a universal installation temperature; follows the insert maker and tests a coupon. Infill: 6 wall loops first, gyroid at 15-20% (cubic if the machine shakes), not grid, lightning, or 100%. Boss strength comes from perimeters, not dense infill. Uses Bambu Studio setting names.",
+      "files": []
+    },
+    {
+      "id": "11",
+      "name": "rhai-boss-sizing",
+      "prompt": "In the existing enclosure-maker Rhai model, make this heat-set insert boss fit a different insert and keep the design parametric.",
+      "expected_output": "Keeps the native Rhai model, exposes bore, insertion depth/relief, wall, floor and placement as numeric parameters, derives boss diameter from bore plus twice the radial wall, and validates available floor and screw engagement. Uses the enclosure-maker helpers and calls out their limits. Preserves named parts and saved transform conventions. Exports with the documented Rhai CLI, then reports mesh-check findings as diagnostics and requests/records target-slicer confirmation without claiming print readiness from code generation alone.",
+      "files": []
+    },
+    {
+      "id": "12",
+      "name": "insert-fit-without-vendor-data",
+      "prompt": "I do not know the heat-set insert brand or have its drawing. Give me dimensions for an M3 boss on the A1 Mini.",
+      "expected_output": "Does not invent a universal press bore, relief, or installation temperature. Clearly labels any provisional example dimensions as uncalibrated, asks the user to identify or measure the insert, and directs them to a fit coupon using the actual insert and tested printer/material/process. Separates CAD bore from slicer compensation and never applies shrink compensation twice.",
+      "files": []
+    },
+    {
+      "id": "13",
+      "name": "enclosure-too-low-dupont",
+      "prompt": "My printed ESP32 enclosure ficou muito baixa: it closes without wires, but with the female Dupont jumpers installed the lid does not seat. Can I fix this in the slicer?",
+      "expected_output": "Diagnoses a geometry/measurement failure, not a slicer issue. Hands enclosure geometry to parametric-enclosures and requires the assembled stack: default 4mm soldered pins below the PCB, 28mm top-entry Dupont envelope above the PCB top when unmeasured, 1mm below and 2mm above clearance. Requires each header to retain its actual PCB face and board edge because one-sided or right-angle headers make the clearance asymmetric. Explicitly rejects Z scaling or forcing the lid because that also distorts cutouts, walls and fastener alignment.",
       "files": []
     }
   ]
