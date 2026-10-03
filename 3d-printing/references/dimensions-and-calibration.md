@@ -28,4 +28,25 @@ screw engagement, hole-centre spacing, and lid clearance. Distinguish calculatio
 rendered-mesh measurement, slicer inspection, and physical measurement. A check
 that could not run stays explicitly unverified.
 
-See `fits-and-fasteners.md` for insert selection and `mesh-and-export.md` for verification.
+## Parametric enclosures
+
+For enclosures expose named independent inputs and derive mating geometry from
+them. Preserve parameter names during edits. Never independently move a lid hole
+and its boss. Increasing a bore grows its boss and placement clearance together,
+or reports which envelope/PCB constraint prevents growth.
+
+The template retains `boss_od` as the requested minimum. `boss_wall` is the
+required radial material and `boss_min_od` the profile minimum; actual OD is
+`max(boss_od, boss_min_od, insert_bore + 2 * boss_wall)`. `insert_bore` is a final
+CAD value. `insert_relief` sets blind depth beyond `insert_len`; `boss_floor_min`
+limits the remaining material under the bore. Check actual screw engagement and
+bottom clearance against the selected hardware, not thread size alone.
+
+Read `rhai-design-and-export.md` for enclosure-maker projects and
+`freecad-design-and-export.md` for FreeCAD. OpenSCAD uses Customizer inputs above
+Hidden; Rhai uses `param(...)` inputs and derived values; FreeCAD keeps inputs in a
+top-level `PARAMS` dict in `enclosure_template.py`, grouped like the Customizer, with
+derived values computed immediately below it.
+
+See `fits-and-fasteners.md` for insert selection and `mesh-and-export.md` for
+mesh verification.

@@ -15,7 +15,7 @@ Use these unless the profile says otherwise. The house PETG-CF profile overrides
 | Supports | None | If a face was sacrificed on purpose, name it and paint support only there |
 | Brim | When the profile says so, or the footprint is small | House rule: height > 2.5 × the smallest base dimension |
 | Seam | A hidden corner, not a sliding face | The seam is a ridge |
-| Elephant foot | Compensation around 0.2 mm if the slicer has it, after the CAD chamfer | Backup for the first-layer squish |
+| Elephant foot | Compensation 0.15–0.2 mm if the slicer has it (Bambu Studio preset 0.15), after the CAD chamfer | Backup for the first-layer squish |
 | Cooling | High on PLA. Modest on PETG, ABS, nylon, and filled PETG | Fan makes prettier overhangs and weaker layer bonds. On an open printer with PETG-CF, prefer the bond |
 
 Outer walls slightly slower than infill. That is a surface setting, not a strength setting.
@@ -126,7 +126,7 @@ Name one cause, the observation that would confirm it, and one fix. Geometry fir
 | Clogs, or dimensions drifting over a spool of filled filament | Brass nozzle wearing, wet filament, or a 0.2 mm nozzle | Orifice looks oval, or fiber filament was the change | Hardened steel, ≥ 0.4 mm, 0.6 mm if clogs continue. Dry |
 | Echoes after corners | Speed and acceleration | The model is fine; the ghost follows direction changes | Slower outer wall. Input shaping is a printer calibration |
 | Fit face is scarred and undersize | Support was on a working face | The bad face was an overhang | Reorient or chamfer so that face is a bed face or a vertical wall |
-| Electronics enclosure is too low, lid will not close, or wires are crushed | CAD used the bare board or rigid component height instead of the assembled wiring envelope | It closes with Dupont leads removed, or the lid marks/presses the leads | Geometry fix in `parametric-enclosures`: include bottom soldered pins, seated connector housing, relaxed bend and closure margin. Preserve asymmetric header sides; do not scale Z or force the lid |
+| Electronics enclosure is too low, lid will not close, or wires are crushed | CAD used the bare board or rigid component height instead of the assembled wiring envelope | It closes with Dupont leads removed, or the lid marks/presses the leads | Geometry fix per the enclosure rules in SKILL.md: include bottom soldered pins, seated connector housing, relaxed bend and closure margin. Preserve asymmetric header sides; do not scale Z or force the lid |
 | Layer shift | Mechanical: belt, nozzle crash, warped part catching the nozzle | The shift is a single step in X or Y | Check the machine. A catching overhang is still a geometry problem |
 | Spaghetti after the first layers | Lost adhesion, or a feature printed in air | The first layer let go, or a mid-air island exists | Brim or a cleaner plate for adhesion. An island with no support is a modeling error. `check_stl.py` samples for possible floating regions; confirm the location in the slicer |
 | Bambu Studio offers Repair, or a warning triangle on the object | Open edges, flipped faces, a zero-thickness skin, or a non-manifold edge | `check_stl.py` may report open edges, non-manifold edges, or degenerate triangles | Inspect the slicer warning and source geometry. Extend cutters past surfaces and overlap features into the body. If using slicer repair, inspect the changed result against intended dimensions |

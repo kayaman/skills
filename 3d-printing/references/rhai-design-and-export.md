@@ -9,6 +9,10 @@ position, derives OD, and rejects insufficient blind-floor thickness. Its ribs
 have sharp junctions: a loaded enclosure still needs root treatment compatible
 with the native API and load case; do not claim that this example supplies fillets.
 
+`references/enclosure-maker-agent.md` is the standalone dimension-and-printing
+guidance maintained for the enclosure-maker app itself; copy it verbatim into the
+app's `docs/printing-guidance.md` when asked to update that resource.
+
 ## Numeric controls and frames
 
 Use `param("Label", default, min, max)` with float dimensions for meaningful UI
@@ -56,7 +60,7 @@ enclosure-maker export --script main.rhai --parts base,lid --output enclosure.3m
 
 Use actual emitted names. From an enclosure-maker source checkout, prefix commands
 with `cargo run -p em-preview --offline --`. Do not export assembly/section views
-as printable parts. Verify STL with the 3d-printing skill checker and inspect slicer
+as printable parts. Verify STL with `scripts/check_stl.py` and inspect slicer
 layers. A 3MF export carries objects/units, not necessarily process settings.
 
 When the host restricts tools to reading/editing files, edit the native source and

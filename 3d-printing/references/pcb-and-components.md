@@ -64,7 +64,7 @@ do not enlarge all four sides or centre the board as a substitute.
 | Pins (locating) + lid posts | quick, no screws | pin Ø = hole − 0.3; lid posts press the board with 0.2 mm interference |
 | Floor rails + stops | board without holes (ESP32 DevKit, XIAO), top-loading box | the template's default when `mount_holes = []`: rails under the front/back edges at standoff height, a stop on each side that has a column zone; the lid limits lift to its headroom. Move or drop a rail (`rail_w`) where header pins run under the edge |
 | Card-guide slots | board without holes, box that opens at one end | slot width = pcb_t + 0.3; rails 2 mm deep; a stop at the end |
-| Snap clips over the board edge | holes absent, board rarely removed | see closures reference for strain |
+| Snap clips over the board edge | holes absent, board rarely removed | see `fits-and-fasteners.md` for strain |
 | Header sockets on a carrier board | dev boards | the carrier gets the holes |
 
 Keep standoff diameter clear of pads and components near the holes (check

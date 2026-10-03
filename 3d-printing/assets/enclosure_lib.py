@@ -1,5 +1,5 @@
 """enclosure_lib.py -- reusable geometry for 3D-printed electronics enclosures
-built on FreeCAD's Part/Draft API, for the parametric-enclosures skill's
+built on FreeCAD's Part/Draft API, for the 3d-printing skill's
 FreeCAD (MCP) backend. v1.0. Units: mm.
 
 Port of assets/enclosure_lib.scad. Same module names and parameter names as the
