@@ -1,6 +1,6 @@
 ---
 name: "parametric-enclosures"
-description: Design 3D-printable electronics enclosures as parametric OpenSCAD and export STL/3MF, with the wiring and power inside them. Produces a .scad file plus shared library, per-part export commands, build notes, fastener BOM, a wiring plan and a self-check, with hard rules for gusseted insert columns, a locating lid, PCB standoffs, connector cutouts plugs can reach, vents, isolated sensor chambers, antenna keepouts, support-free printing, closures, sealing, batteries, cable exits, mounting and child/pet safety. Use whenever the user mentions an enclosure, case, housing, box or "caixa" for a PCB, ESP32/Arduino/Raspberry Pi/Pico project or sensor node; asks for OpenSCAD/.scad/STL/3MF for one; wants to modify one (resize, move a cutout, add vents, a button, mounting, waterproofing); or asks how to wire or power one (pins, supply, battery, relay, servo, LED strip, wire gauge, connectors). Trigger even without "OpenSCAD" or "3D printing" — "I need a case for this board" is enough.
+description: Design and revise parametric electronics enclosures with dimensioned fits, fasteners, PCB and connector clearances, print-oriented exports, and wiring guidance when needed. Preserve existing OpenSCAD or enclosure-maker Rhai projects; use OpenSCAD for new standalone designs. Pair with 3d-printing for process and calibration.
 ---
 
 # Parametric enclosures for electronics
@@ -12,6 +12,20 @@ module loses 10 dB because an insert sits next to the antenna, a pull on a cable
 its solder joint. Every rule here exists to close one of those failure modes. Follow
 them by default and say so when a brief forces an exception.
 
+## Preserve the project format
+
+Use the existing CAD language and parameter names. For `.rhai` projects read
+`references/rhai-design-and-export.md`; do not replace them with OpenSCAD or use
+OpenSCAD-only syntax. For an existing `.FCStd` project, or whenever the user asks
+for FreeCAD, STEP, the FreeCAD MCP connection, or mechanical-CAD interchange, read
+`references/freecad-design-and-export.md` and preserve that project the same way.
+New standalone designs default to OpenSCAD when the user states no engine
+preference. The Customizer, SCAD library and SCAD export contract below apply to
+OpenSCAD only; the Rhai and FreeCAD references give the equivalent deliverables
+for their engines. Process rules (fits, structural columns, ventilation, sensor
+compartments, closures, safety) apply to all three.
+Read `references/dimensions-and-calibration.md` for critical dimensions and fits.
+
 ## How this skill is organised — read only what the task needs
 
 This file holds the workflow and the rules that apply to every enclosure. Detail lives
@@ -22,6 +36,7 @@ in `references/` and is loaded when the task touches it:
 | **Any geometry** (always, before writing numbers) | `references/manufacturing-profiles.md` — the printer/material profile overrides generic numbers |
 | Generic FDM limits, tolerances, holes, orientation, choosing a material, no profile applies | `references/fdm-design-rules.md` |
 | Writing or debugging OpenSCAD: language, Customizer, libraries | `references/openscad-language.md` |
+| Writing or debugging FreeCAD via the MCP connection: execute_code / _async / _headless choice, the parametric Python library, export, verification | `references/freecad-design-and-export.md` |
 | File layout, assert/echo patterns, pitfalls that make bad STLs | `references/openscad-conventions.md` |
 | Board footprints (Uno, Nano, ESP32, Pi, Pico, XIAO), holding the board, connector sizes, the USB plug trap | `references/pcb-and-components.md` |
 | More than one module, a battery, a switched load or a cable leaving the box: power budget, pins, relays, MOSFETs, servos, LED strips, wire gauge, connectors, harness routing, the wiring bay | `references/electronics-and-wiring.md` |
@@ -52,6 +67,20 @@ Assets and tools (copy, don't re-derive):
 - `assets/selftest.scad` — renders every library module; run after any library change.
 - `scripts/check_scad.py` — static check that runs without OpenSCAD.
 - `scripts/export_parts.sh` — renders parts, the interference check and PNG previews.
+- `assets/enclosure_lib.py` — the same module set as `enclosure_lib.scad`, ported to
+  FreeCAD's Part/Draft API for the live MCP connection: chamfered rounded boxes (real
+  OCCT chamfers), gusseted filleted bosses (real B-rep fillets, not the SCAD ring
+  workaround), standoffs, tongue-and-groove, face-frame placements, vent patterns,
+  cutters and wiring helpers. Load it once per FreeCAD session with `execute_code`
+  (see `references/freecad-design-and-export.md`); `execute_code_headless` does not
+  share that session and must re-load it.
+- `assets/enclosure_template.py` — complete base + lid build on the house profile,
+  parameters in a top-level `PARAMS` dict grouped like the Customizer. Builds named
+  `Part::Feature` objects per part and a `set_view(doc, mode)` helper (assembly,
+  exploded, base, lid, section, check) — the FreeCAD equivalent of the SCAD `part`
+  switch; there is no CLI `-D`, so parameters are edited in the script text.
+- `assets/selftest.py` — exercises every `enclosure_lib.py` function once; run after
+  any library change, the same discipline as `selftest.scad`.
 
 ## Workflow
 
@@ -124,7 +153,7 @@ section | check; only base/lid (and extra printable parts) are exported.
 A part that needs supports has scarred internal surfaces exactly where the fits matter.
 Every part prints on a flat face with nothing under it.
 
-- Wall = integer multiple of the extrusion width, ≥ 3 perimeters. Floor and ceiling
+- Choose wall widths around ≥ 3 extrusion lines; verify actual paths in the slicer. Floor and ceiling
   at least as thick as the wall and ≥ 4 layers.
 - No overhang steeper than 45° from vertical. Horizontal round holes above the
   profile's teardrop threshold get a teardrop or 45° roof. Downward-facing screw
@@ -149,12 +178,11 @@ a layer line at its root.
   away from the board (the template runs them along the wall of the zone that holds
   the column).
 - Fillet gusset roots and the column-to-floor junction.
-- Boss OD = hole Ø + 2 × wall, and at least the profile's minimum.
-- Heat-set inserts: the datasheet hole is the hole after printing. CAD is larger
-  by the printed-hole shrink, often 0.2–0.3 mm, so a typical short M3 (4.6 × 5.7 mm)
-  starts at Ø 4.0–4.2. Straight bore. Depth = insert length + 1.0 mm relief.
-  No mouth chamfer; the top knurl needs that plastic. A lead-in of at most 0.4 mm
-  only if the insert will not start.
+- Boss OD is at least the final CAD bore Ø + 2 × required radial wall and the profile minimum. Derive layout from the resulting OD.
+- Heat-set inserts: use the actual insert manufacturer's hole shape, diameter,
+  depth and installation guidance. Coupon-tested CAD bore dimensions already include
+  process compensation. House M3 defaults are uncalibrated; straight bore, no mouth
+  chamfer, and 1 mm relief are defaults for that example, not all insert products.
 - Self-tapping: pilot ≈ 0.8 × major Ø (2.4 mm for M3), engagement ≥ 2 × Ø, boss wall ≥ 2 mm.
 - Mating part: clearance hole (3.4 mm for M3, + hole_comp) plus counterbore/countersink.
 - ≥ 4 columns up to a 100 mm span, one more per additional ~70 mm, plus one beside
@@ -260,8 +288,9 @@ reject a boss with no gusset.
 - Default closure: lid screwed into insert columns and located by the register
   above. Other closures: closures reference — check the profile before any
   elastic feature.
-- One `tol` drives the fit table (press / slip / loose), calibrated once per
-  printer–material pair.
+- One `tol` drives the fit table (press / slip / loose). Measure and record it
+  for the printer, material, and process; reuse it across mating pairs, then
+  revalidate after process changes.
 - Screws from the least visible face (the template drives them down through the
   lid; the closures reference covers screwing up through the floor). Hide the
   parting seam on a chamfer (template `seam_ch`).
@@ -296,7 +325,7 @@ a pin map, a wiring table, a fuse at the source, and a keyed/latched or screwed
 power connection; each cable exit has a zip-tie anchor and an anti-chafe hole.
 
 If a check fails, fix the design before replying. Don't ship a caveat where geometry
-was the answer. If OpenSCAD wasn't available to render, say the file is unrendered.
+was the answer. If the native renderer or slicer was unavailable, identify the checks that remain unverified. Never infer a mesh or physical-fit pass from static source checks.
 
 ## Output contract
 

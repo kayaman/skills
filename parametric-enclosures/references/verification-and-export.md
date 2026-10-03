@@ -8,6 +8,7 @@
 5. Pre-delivery checklist (use when OpenSCAD isn't available)
 6. Delivering in chat
 7. Slicer hand-off notes
+8. FreeCAD (MCP) equivalents
 
 ## 1. Static check
 
@@ -96,8 +97,9 @@ This expands the SKILL.md self-check into things to trace in the code:
 4. Each cutout traces to board coordinates through its edge, meets a wall with no
    column zone, doesn't cross the lid split, and its plug can reach the socket
    (overmold recess set if needed; roof on openings wider than the bridge limit).
-5. Columns: gusseted, filleted, fused to walls, ribs clear of the board, bore =
-   insert length + 1.0; enough columns for the span.
+5. Columns: gusseted, filleted, fused to walls, ribs clear of the board, derive bore depth from the selected insert length plus documented relief; preserve
+   the blind floor, avoid the PCB and components, and derive boss OD from bore plus
+   twice the minimum radial wall. Size and space columns for the span.
 6. Standoffs start at `floor_t − EPS`; no column passes through the board footprint.
 7. Body and lid fit: a continuous tongue, lip, or lap, with the slip clearance on
    each mating face and one slip of depth past the tongue. A rim-to-rim plate fails
@@ -132,3 +134,25 @@ dense infill), sparse infill 15–20% gyroid (cubic if the machine shakes; not g
 or lightning), brim for ABS/ASA, material temperatures from
 the spool. Mention any pause-at-height for captured magnets/nuts with the Z
 value.
+
+## 8. FreeCAD (MCP) equivalents
+
+No CLI exists for this backend; every check below is a Python call run through
+`execute_code` (tool-choice rules: `references/freecad-design-and-export.md`).
+
+- **Clean render** — after every boolean: `shape.isValid()` is True, `shape.isNull()`
+  is False, `shape.Volume` is finite and > 0. There is no "Simple: yes/no" line;
+  treat any `isValid() == False` or a zero/negative Volume as the defect it reports.
+  A `doc.recompute()` error state on any object is a hard failure, the FreeCAD analog
+  of `--hardwarnings`.
+- **Interference check** — `inter = base_shape.common(lid_shape)`; pass is
+  `inter.isNull() or inter.Volume < 1e-3`. BRep booleans rarely return an exactly-null
+  shape the way OpenSCAD's CGAL kernel does — state this epsilon, don't assert exact
+  zero. Extend `.common()` + Volume to other pairs (board keepout vs. bosses, cutout
+  vs. wall) the same way §3 already recommends generically.
+- **Export** — `Part.export([obj], "out.step")` for STEP, `Mesh.export([obj], "out.stl")`
+  for STL/3MF. Check STL facet density on small-radius features (bosses, gussets)
+  before calling it done — the default tessellation deflection can be coarse there.
+- **Visual delivery** — a screenshot from `execute_code`'s own return, or an explicit
+  `get_view(doc_name, view_name=...)` call. No PNG file is written the way
+  `export_parts.sh` writes one; the screenshot is the delivered visual.

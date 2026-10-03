@@ -224,21 +224,25 @@ module boss(h, od, bore = 0, bore_depth = 0,
         if (bore > 0) {
             bz = bore_depth >= h ? -EPS : h - bore_depth;
             translate([0, 0, bz])
-                cylinder(d = bore, h = h - bz + EPS);
+                cylinder(d = bore, h = h - bz + EPS, $fn = is_undef($functional_fn) ? 64 : $functional_fn);
             if (mouth > 0)
                 translate([0, 0, h - mouth])
-                    cylinder(d1 = bore, d2 = bore + 2 * mouth, h = mouth + EPS);
+                    cylinder(d1 = bore, d2 = bore + 2 * mouth, h = mouth + EPS, $fn = is_undef($functional_fn) ? 64 : $functional_fn);
         }
     }
 }
 
-// Heat-set insert column. bore/insert_len from the insert datasheet (defaults:
-// common M3 4.6 × 5.7 mm). Depth = insert_len + 1.0 relief so the insert never
-// bottoms out and splits the column.
+// Heat-set insert column. bore is final CAD diameter (no automatic compensation).
+// Defaults are an uncalibrated house M3 example, not an insert outside diameter.
+// Confirm bore shape, relief and mouth with the selected insert drawing/coupon.
 module insert_boss(h, od = 9.5, bore = 4.1, insert_len = 5.7,
                    gussets = 3, gusset_h = 0, gusset_l = 0, gusset_t = 2.52,
-                   angle0 = 0, spread = 0, fillet_r = 1.0, mouth = 0) {
-    boss(h = h, od = od, bore = bore, bore_depth = insert_len + 1.0,
+                   angle0 = 0, spread = 0, fillet_r = 1.0, mouth = 0,
+                   relief = 1.0, min_floor = 0) {
+    assert(insert_len > 0 && relief >= 0 && min_floor >= 0, "invalid insert depth inputs");
+    assert(h - insert_len - relief >= min_floor - EPS,
+           "insert bore would exceed the available column depth");
+    boss(h = h, od = od, bore = bore, bore_depth = insert_len + relief,
          gussets = gussets, gusset_h = gusset_h, gusset_l = gusset_l,
          gusset_t = gusset_t, angle0 = angle0, spread = spread,
          fillet_r = fillet_r, mouth = mouth);
@@ -309,12 +313,12 @@ module snap_hook(length = 12, thick = 1.6, width = 6, hook_depth = 0.8, hook_h =
 // Clearance hole through a plate of thickness t; head recess cut from the top.
 // type: "counterbore" | "countersink" | "none"
 module screw_cut(d = 3.4, t = 3, type = "counterbore", head_d = 6.0, head_h = 3.0) {
-    translate([0, 0, -EPS]) cylinder(d = d, h = t + 2 * EPS);
+    translate([0, 0, -EPS]) cylinder(d = d, h = t + 2 * EPS, $fn = is_undef($functional_fn) ? 64 : $functional_fn);
     if (type == "counterbore")
-        translate([0, 0, t - head_h]) cylinder(d = head_d, h = head_h + EPS);
+        translate([0, 0, t - head_h]) cylinder(d = head_d, h = head_h + EPS, $fn = is_undef($functional_fn) ? 64 : $functional_fn);
     if (type == "countersink")
         translate([0, 0, t - head_d / 2])
-            cylinder(d1 = d, d2 = head_d, h = head_d / 2 + EPS);
+            cylinder(d1 = d, d2 = head_d, h = head_d / 2 + EPS, $fn = is_undef($functional_fn) ? 64 : $functional_fn);
 }
 
 // Hex nut pocket from z=0 up to depth; af = across flats incl. clearance.

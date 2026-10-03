@@ -42,6 +42,13 @@
       "prompt": "I'm wiring a soil-moisture analog sensor to GPIO4 on an ESP32-WROOM DevKit and powering a 2A LED strip from the board's 5V pin with Dupont jumpers. Wi-Fi stays on. Is that OK?",
       "expected_output": "Two rejects: GPIO4 is ADC2 and cannot be read with Wi-Fi on — move analog to ADC1 (32-39). The LED strip must be fed from the supply, not through the board, on 20 AWG or thicker, common ground, 1000µF at the strip. Dupont is not a power connection. 3.3V data to WS2812 needs a 74AHCT125. Power budget at 60mA per pixel full white. No enclosure.",
       "files": []
+    },
+    {
+      "id": 7,
+      "name": "freecad-boss-resize-and-vent",
+      "prompt": "In this existing FreeCAD enclosure project, resize the heat-set insert boss to fit a different insert and add a vent pattern on the free side wall. Keep it parametric and re-export STEP and STL.",
+      "expected_output": "Preserves the existing .FCStd document and object names; edits the PARAMS dict rather than hard-coding a new literal; derives boss OD from the new bore plus twice the required radial wall, keeps the gusseted/filleted boss shape (not a bare cylinder); uses execute_code for the document edit (not execute_code_async, which must not touch the document directly); checks Shape.isValid()/isNull()/Volume on the rebuilt boss and the interference volume between base and lid after recompute; exports STEP then STL to reported paths; reports only checks actually run via the MCP connection and flags anything unverified; does not claim a print-fit test.",
+      "files": []
     }
   ]
 }
