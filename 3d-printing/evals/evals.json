@@ -1,0 +1,152 @@
+{
+  "skill_name": "3d-printing",
+  "evals": [
+    {
+      "id": 1,
+      "name": "wall-shelf-bracket-load-path",
+      "prompt": "I need an L bracket to hold a small shelf on the wall, maybe 2 kg on it. Two screws into the wall, two into the shelf. Printing on my A1 Mini.",
+      "expected_output": "Full contract on the house PETG-CF profile. Orientation puts the L on its side so the bending load runs in XY, not across layers; states that standing it up would snap at the corner. Walls 6 x 0.42 = 2.52 mm, filleted inside corner R >= 1 mm, gusset, bed-edge chamfer, countersunk or clearance holes with hole_comp. Supports: none. Watch-out names the layer peel or the root fillet. Load and screw size listed as assumptions.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "failed-print-layer-split",
+      "prompt": "My PETG-CF hook cracked clean along a layer line right where the arm meets the base after a week of holding a bag. What went wrong?",
+      "expected_output": "Uses the diagnosis shape: one most likely cause (the load puts the arm's root in tension across layers because it was printed standing), the observation that confirms it (flat break between layers), one fix (reorient so the arm lies in XY, add a root fillet). Mentions drying and fan only as secondary. Does not recommend 100% infill or a raft.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "clip-on-house-material",
+      "prompt": "Design a snap-fit battery door for a remote, 40 x 25 mm. Print it in the carbon PETG I have loaded.",
+      "expected_output": "Flags that snaps crack in PETG-CF and offers unfilled PETG on the same printer or a screw. If it proceeds in PETG-CF because the user insisted, it applies the house limits (arm >= 10 x thickness, root fillet >= 1.5 mm, deflection < 1.5% of arm) and states the fatigue risk in Watch-out. Arm laid in XY. Strain formula used with real numbers.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "car-dashboard-material-question",
+      "prompt": "What filament should I use for a phone mount that sits on my car dashboard?",
+      "expected_output": "Short answer, no full print plan. Rules out PLA and house PETG-CF on heat. Recommends ASA (or PC/ABS) and says those want an enclosed printer, which the open A1 Mini is not; offers ordering the part or accepting risk with a higher-temp option. No invented print plan.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "pi4-case-with-fan",
+      "prompt": "Make me a case for a Raspberry Pi 4 with a fan.",
+      "expected_output": "Recognises an electronics enclosure job and runs the enclosure workflow rather than inventing an ad-hoc box: Pi 4 footprint and connector positions from the board footprint reference, board against the two connector walls with three gusseted insert columns plus the register, fan treated as a heat source with chimney venting sized for it, cutouts referenced to the PCB origin through their board edges, plug overmold recesses where sockets sit deep. Delivers the enclosure contract: .scad from the template with enclosure_lib, per-part export commands, BUILD NOTES with fastener BOM, ASSUMPTIONS, SELF-CHECK.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "name": "oversize-part-split",
+      "prompt": "I want to print a 240 mm long cable tray that screws under my desk.",
+      "expected_output": "Detects that 240 mm exceeds the 170 mm envelope in every flat orientation, splits the tray, and joins the halves with M3 bolts plus at least two dowel pins at 0.20 mm clearance per side. Explicitly no glue on PETG-CF. Split placed away from the screw points.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "name": "mesh-review-inches",
+      "prompt": "I downloaded this knob STL and it shows up tiny in Bambu Studio, about 1.5 x 1.5 x 0.8 mm. Will it print and how do I fix it?",
+      "expected_output": "Identifies an inch-unit export (scale by 25.4 gives about 38 x 38 x 20 mm) before any other advice. Then runs the rest of the mesh checks in order: envelope, manifold (says which tool ran or that the slicer warning is the check), bed face, shaft bore with hole_comp. Does not pretend to have inspected a file it was not given.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "name": "calibrate-fits",
+      "prompt": "My lids are always either too tight or rattling. How do I dial in tolerances on my A1 Mini?",
+      "expected_output": "Explains a measured, reusable tolerance for the tested printer, material, and process; does not freeze an untested default as calibrated. Mentions drying and flow calibration before the coupon. Uses Bambu Studio setting names if any slicer setting is mentioned.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "name": "bambu-repair-and-floating",
+      "prompt": "Bambu Studio says my bracket STL needs repair, and after slicing there is a little pad floating near the top that is only joined by a thin web. I am printing it on the A1 Mini. Fix the model so I can slice it.",
+      "expected_output": "Names likely causes such as cutters ending on faces, features that only touch, multiple shells, or unsupported floating regions. Fixes source geometry with overlapping features, cutters past surfaces, and one intended solid per file on z=0. Runs scripts/check_stl.py and reports measurements plus limits; unmatched facet-edge references are advisory unless strict mode is requested. Confirms the slicer result rather than treating checker output as acceptance. Print plan uses Bambu Studio names for the A1 Mini preset, with X-Y hole compensation 0 and Make overhangs printable off. Supports none unless a face was sacrificed.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "name": "corners-inserts-infill",
+      "prompt": "I'm designing a PETG-CF bracket for the A1 Mini. How should I do the corners, the M3 heat-set inserts, and the infill?",
+      "expected_output": "Chamfers edges parallel to the bed, including bed contact and the underside of a lip. Fillets vertical edges and loaded internal corners, R >= 1 mm, without thinning the wall. Insert sizing follows the chosen manufacturer drawing and measured fit; clearly labels 4.1 mm bore, 1 mm relief, and 9.5 mm boss only as uncalibrated house M3 starting assumptions. Does not double-apply hole compensation or invent a universal installation temperature; follows the insert maker and tests a coupon. Infill: 6 wall loops first, gyroid at 15-20% (cubic if the machine shakes), not grid, lightning, or 100%. Boss strength comes from perimeters, not dense infill. Uses Bambu Studio setting names.",
+      "files": []
+    },
+    {
+      "id": 11,
+      "name": "rhai-boss-sizing",
+      "prompt": "In the existing enclosure-maker Rhai model, make this heat-set insert boss fit a different insert and keep the design parametric.",
+      "expected_output": "Keeps the native Rhai model, exposes bore, insertion depth/relief, wall, floor and placement as numeric parameters, derives boss diameter from bore plus twice the radial wall, and validates available floor and screw engagement. Uses the enclosure-maker helpers and calls out their limits. Preserves named parts and saved transform conventions. Exports with the documented Rhai CLI, then reports mesh-check findings as diagnostics and requests/records target-slicer confirmation without claiming print readiness from code generation alone.",
+      "files": []
+    },
+    {
+      "id": 12,
+      "name": "insert-fit-without-vendor-data",
+      "prompt": "I do not know the heat-set insert brand or have its drawing. Give me dimensions for an M3 boss on the A1 Mini.",
+      "expected_output": "Does not invent a universal press bore, relief, or installation temperature. Clearly labels any provisional example dimensions as uncalibrated, asks the user to identify or measure the insert, and directs them to a fit coupon using the actual insert and tested printer/material/process. Separates CAD bore from slicer compensation and never applies shrink compensation twice.",
+      "files": []
+    },
+    {
+      "id": 13,
+      "name": "enclosure-too-low-dupont",
+      "prompt": "My printed ESP32 enclosure ficou muito baixa: it closes without wires, but with the female Dupont jumpers installed the lid does not seat. Can I fix this in the slicer?",
+      "expected_output": "Diagnoses a geometry/measurement failure, not a slicer issue, and fixes it with the enclosure rules: rebuilds the assembled stack with default 4mm soldered pins below the PCB, 28mm top-entry Dupont envelope above the PCB top when unmeasured, 1mm below and 2mm above clearance. Requires each header to retain its actual PCB face and board edge because one-sided or right-angle headers make the clearance asymmetric. Explicitly rejects Z scaling or forcing the lid because that also distorts cutouts, walls and fastener alignment.",
+      "files": []
+    },
+    {
+      "id": 14,
+      "name": "esp32-sensor-node-with-bme280",
+      "prompt": "I need a case for an ESP32-C3 sensor node. Custom PCB 45x35mm, 1.6mm thick, M3 mounting holes 4mm in from each corner. USB-C on the short edge, centred, 3.2mm above the board. BME280 on the board at about 10mm from the opposite short edge. Chip antenna on the corner nearest the USB. Sits on a shelf indoors. Give me the SCAD and the STL exports.",
+      "expected_output": "A .scad file plus enclosure_lib.scad, per-part export commands, BUILD NOTES with orientation and fastener BOM, ASSUMPTIONS list, SELF-CHECK. The BME280 must get its own divided chamber with vents at both bottom and top, positioned away from the regulator. No structure within 20mm of the antenna corner. Insert bosses at least 9.5mm OD with 3 filleted gussets. No WIRING section required: one board, USB, no cable out.",
+      "files": []
+    },
+    {
+      "id": 15,
+      "name": "vented-psu-case-child-reachable",
+      "prompt": "Enclosure for a small buck converter board, 60x45mm, dissipating around 3W. It'll be on the floor in a room with a toddler and a cat. Wall-mountable would be a bonus.",
+      "expected_output": "Ventilation sized for >1W (open area >=25% of the vented wall) with a bottom-inlet/top-outlet chimney path, but every opening <=4mm and offset louvres so nothing lines up above the PCB. Keyhole wall mounts. Should raise the child/animal constraint explicitly rather than silently assuming.",
+      "files": []
+    },
+    {
+      "id": 16,
+      "name": "oversized-carrier-board-must-split",
+      "prompt": "I want a single enclosure for a 190x120mm carrier board with a fan and a PIR on the front face.",
+      "expected_output": "Must detect that 190mm exceeds the 170mm A1 Mini envelope, split the part, and join with M3 bolts plus dowel pins — explicitly not glue. PIR lens flush in the front face, not recessed. Fan treated as a heat source for the sensor decoupling rule.",
+      "files": []
+    },
+    {
+      "id": 17,
+      "name": "pump-relay-brownout",
+      "prompt": "ESP32 DevKitC running a 12V aquarium pump through a 5V relay module. The board is on USB from a phone charger. Every time the pump starts the ESP32 resets. What's wrong and how should I wire it in the box?",
+      "expected_output": "Diagnosis first: the pump's inrush is collapsing the USB 5V rail, or the relay coil is being fed from the DevKit's 5V pin. The pump and relay coil get a 12V supply in parallel with the board, common ground, flyback already on the module. USB stays on the MCU only. Power budget on peaks. Pin map that avoids strapping pins and boot-pulse pins for the relay IN. WIRING table with AWG. Does not design an enclosure unless asked. Does not feed the pump from the DevKit 5V pin.",
+      "files": []
+    },
+    {
+      "id": 18,
+      "name": "ds18b20-probe-cable-exit",
+      "prompt": "Case for a DOIT ESP32 DevKit v1, 30-pin, USB on a short edge. One DS18B20 on a 1m three-core silicone lead, 4mm jacket, leaving the box to sit in a water tank. Indoor, on a shelf. I print on the A1 Mini in PETG-CF.",
+      "expected_output": "Enclosure from the template. USB on a front/back face with an overmold recess. Wiring bay on the opposite long side, cable_exits entry for the 4mm lead, zip-tie anchor, anti-chafe chamfered hole. 4.7k pull-up on 1-Wire, three-wire powered mode. Pin map that does not put the sensor on a strapping pin or on GPIO6-11. WIRING section with power budget (USB, MCU only), pin map, wiring table, fuse not required on USB-only. One zip tie in the BOM. heat_w from the MCU, not the probe.",
+      "files": []
+    },
+    {
+      "id": 19,
+      "name": "adc2-wifi-and-dupont-power",
+      "prompt": "I'm wiring a soil-moisture analog sensor to GPIO4 on an ESP32-WROOM DevKit and powering a 2A LED strip from the board's 5V pin with Dupont jumpers. Wi-Fi stays on. Is that OK?",
+      "expected_output": "Two rejects: GPIO4 is ADC2 and cannot be read with Wi-Fi on — move analog to ADC1 (32-39). The LED strip must be fed from the supply, not through the board, on 20 AWG or thicker, common ground, 1000µF at the strip. Dupont is not a power connection. 3.3V data to WS2812 needs a 74AHCT125. Power budget at 60mA per pixel full white. No enclosure.",
+      "files": []
+    },
+    {
+      "id": 20,
+      "name": "freecad-boss-resize-and-vent",
+      "prompt": "In this existing FreeCAD enclosure project, resize the heat-set insert boss to fit a different insert and add a vent pattern on the free side wall. Keep it parametric and re-export STEP and STL.",
+      "expected_output": "Preserves the existing .FCStd document and object names; edits the PARAMS dict rather than hard-coding a new literal; derives boss OD from the new bore plus twice the required radial wall, keeps the gusseted/filleted boss shape (not a bare cylinder); uses execute_code for the document edit (not execute_code_async, which must not touch the document directly); checks Shape.isValid()/isNull()/Volume on the rebuilt boss and the interference volume between base and lid after recompute; exports STEP then STL to reported paths; reports only checks actually run via the MCP connection and flags anything unverified; does not claim a print-fit test.",
+      "files": []
+    },
+    {
+      "id": 21,
+      "name": "pinned-devkit-dupont-height",
+      "prompt": "Make a case for my ESP32 DevKit. I solder straight header pins only on the right-hand long edge of the board and connect the sensors with female Dupont jumpers from above. My last case was too low and would not close.",
+      "expected_output": "Uses assembled rather than bare-board height. With no measurements, defaults pin_tail_h to 4mm below the PCB and wiring_top_h to 28mm above the PCB top, standoff at least bottom stack +1mm, and 2mm closure margin above the relaxed Dupont wire bend. Assigns the header to the actual board edge and uses an asymmetric header_edge_clear value only on that edge after pcb_rot; it does not mirror clearance onto the unused side. Keeps housings and wires out of columns, rails and the lid register, and requires a closed section or physical dry-fit. Does not reuse the old 15-20mm allowance or propose scaling the STL in Z.",
+      "files": []
+    }
+  ]
+}
