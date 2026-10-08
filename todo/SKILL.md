@@ -69,11 +69,8 @@ proactive use. When they say something is done, check it off.
 
 ## Keep it off the remote
 
-The user wants this list to survive locally but never reach a remote. Git can't keep a *committed*
-file off a remote per-file (push moves whole commits), so the reliable mechanism is to **gitignore
-it**: the file stays in the working tree (safe across sessions) and can never be pushed.
-
-Ensure the repo root `.gitignore` contains a `TODO.md` line; create `.gitignore` if absent and
-append the line if missing. Don't add `TODO.md` to a commit. If the user later says they *do* want
-it version-controlled, removing the `.gitignore` line is all it takes — mention that option rather
-than deciding for them a second time.
+The user wants this list to survive locally but not be committed/pushed. Git can't keep a *committed*
+file off a remote per-file (push moves whole commits), so keep `TODO.md` **untracked** and **ignored**.
+Ensure the repo root `.gitignore` contains `/TODO.md` (create it if absent; append if missing).
+This prevents accidental commits; ignored files can still be committed intentionally via `git add -f`.
+Do not add `TODO.md` to a commit.
